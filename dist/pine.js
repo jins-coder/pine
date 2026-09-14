@@ -743,8 +743,10 @@
             sig.value = v !== null ? v : initialValue;
           };
           window.addEventListener('popstate', popHandler);
-          const scope = getScope(el);
-          if (scope) scope.addCleanup(() => window.removeEventListener('popstate', popHandler));
+          queueMicrotask(() => {
+            const scope = getScope(el);
+            if (scope) scope.addCleanup(() => window.removeEventListener('popstate', popHandler));
+          });
         }
 
         return rxVal;

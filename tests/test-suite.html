@@ -399,21 +399,47 @@
     });
 
     test("Magics: $history Reactive URL Sync", "Bidirectional URL query sync with reactive signal", () => {
-      const sandbox = document.getElementById("sandbox-root");
-      sandbox.innerHTML = `
-        <div id="t-hist" p-data="{ query: $history('initialQuery', 'test_search_key') }">
-          <input id="hist-input" p-model="query.value" />
-          <span id="hist-span" p-text="query.value"></span>
-        </div>
-      `;
-      Pine.initTree(sandbox.querySelector("#t-hist"));
-      const input = sandbox.querySelector("#hist-input");
-      const span = sandbox.querySelector("#hist-span");
-      if (span.textContent !== "initialQuery") throw new Error(`Expected 'initialQuery', got '${span.textContent}'`);
-      
-      input.value = "updatedFilter";
-      input.dispatchEvent(new Event("input"));
-      if (span.textContent !== "updatedFilter") throw new Error(`Expected 'updatedFilter', got '${span.textContent}'`);
+      // Clear URL state before test
+      if (typeof window !== "undefined") {
+        try {
+          const u = new URL(window.location.href);
+          u.searchParams.delete("test_search_key");
+          window.history.replaceState({}, "", u.toString());
+        } catch {}
+      }
+
+      try {
+        const sandbox = document.getElementById("sandbox-root");
+        sandbox.innerHTML = `
+          <div id="t-hist" p-data="{ query: $history('initialQuery', 'test_search_key') }">
+            <input id="hist-input" p-model="query.value" />
+            <span id="hist-span" p-text="query.value"></span>
+          </div>
+        `;
+        Pine.initTree(sandbox.querySelector("#t-hist"));
+        const input = sandbox.querySelector("#hist-input");
+        const span = sandbox.querySelector("#hist-span");
+        if (span.textContent !== "initialQuery") throw new Error(`Expected 'initialQuery', got '${span.textContent}'`);
+        
+        input.value = "updatedFilter";
+        input.dispatchEvent(new Event("input"));
+        if (span.textContent !== "updatedFilter") throw new Error(`Expected 'updatedFilter', got '${span.textContent}'`);
+
+        if (typeof window !== "undefined") {
+          const checkUrl = new URL(window.location.href);
+          if (checkUrl.searchParams.get("test_search_key") !== "updatedFilter") {
+            throw new Error(`Expected URL param 'test_search_key' to be 'updatedFilter', got '${checkUrl.searchParams.get("test_search_key")}'`);
+          }
+        }
+      } finally {
+        if (typeof window !== "undefined") {
+          try {
+            const u = new URL(window.location.href);
+            u.searchParams.delete("test_search_key");
+            window.history.replaceState({}, "", u.toString());
+          } catch {}
+        }
+      }
     });
 
     // Run tests & render report
