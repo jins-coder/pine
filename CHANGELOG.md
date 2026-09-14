@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 📦 Releases
 
-- [v1.5.0 — "Larch" (2026-09-15)](#v150--larch-2026-09-15) — **Latest Stable**
+- [v1.5.1 — "Larch" (2026-09-15)](#v151--larch-2026-09-15) — **Latest Stable**
 - [v1.4.0 — "Spruce" (2026-09-15)](#v140--spruce-2026-09-15)
 - [v1.3.0 — "Cedar" (2026-09-15)](#v130--cedar-2026-09-15)
 - [v1.2.0 — "Redwood" (2026-09-14)](#v120--redwood-2026-09-14)
@@ -18,12 +18,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
-## [v1.5.0] — "Larch" (2026-09-15)
+## [v1.5.1] — "Larch" (2026-09-15)
 
 > **Codename**: Larch  
 > **Status**: Latest Stable  
-> **Bundle Size**: ~29.8 KB minified (~9.85 KB gzipped)  
-> **CDN Link**: `https://unpkg.com/pinejs-core@1.5.0/dist/pine.min.js`
+> **Bundle Size**: ~33.6 KB minified (~11.10 KB gzipped)  
+> **CDN Link**: `https://unpkg.com/pinejs-core@1.5.1/dist/pine.min.js`
 
 ### 🚀 Major Enhancements
 

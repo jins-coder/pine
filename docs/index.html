@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PineJS — Next-Gen Fine-Grained Declarative Micro-Framework</title>
-  <meta name="description" content="Next-generation CDN-based fine-grained reactive declarative micro-framework. Complete Alpine.js parity with signals, faster DOM updates, and built-in plugins.">
+  <meta name="description"
+    content="Next-generation CDN-based fine-grained reactive declarative micro-framework. Complete Alpine.js parity with signals, faster DOM updates, and built-in plugins.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="docs.css">
   <!-- Load PineJS library via CDN with local fallback -->
-  <script src="https://unpkg.com/pinejs-core@1.5.0/dist/pine.min.js"></script>
+  <script src="https://unpkg.com/pinejs-core@1.5.1/dist/pine.min.js"></script>
   <script>window.Pine || document.write('<script src="../dist/pine.min.js"><\/script>')</script>
   <script src="docs.js" defer></script>
 </head>
+
 <body>
 
   <!-- Top Header Navigation -->
@@ -22,11 +25,14 @@
           <img src="logo.svg" alt="PineJS Logo" width="24" height="24" style="display: block;">
         </div>
         <div class="brand-title">PineJS</div>
-        <span class="brand-version" title="Codename: Larch">v1.5.0 (Larch)</span>
+        <span class="brand-version" title="Codename: Larch">v1.5.1 (Larch)</span>
       </a>
 
       <button id="search-trigger" class="search-trigger">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
         <span>Search documentation...</span>
         <kbd class="search-kbd">Ctrl K</kbd>
       </button>
@@ -35,13 +41,17 @@
     <div class="header-actions">
       <ul class="nav-links">
         <li><a href="#start-here" class="nav-link">Docs</a></li>
-        <li><a href="playground.html" class="nav-link" style="color: var(--alpine-teal); font-weight: 700;">Playground ⚡</a></li>
+        <li><a href="playground.html" class="nav-link" style="color: var(--alpine-teal); font-weight: 700;">Playground
+            ⚡</a></li>
         <li><a href="benchmarks.html" class="nav-link">Benchmarks 📊</a></li>
         <li><a href="../tests/test-suite.html" class="nav-link" target="_blank">Test Suite 🧪</a></li>
       </ul>
 
       <a href="https://github.com" target="_blank" class="icon-btn" title="GitHub Repository">
-        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+        </svg>
       </a>
     </div>
   </header>
@@ -104,8 +114,10 @@
           <li class="sidebar-item"><a href="#p-teleport"><code>p-teleport</code></a></li>
           <li class="sidebar-item"><a href="#p-if"><code>p-if</code></a></li>
           <li class="sidebar-item"><a href="#p-id"><code>p-id</code></a></li>
-          <li class="sidebar-item"><a href="#p-animate"><code>p-animate</code> <span class="sidebar-tag">⚡</span></a></li>
-          <li class="sidebar-item"><a href="#p-validate"><code>p-validate</code> <span class="sidebar-tag">✓</span></a></li>
+          <li class="sidebar-item"><a href="#p-animate"><code>p-animate</code> <span class="sidebar-tag">⚡</span></a>
+          </li>
+          <li class="sidebar-item"><a href="#p-validate"><code>p-validate</code> <span class="sidebar-tag">✓</span></a>
+          </li>
           <li class="sidebar-item"><a href="#p-hydrate"><code>p-hydrate</code></a></li>
         </ul>
       </div>
@@ -127,8 +139,10 @@
           <li class="sidebar-item"><a href="#magic-persist"><code>$persist</code></a></li>
           <li class="sidebar-item"><a href="#magic-history"><code>$history</code></a></li>
           <li class="sidebar-item"><a href="#magic-fetch"><code>$fetch</code></a></li>
-          <li class="sidebar-item"><a href="#magic-broadcast"><code>$broadcast</code> <span class="sidebar-tag">📡</span></a></li>
-          <li class="sidebar-item"><a href="#magic-viewtransition"><code>$viewTransition</code> <span class="sidebar-tag">🎬</span></a></li>
+          <li class="sidebar-item"><a href="#magic-broadcast"><code>$broadcast</code> <span
+                class="sidebar-tag">📡</span></a></li>
+          <li class="sidebar-item"><a href="#magic-viewtransition"><code>$viewTransition</code> <span
+                class="sidebar-tag">🎬</span></a></li>
           <li class="sidebar-item"><a href="#magic-intersect"><code>$intersect</code></a></li>
         </ul>
       </div>
@@ -142,8 +156,10 @@
           <li class="sidebar-item"><a href="#global-bind"><code>Pine.bind()</code></a></li>
           <li class="sidebar-item"><a href="#global-directive"><code>Pine.directive()</code></a></li>
           <li class="sidebar-item"><a href="#global-magic"><code>Pine.magic()</code></a></li>
-          <li class="sidebar-item"><a href="#global-html"><code>Pine.html()</code> <span class="sidebar-tag">🏷️</span></a></li>
-          <li class="sidebar-item"><a href="#global-worker"><code>Pine.worker()</code> <span class="sidebar-tag">⚡</span></a></li>
+          <li class="sidebar-item"><a href="#global-html"><code>Pine.html()</code> <span
+                class="sidebar-tag">🏷️</span></a></li>
+          <li class="sidebar-item"><a href="#global-worker"><code>Pine.worker()</code> <span
+                class="sidebar-tag">⚡</span></a></li>
           <li class="sidebar-item"><a href="#global-plugin"><code>Pine.plugin()</code></a></li>
           <li class="sidebar-item"><a href="#global-start"><code>Pine.start()</code></a></li>
         </ul>
@@ -154,11 +170,13 @@
         <div class="sidebar-title">Plugins</div>
         <ul class="sidebar-items">
           <li class="sidebar-item"><a href="#plugin-mask">Mask <span class="sidebar-tag">p-mask</span></a></li>
-          <li class="sidebar-item"><a href="#plugin-intersect">Intersect <span class="sidebar-tag">$intersect</span></a></li>
+          <li class="sidebar-item"><a href="#plugin-intersect">Intersect <span class="sidebar-tag">$intersect</span></a>
+          </li>
           <li class="sidebar-item"><a href="#plugin-resize">Resize <span class="sidebar-tag">p-resize</span></a></li>
           <li class="sidebar-item"><a href="#plugin-persist">Persist <span class="sidebar-tag">$persist</span></a></li>
           <li class="sidebar-item"><a href="#plugin-focus">Focus <span class="sidebar-tag">$focus</span></a></li>
-          <li class="sidebar-item"><a href="#plugin-collapse">Collapse <span class="sidebar-tag">p-collapse</span></a></li>
+          <li class="sidebar-item"><a href="#plugin-collapse">Collapse <span class="sidebar-tag">p-collapse</span></a>
+          </li>
           <li class="sidebar-item"><a href="#plugin-anchor">Anchor <span class="sidebar-tag">p-anchor</span></a></li>
           <li class="sidebar-item"><a href="#plugin-morph">Morph <span class="sidebar-tag">morph</span></a></li>
           <li class="sidebar-item"><a href="#plugin-sort">Sort <span class="sidebar-tag">p-sort</span></a></li>
@@ -186,16 +204,18 @@
            =================================================================== -->
       <section id="start-here" class="doc-section active">
         <h1 class="doc-h1">Start Here</h1>
-        <p class="lead-p">PineJS is a lightweight, fine-grained declarative micro-framework for building modern reactive web applications directly in your HTML markup.</p>
+        <p class="lead-p">PineJS is a lightweight, fine-grained declarative micro-framework for building modern reactive
+          web applications directly in your HTML markup.</p>
 
         <div class="doc-alert">
-          <strong>🌲 Signals + Alpine Ergonomics:</strong> Powered by true Fine-Grained Signals with atomic DOM bindings, sub-millisecond execution latency, and &lt; 8 kB footprint.
+          <strong>🌲 Signals + Alpine Ergonomics:</strong> Powered by true Fine-Grained Signals with atomic DOM
+          bindings, sub-millisecond execution latency, and &lt; 8 kB footprint.
         </div>
 
         <h2 class="doc-h2">Quick Example</h2>
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
-          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.5.0/dist/pine.min.js" defer&gt;&lt;/script&gt;
+          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.5.1/dist/pine.min.js" defer&gt;&lt;/script&gt;
 
 &lt;div p-data="{ count: 0 }"&gt;
   &lt;button @click="count++"&gt;Increment&lt;/button&gt;
@@ -206,12 +226,13 @@
         <div class="demo-card">
           <div class="demo-preview-header"><span>⚡ Live Interactive Demo</span></div>
           <div class="demo-preview-body">
-            <div p-data="{ count: 0, multiplier: 2 }" style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div p-data="{ count: 0, multiplier: 2 }"
+              style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
               <button class="btn-demo" @click="count++">Increment Count</button>
               <button class="btn-demo-outline" @click="count = 0">Reset</button>
               <div style="font-size: 1.1rem;">
                 Count: <strong style="color: var(--alpine-teal);" p-text="count">0</strong>
-                &nbsp;|&nbsp; 
+                &nbsp;|&nbsp;
                 Doubled: <strong style="color: var(--alpine-cyan);" p-text="count * multiplier">0</strong>
               </div>
             </div>
@@ -224,9 +245,10 @@
            =================================================================== -->
       <section id="upgrade-guide" class="doc-section">
         <h1 class="doc-h1">Upgrade From Alpine.js</h1>
-        <p class="lead-p">Transition existing Alpine.js applications with <strong>0 migration edits</strong> via Chameleon Mode, or standardize on <code>p-</code> or prefix-free semantic HTML.</p>
+        <p class="lead-p">Transition existing Alpine.js applications with <strong>0 migration edits</strong> via
+          Chameleon Mode, or standardize on <code>p-</code> or prefix-free semantic HTML.</p>
 
-        <h2 class="doc-h2">4 Flavor Equivalency (v1.5.0 Larch)</h2>
+        <h2 class="doc-h2">4 Flavor Equivalency (v1.5.1 Larch)</h2>
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
           <pre><code>&lt;!-- Flavor 1: Standard Pine --&gt;
@@ -258,23 +280,33 @@
           <div class="demo-preview-header"><span>⚡ Live 4-Flavor Demo</span></div>
           <div class="demo-preview-body">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-              <div p-data="{ count: 0 }" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
-                <div style="font-weight: 700; font-size: 0.85rem; color: var(--alpine-teal); margin-bottom: 0.5rem;">Standard <code>p-</code></div>
+              <div p-data="{ count: 0 }"
+                style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: var(--alpine-teal); margin-bottom: 0.5rem;">
+                  Standard <code>p-</code></div>
                 <button class="btn-demo" @click="count++">Increment</button>
                 <div style="margin-top: 0.5rem;">Count: <strong p-text="count">0</strong></div>
               </div>
-              <div state="{ count: 0 }" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
-                <div style="font-weight: 700; font-size: 0.85rem; color: #8b5cf6; margin-bottom: 0.5rem;">Semantic <code>state/text</code></div>
+              <div state="{ count: 0 }"
+                style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: #8b5cf6; margin-bottom: 0.5rem;">Semantic
+                  <code>state/text</code>
+                </div>
                 <button class="btn-demo" @click="count++">Increment</button>
                 <div style="margin-top: 0.5rem;">Count: <strong text="count">0</strong></div>
               </div>
               <div 🌲="{ count: 0 }" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
-                <div style="font-weight: 700; font-size: 0.85rem; color: #ec4899; margin-bottom: 0.5rem;">Emoji <code>🌲/⚡</code></div>
+                <div style="font-weight: 700; font-size: 0.85rem; color: #ec4899; margin-bottom: 0.5rem;">Emoji
+                  <code>🌲/⚡</code>
+                </div>
                 <button class="btn-demo" @click="count++">Increment</button>
                 <div style="margin-top: 0.5rem;">Count: <strong ⚡="count">0</strong></div>
               </div>
-              <div x-data="{ count: 0 }" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
-                <div style="font-weight: 700; font-size: 0.85rem; color: #06b6d4; margin-bottom: 0.5rem;">Alpine <code>x-</code> Chameleon</div>
+              <div x-data="{ count: 0 }"
+                style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: #06b6d4; margin-bottom: 0.5rem;">Alpine
+                  <code>x-</code> Chameleon
+                </div>
                 <button class="btn-demo" @click="count++">Increment</button>
                 <div style="margin-top: 0.5rem;">Count: <strong x-text="count">0</strong></div>
               </div>
@@ -291,9 +323,9 @@
         <p class="lead-p">Explore PineJS releases, codenames, and release highlights.</p>
 
         <div class="demo-card" p-data="{
-          selectedVer: '1.5.0',
+          selectedVer: '1.5.1',
           releases: [
-            { ver: '1.5.0', name: 'Larch', date: '2026-09-15', status: 'Latest Stable', badge: 'stable', desc: 'Tagged Template Components (Pine.html), Form Validation (p-validate), Cross-Tab Broadcast Sync ($broadcast), Native View Transitions API ($viewTransition), and Off-Thread Web Worker Signal Bridge (Pine.worker).' },
+            { ver: '1.5.1', name: 'Larch', date: '2026-09-15', status: 'Latest Stable', badge: 'stable', desc: 'Tagged Template Components (Pine.html), Form Validation (p-validate), Cross-Tab Broadcast Sync ($broadcast), Native View Transitions API ($viewTransition), and Off-Thread Web Worker Signal Bridge (Pine.worker).' },
             { ver: '1.4.0', name: 'Spruce', date: '2026-09-15', status: 'Previous Stable', badge: 'prev', desc: 'Configurable multi-prefix engine (Pine.prefix), prefix-free semantic HTML (state, text, show, model, loop), symbol & emoji shorthands (🌲, ⚡, ~, ?, *), WAAPI timeline orchestrator (Pine.timeline), and 100% Alpine Chameleon drop-in mode.' },
             { ver: '1.3.0', name: 'Cedar', date: '2026-09-15', status: 'Stable', badge: 'prev', desc: 'p-animate spring physics & WAAPI keyframes, Pine.devtools diagnostic bridge, and proxy receiver binding.' },
             { ver: '1.2.0', name: 'Redwood', date: '2026-09-14', status: 'Stable', badge: 'prev', desc: 'Official TypeScript typings (dist/pine.d.ts), $history URL sync magic, and p-hydrate SSR hydration activation.' },
@@ -307,20 +339,22 @@
               <template p-for="rel in releases">
                 <button class="btn-demo-outline"
                   :style="selectedVer === rel.ver ? 'background: var(--alpine-teal); color: white; border-color: var(--alpine-teal);' : ''"
-                  @click="selectedVer = rel.ver"
-                  p-text="'v' + rel.ver + ' (' + rel.name + ')'"></button>
+                  @click="selectedVer = rel.ver" p-text="'v' + rel.ver + ' (' + rel.name + ')'"></button>
               </template>
             </div>
 
             <template p-for="rel in releases">
-              <div p-show="selectedVer === rel.ver" style="padding: 1.25rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-surface);">
+              <div p-show="selectedVer === rel.ver"
+                style="padding: 1.25rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-surface);">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-                  <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700;" p-text="'🌲 v' + rel.ver + ' — ' + rel.name"></h3>
+                  <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700;"
+                    p-text="'🌲 v' + rel.ver + ' — ' + rel.name"></h3>
                   <span style="font-size: 0.8rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 9999px;"
                     :style="rel.badge === 'stable' ? 'background: #10b981; color: white;' : 'background: #64748b; color: white;'"
                     p-text="rel.status"></span>
                 </div>
-                <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem;" p-text="'Released on: ' + rel.date"></div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem;"
+                  p-text="'Released on: ' + rel.date"></div>
                 <p style="margin: 0; line-height: 1.6;" p-text="rel.desc"></p>
               </div>
             </template>
@@ -344,7 +378,8 @@
           <div class="demo-preview-header"><span>⚡ Live Runtime Diagnostics</span></div>
           <div class="demo-preview-body">
             <div p-data="{ ready: true }">
-              <div>Runtime Version: <strong style="color: var(--alpine-teal);" p-text="Pine.version + ' (' + Pine.versionName + ')'"></strong></div>
+              <div>Runtime Version: <strong style="color: var(--alpine-teal);"
+                  p-text="Pine.version + ' (' + Pine.versionName + ')'"></strong></div>
               <div style="color: #22c55e; font-weight: 600; margin-top: 0.3rem;">Status: Core Engine Active ✓</div>
             </div>
           </div>
@@ -377,7 +412,8 @@
               toggle() { this.status = this.status === 'Online' ? 'Away' : 'Online'; }
             }">
               <div style="font-size: 1.2rem; font-weight: 700;" p-text="profile.name"></div>
-              <div style="color: var(--text-muted); margin-bottom: 0.75rem;" p-text="profile.role + ' • ' + status"></div>
+              <div style="color: var(--text-muted); margin-bottom: 0.75rem;" p-text="profile.role + ' • ' + status">
+              </div>
               <button class="btn-demo" @click="toggle">Change Status</button>
             </div>
           </div>
@@ -423,7 +459,8 @@
           <div class="demo-preview-header"><span>⚡ Live Keypress & Debounce</span></div>
           <div class="demo-preview-body">
             <div p-data="{ typed: '', searches: 0 }">
-              <input class="input-demo" placeholder="Type and hit Enter..." p-model="typed" @keydown.enter="searches++" style="width: 260px;" />
+              <input class="input-demo" placeholder="Type and hit Enter..." p-model="typed" @keydown.enter="searches++"
+                style="width: 260px;" />
               <div style="margin-top: 0.75rem; font-size: 0.9rem;">
                 Submissions (Enter key): <strong style="color: var(--alpine-teal);" p-text="searches">0</strong>
               </div>
@@ -447,7 +484,8 @@
           <div class="demo-preview-header"><span>⚡ Live p-init Timer</span></div>
           <div class="demo-preview-body">
             <div p-data="{ seconds: 0 }" p-init="setInterval(() => seconds++, 1000)">
-              <div>Elapsed time since component mounted: <strong style="color: var(--alpine-teal);" p-text="seconds + ' seconds'"></strong></div>
+              <div>Elapsed time since component mounted: <strong style="color: var(--alpine-teal);"
+                  p-text="seconds + ' seconds'"></strong></div>
             </div>
           </div>
         </div>
@@ -465,10 +503,18 @@
           <div class="demo-preview-body">
             <div p-data="{ open: false }" style="position: relative; display: inline-block;">
               <button class="btn-demo" @click="open = !open">Options ▾</button>
-              <div p-show="open" @click.outside="open = false" @keydown.escape.window="open = false" style="position: absolute; top: calc(100% + 6px); left: 0; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; width: 210px; padding: 0.5rem; box-shadow: 0 12px 28px rgba(0,0,0,0.18); z-index: 100;">
-                <div style="padding: 0.5rem 0.75rem; cursor: pointer; border-radius: 4px; transition: background 0.15s;" @click="open = false" onmouseover="this.style.background='var(--bg-code)'" onmouseout="this.style.background='transparent'">👤 Profile Settings</div>
-                <div style="padding: 0.5rem 0.75rem; cursor: pointer; border-radius: 4px; transition: background 0.15s;" @click="open = false" onmouseover="this.style.background='var(--bg-code)'" onmouseout="this.style.background='transparent'">🔑 API Keys</div>
-                <div style="padding: 0.5rem 0.75rem; cursor: pointer; border-radius: 4px; color: #ef4444; transition: background 0.15s;" @click="open = false" onmouseover="this.style.background='var(--bg-code)'" onmouseout="this.style.background='transparent'">🚪 Sign Out</div>
+              <div p-show="open" @click.outside="open = false" @keydown.escape.window="open = false"
+                style="position: absolute; top: calc(100% + 6px); left: 0; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; width: 210px; padding: 0.5rem; box-shadow: 0 12px 28px rgba(0,0,0,0.18); z-index: 100;">
+                <div style="padding: 0.5rem 0.75rem; cursor: pointer; border-radius: 4px; transition: background 0.15s;"
+                  @click="open = false" onmouseover="this.style.background='var(--bg-code)'"
+                  onmouseout="this.style.background='transparent'">👤 Profile Settings</div>
+                <div style="padding: 0.5rem 0.75rem; cursor: pointer; border-radius: 4px; transition: background 0.15s;"
+                  @click="open = false" onmouseover="this.style.background='var(--bg-code)'"
+                  onmouseout="this.style.background='transparent'">🔑 API Keys</div>
+                <div
+                  style="padding: 0.5rem 0.75rem; cursor: pointer; border-radius: 4px; color: #ef4444; transition: background 0.15s;"
+                  @click="open = false" onmouseover="this.style.background='var(--bg-code)'"
+                  onmouseout="this.style.background='transparent'">🚪 Sign Out</div>
               </div>
             </div>
           </div>
@@ -485,10 +531,14 @@
             <div p-data="{ showModal: false }">
               <button class="btn-demo" @click="showModal = true">Open Confirm Dialog</button>
 
-              <div p-show="showModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: center; justify-content: center;" @keydown.escape.window="showModal = false">
-                <div @click.outside="showModal = false" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; width: 90%; max-width: 440px; box-shadow: 0 25px 50px rgba(0,0,0,0.4);">
+              <div p-show="showModal"
+                style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: center; justify-content: center;"
+                @keydown.escape.window="showModal = false">
+                <div @click.outside="showModal = false"
+                  style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; width: 90%; max-width: 440px; box-shadow: 0 25px 50px rgba(0,0,0,0.4);">
                   <h3 style="margin-top: 0; font-size: 1.3rem;">🌲 Confirm Action</h3>
-                  <p style="color: var(--text-secondary); margin: 1rem 0;">Are you sure you want to proceed with this operation?</p>
+                  <p style="color: var(--text-secondary); margin: 1rem 0;">Are you sure you want to proceed with this
+                    operation?</p>
                   <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
                     <button class="btn-demo-outline" @click="showModal = false">Cancel</button>
                     <button class="btn-demo" @click="showModal = false">Confirm & Close</button>
@@ -508,8 +558,11 @@
           <div class="demo-preview-header"><span>⚡ Accordion Demo</span></div>
           <div class="demo-preview-body">
             <div p-data="{ expanded: 1 }">
-              <div style="border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.5rem; overflow: hidden;">
-                <div style="padding: 0.75rem 1rem; background: var(--bg-surface-elevated); cursor: pointer; font-weight: 600; display: flex; justify-content: space-between;" @click="expanded = (expanded === 1 ? 0 : 1)">
+              <div
+                style="border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.5rem; overflow: hidden;">
+                <div
+                  style="padding: 0.75rem 1rem; background: var(--bg-surface-elevated); cursor: pointer; font-weight: 600; display: flex; justify-content: space-between;"
+                  @click="expanded = (expanded === 1 ? 0 : 1)">
                   <span>Section 1: Signals Architecture</span>
                   <span p-text="expanded === 1 ? '−' : '+'"></span>
                 </div>
@@ -519,7 +572,9 @@
               </div>
 
               <div style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
-                <div style="padding: 0.75rem 1rem; background: var(--bg-surface-elevated); cursor: pointer; font-weight: 600; display: flex; justify-content: space-between;" @click="expanded = (expanded === 2 ? 0 : 2)">
+                <div
+                  style="padding: 0.75rem 1rem; background: var(--bg-surface-elevated); cursor: pointer; font-weight: 600; display: flex; justify-content: space-between;"
+                  @click="expanded = (expanded === 2 ? 0 : 2)">
                   <span>Section 2: Zero Virtual DOM Overhead</span>
                   <span p-text="expanded === 2 ? '−' : '+'"></span>
                 </div>
@@ -537,7 +592,8 @@
            =================================================================== -->
       <section id="p-data" class="doc-section">
         <h1 class="doc-h1"><code>p-data</code></h1>
-        <p class="lead-p">Declares a new component root element and initializes its fine-grained reactive state object.</p>
+        <p class="lead-p">Declares a new component root element and initializes its fine-grained reactive state object.
+        </p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -587,7 +643,8 @@
 
       <section id="p-show" class="doc-section">
         <h1 class="doc-h1"><code>p-show</code></h1>
-        <p class="lead-p">Toggles the CSS <code>display</code> property of an element while integrating with enter/leave transition animations.</p>
+        <p class="lead-p">Toggles the CSS <code>display</code> property of an element while integrating with enter/leave
+          transition animations.</p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -602,7 +659,8 @@
           <div class="demo-preview-body">
             <div p-data="{ isVisible: true }">
               <button class="btn-demo" @click="isVisible = !isVisible">Toggle Visibility</button>
-              <div p-show="isVisible" p-transition.fade style="margin-top: 1rem; padding: 1rem; background: var(--bg-surface-elevated); border-radius: 8px; border: 1px solid var(--border-color);">
+              <div p-show="isVisible" p-transition.fade
+                style="margin-top: 1rem; padding: 1rem; background: var(--bg-surface-elevated); border-radius: 8px; border: 1px solid var(--border-color);">
                 🌲 This content box toggles smoothly via <code>p-show</code>!
               </div>
             </div>
@@ -612,7 +670,9 @@
 
       <section id="p-bind" class="doc-section">
         <h1 class="doc-h1"><code>p-bind</code> / <code>:attr</code></h1>
-        <p class="lead-p">Dynamically binds HTML attributes, class maps, inline styles, or reusable binding objects via <code>Pine.bind()</code>.</p>
+        <p class="lead-p">Dynamically binds HTML attributes, class maps, inline styles, or reusable binding objects via
+          <code>Pine.bind()</code>.
+        </p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -627,9 +687,11 @@
             <div p-data="{ isSelected: true, customColor: '#0d9488' }">
               <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
                 <button class="btn-demo" @click="isSelected = !isSelected">Toggle Selected Class</button>
-                <input type="color" class="input-demo" p-model="customColor" style="height: 38px; width: 60px; padding: 0.2rem;" />
+                <input type="color" class="input-demo" p-model="customColor"
+                  style="height: 38px; width: 60px; padding: 0.2rem;" />
               </div>
-              <div :style="{ borderColor: customColor, color: customColor }" style="padding: 1rem; border: 2px solid; border-radius: 8px; font-weight: 600;">
+              <div :style="{ borderColor: customColor, color: customColor }"
+                style="padding: 1rem; border: 2px solid; border-radius: 8px; font-weight: 600;">
                 Selected: <span p-text="isSelected"></span> | Active Color: <span p-text="customColor"></span>
               </div>
             </div>
@@ -639,7 +701,9 @@
 
       <section id="p-on" class="doc-section">
         <h1 class="doc-h1"><code>p-on</code> / <code>@event</code></h1>
-        <p class="lead-p">Listens to DOM events with full modifier support (<code>.prevent</code>, <code>.stop</code>, <code>.outside</code>, <code>.window</code>, <code>.debounce</code>, <code>.throttle</code>).</p>
+        <p class="lead-p">Listens to DOM events with full modifier support (<code>.prevent</code>, <code>.stop</code>,
+          <code>.outside</code>, <code>.window</code>, <code>.debounce</code>, <code>.throttle</code>).
+        </p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -653,8 +717,10 @@
             <div p-data="{ clicks: 0, outsideHits: 0 }">
               <div style="display: flex; gap: 1rem;">
                 <button class="btn-demo" @click="clicks++">Button Click (<span p-text="clicks"></span>)</button>
-                <div @click.outside="outsideHits++" style="padding: 0.5rem 1rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.88rem;">
-                  Click Outside this box (Hits: <strong style="color: var(--alpine-teal);" p-text="outsideHits">0</strong>)
+                <div @click.outside="outsideHits++"
+                  style="padding: 0.5rem 1rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.88rem;">
+                  Click Outside this box (Hits: <strong style="color: var(--alpine-teal);"
+                    p-text="outsideHits">0</strong>)
                 </div>
               </div>
             </div>
@@ -698,7 +764,8 @@
         <div class="demo-card">
           <div class="demo-preview-header"><span>⚡ Live p-html Example</span></div>
           <div class="demo-preview-body">
-            <div p-data="{ rawHtml: '<span style=\'color: var(--alpine-teal); font-weight: bold;\'>🌲 PineJS Rendered via p-html</span>' }">
+            <div
+              p-data="{ rawHtml: '<span style=\'color: var(--alpine-teal); font-weight: bold;\'>🌲 PineJS Rendered via p-html</span>' }">
               <div p-html="rawHtml"></div>
             </div>
           </div>
@@ -707,7 +774,8 @@
 
       <section id="p-model" class="doc-section">
         <h1 class="doc-h1"><code>p-model</code></h1>
-        <p class="lead-p">Two-way data binding for text inputs, numbers, textareas, checkboxes, radio buttons, and select dropdowns.</p>
+        <p class="lead-p">Two-way data binding for text inputs, numbers, textareas, checkboxes, radio buttons, and
+          select dropdowns.</p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -735,7 +803,8 @@
                 </label>
               </div>
               <div style="font-size: 0.88rem; background: var(--bg-code); padding: 0.75rem; border-radius: 6px;">
-                State: <span style="color: var(--alpine-teal);" p-text="JSON.stringify({ text, choice, isChecked })"></span>
+                State: <span style="color: var(--alpine-teal);"
+                  p-text="JSON.stringify({ text, choice, isChecked })"></span>
               </div>
             </div>
           </div>
@@ -759,8 +828,10 @@
           <div class="demo-preview-header"><span>⚡ Live p-modelable Example</span></div>
           <div class="demo-preview-body">
             <div p-data="{ parentCount: 10 }">
-              <div style="margin-bottom: 0.5rem;">Parent Count: <strong style="color: var(--alpine-teal);" p-text="parentCount"></strong></div>
-              <div p-data="{ innerVal: 10 }" p-modelable="innerVal" p-model="parentCount" style="display: flex; gap: 0.5rem;">
+              <div style="margin-bottom: 0.5rem;">Parent Count: <strong style="color: var(--alpine-teal);"
+                  p-text="parentCount"></strong></div>
+              <div p-data="{ innerVal: 10 }" p-modelable="innerVal" p-model="parentCount"
+                style="display: flex; gap: 0.5rem;">
                 <button class="btn-demo" @click="innerVal++">Increment Inner Value</button>
                 <button class="btn-demo-outline" @click="innerVal = 0">Reset</button>
               </div>
@@ -771,7 +842,8 @@
 
       <section id="p-for" class="doc-section">
         <h1 class="doc-h1"><code>p-for</code></h1>
-        <p class="lead-p">Iterates over arrays, objects, or numbers on <code>&lt;template&gt;</code> tags with fine-grained DOM recycling.</p>
+        <p class="lead-p">Iterates over arrays, objects, or numbers on <code>&lt;template&gt;</code> tags with
+          fine-grained DOM recycling.</p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -806,7 +878,9 @@
 
       <section id="p-transition" class="doc-section">
         <h1 class="doc-h1"><code>p-transition</code></h1>
-        <p class="lead-p">Applies smooth CSS transitions. Supports preset shortcuts: <code>p-transition.fade</code>, <code>p-transition.slide</code>, and <code>p-transition.scale</code>.</p>
+        <p class="lead-p">Applies smooth CSS transitions. Supports preset shortcuts: <code>p-transition.fade</code>,
+          <code>p-transition.slide</code>, and <code>p-transition.scale</code>.
+        </p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -818,7 +892,8 @@
           <div class="demo-preview-body">
             <div p-data="{ showBox: true }">
               <button class="btn-demo" @click="showBox = !showBox">Toggle Scale Animation</button>
-              <div p-show="showBox" p-transition.scale style="margin-top: 1rem; padding: 1.25rem; background: var(--bg-surface-elevated); border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+              <div p-show="showBox" p-transition.scale
+                style="margin-top: 1rem; padding: 1.25rem; background: var(--bg-surface-elevated); border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
                 ✨ Scaled via <code>p-transition.scale</code>
               </div>
             </div>
@@ -852,7 +927,8 @@
 
       <section id="p-ignore" class="doc-section">
         <h1 class="doc-h1"><code>p-ignore</code></h1>
-        <p class="lead-p">Instructs PineJS to ignore an element and all of its descendants during DOM initialization (ideal for embedding legacy widgets or 3rd-party libs).</p>
+        <p class="lead-p">Instructs PineJS to ignore an element and all of its descendants during DOM initialization
+          (ideal for embedding legacy widgets or 3rd-party libs).</p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -877,7 +953,9 @@
 
       <section id="p-ref" class="doc-section">
         <h1 class="doc-h1"><code>p-ref</code></h1>
-        <p class="lead-p">Registers a direct DOM reference accessible inside your component via <code>$refs[name]</code>.</p>
+        <p class="lead-p">Registers a direct DOM reference accessible inside your component via
+          <code>$refs[name]</code>.
+        </p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -898,7 +976,9 @@
 
       <section id="p-cloak" class="doc-section">
         <h1 class="doc-h1"><code>p-cloak</code></h1>
-        <p class="lead-p">Hides unrendered elements before PineJS finishes initialization. Combine with <code>[p-cloak] { display: none !important; }</code>.</p>
+        <p class="lead-p">Hides unrendered elements before PineJS finishes initialization. Combine with
+          <code>[p-cloak] { display: none !important; }</code>.
+        </p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML & CSS</span><button class="code-copy-btn">Copy</button></div>
@@ -921,7 +1001,9 @@
 
       <section id="p-teleport" class="doc-section">
         <h1 class="doc-h1"><code>p-teleport</code></h1>
-        <p class="lead-p">Teleports <code>&lt;template&gt;</code> contents to an external DOM container such as <code>body</code>.</p>
+        <p class="lead-p">Teleports <code>&lt;template&gt;</code> contents to an external DOM container such as
+          <code>body</code>.
+        </p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -936,7 +1018,9 @@
             <div p-data="{ openToast: false }">
               <button class="btn-demo" @click="openToast = !openToast">Toggle Teleported Toast</button>
               <template p-teleport="body">
-                <div p-show="openToast" style="position: fixed; bottom: 20px; right: 20px; background: #0f172a; border: 1px solid var(--alpine-teal); color: #fff; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10000;" @click="openToast = false">
+                <div p-show="openToast"
+                  style="position: fixed; bottom: 20px; right: 20px; background: #0f172a; border: 1px solid var(--alpine-teal); color: #fff; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10000;"
+                  @click="openToast = false">
                   🌲 Teleported directly into <code>&lt;body&gt;</code>! (Click to dismiss)
                 </div>
               </template>
@@ -947,7 +1031,8 @@
 
       <section id="p-if" class="doc-section">
         <h1 class="doc-h1"><code>p-if</code></h1>
-        <p class="lead-p">Conditionally mounts and unmounts DOM elements on <code>&lt;template&gt;</code> tags with full signal teardown.</p>
+        <p class="lead-p">Conditionally mounts and unmounts DOM elements on <code>&lt;template&gt;</code> tags with full
+          signal teardown.</p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -963,7 +1048,8 @@
               <button class="btn-demo" @click="loggedIn = !loggedIn" p-text="loggedIn ? 'Log Out' : 'Log In'"></button>
               <div style="margin-top: 1rem;">
                 <template p-if="loggedIn">
-                  <div style="padding: 1rem; background: rgba(45, 212, 191, 0.1); border: 1px solid var(--alpine-teal); border-radius: 6px;">
+                  <div
+                    style="padding: 1rem; background: rgba(45, 212, 191, 0.1); border: 1px solid var(--alpine-teal); border-radius: 6px;">
                     🔓 Welcome to the authenticated user view!
                   </div>
                 </template>
@@ -1000,7 +1086,10 @@
 
       <section id="p-animate" class="doc-section">
         <h1 class="doc-h1"><code>p-animate</code></h1>
-        <p class="lead-p">Declarative hardware-accelerated Web Animations API (WAAPI) micro-animations with built-in spring physics (<code>.spring</code>, <code>.bounce</code>, <code>.shake</code>, <code>.pulse</code>, <code>.loop</code>).</p>
+        <p class="lead-p">Declarative hardware-accelerated Web Animations API (WAAPI) micro-animations with built-in
+          spring physics (<code>.spring</code>, <code>.bounce</code>, <code>.shake</code>, <code>.pulse</code>,
+          <code>.loop</code>).
+        </p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -1024,19 +1113,23 @@
               </div>
 
               <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
-                <div p-animate.spring="clicks" style="padding: 1rem 1.5rem; background: linear-gradient(135deg, #10b981, #06b6d4); color: white; font-weight: 700; border-radius: 12px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); display: inline-block;">
+                <div p-animate.spring="clicks"
+                  style="padding: 1rem 1.5rem; background: linear-gradient(135deg, #10b981, #06b6d4); color: white; font-weight: 700; border-radius: 12px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); display: inline-block;">
                   Spring Hits: <span p-text="clicks">0</span>
                 </div>
 
-                <div p-animate.bounce="bounceTrigger" style="padding: 1rem 1.5rem; background: var(--bg-surface-elevated); border: 1px solid var(--alpine-cyan); color: var(--alpine-cyan); font-weight: 600; border-radius: 12px;">
+                <div p-animate.bounce="bounceTrigger"
+                  style="padding: 1rem 1.5rem; background: var(--bg-surface-elevated); border: 1px solid var(--alpine-cyan); color: var(--alpine-cyan); font-weight: 600; border-radius: 12px;">
                   Bounce Target
                 </div>
 
-                <div p-animate.shake="shakeTrigger" style="padding: 1rem 1.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; font-weight: 600; border-radius: 12px;">
+                <div p-animate.shake="shakeTrigger"
+                  style="padding: 1rem 1.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; font-weight: 600; border-radius: 12px;">
                   Shake Warning
                 </div>
 
-                <div p-animate.pulse.loop style="padding: 0.5rem 1rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--alpine-teal); color: var(--alpine-teal); border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
+                <div p-animate.pulse.loop
+                  style="padding: 0.5rem 1rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--alpine-teal); color: var(--alpine-teal); border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
                   ● Pulse Looping
                 </div>
               </div>
@@ -1050,7 +1143,10 @@
            =================================================================== -->
       <section id="p-validate" class="doc-section">
         <h1 class="doc-h1"><code>p-validate</code></h1>
-        <p class="lead-p">Declarative field and form constraint validation. Automatically injects <code>$errors</code>, <code>$valid</code>, <code>$touched</code>, and <code>$dirty</code> into component scopes with zero boilerplate.</p>
+        <p class="lead-p">Declarative field and form constraint validation. Automatically injects <code>$errors</code>,
+          <code>$valid</code>, <code>$touched</code>, and <code>$dirty</code> into component scopes with zero
+          boilerplate.
+        </p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -1073,22 +1169,29 @@
             <div p-data="{ email: '', username: '', submitted: false }">
               <div style="display: grid; gap: 1.25rem; max-width: 420px;">
                 <div>
-                  <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem;">Email Address *</label>
-                  <input class="input-demo" name="val_email" p-model="email" p-validate.required.email placeholder="name@domain.com" style="width: 100%;" />
-                  <div p-show="$errors?.val_email" style="color: #ef4444; font-size: 0.8rem; margin-top: 0.35rem;" p-text="$errors?.val_email"></div>
+                  <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem;">Email
+                    Address *</label>
+                  <input class="input-demo" name="val_email" p-model="email" p-validate.required.email
+                    placeholder="name@domain.com" style="width: 100%;" />
+                  <div p-show="$errors?.val_email" style="color: #ef4444; font-size: 0.8rem; margin-top: 0.35rem;"
+                    p-text="$errors?.val_email"></div>
                 </div>
 
                 <div>
-                  <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem;">Username (Min 4 chars) *</label>
-                  <input class="input-demo" name="val_user" p-model="username" p-validate.required.min.4 placeholder="Choose username" style="width: 100%;" />
-                  <div p-show="$errors?.val_user" style="color: #ef4444; font-size: 0.8rem; margin-top: 0.35rem;" p-text="$errors?.val_user"></div>
+                  <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem;">Username
+                    (Min 4 chars) *</label>
+                  <input class="input-demo" name="val_user" p-model="username" p-validate.required.min.4
+                    placeholder="Choose username" style="width: 100%;" />
+                  <div p-show="$errors?.val_user" style="color: #ef4444; font-size: 0.8rem; margin-top: 0.35rem;"
+                    p-text="$errors?.val_user"></div>
                 </div>
 
                 <button class="btn-demo" :disabled="!$valid?.val_email || !$valid?.val_user" @click="submitted = true">
                   Submit Registration
                 </button>
 
-                <div p-show="submitted" style="padding: 0.85rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--alpine-teal); border-radius: 6px; color: var(--alpine-teal); font-weight: 600;">
+                <div p-show="submitted"
+                  style="padding: 0.85rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--alpine-teal); border-radius: 6px; color: var(--alpine-teal); font-weight: 600;">
                   ✓ Form successfully validated and submitted!
                 </div>
               </div>
@@ -1099,7 +1202,8 @@
 
       <section id="p-hydrate" class="doc-section">
         <h1 class="doc-h1"><code>p-hydrate</code></h1>
-        <p class="lead-p">Seamless Server-Side Rendering (SSR) hydration marker that activates server-rendered DOM nodes without layout shift or UI tearing.</p>
+        <p class="lead-p">Seamless Server-Side Rendering (SSR) hydration marker that activates server-rendered DOM nodes
+          without layout shift or UI tearing.</p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -1115,7 +1219,8 @@
           <div class="demo-preview-body">
             <div p-data="{ hydrated: true, count: 42 }" p-hydrate>
               <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                <span style="padding: 0.35rem 0.75rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--alpine-teal); border-radius: 6px; font-weight: 600; color: var(--alpine-teal);">
+                <span
+                  style="padding: 0.35rem 0.75rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--alpine-teal); border-radius: 6px; font-weight: 600; color: var(--alpine-teal);">
                   Hydrated SSR Tree ✓
                 </span>
                 <div>Counter: <strong style="color: var(--alpine-teal);" p-text="count">42</strong></div>
@@ -1142,7 +1247,9 @@
           <div class="demo-preview-header"><span>⚡ Live $el Example</span></div>
           <div class="demo-preview-body">
             <div p-data>
-              <button class="btn-demo" @click="$el.textContent = 'Updated via $el at ' + new Date().toLocaleTimeString()">Click to mutate $el directly</button>
+              <button class="btn-demo"
+                @click="$el.textContent = 'Updated via $el at ' + new Date().toLocaleTimeString()">Click to mutate $el
+                directly</button>
             </div>
           </div>
         </div>
@@ -1157,7 +1264,8 @@
           <div class="demo-preview-body">
             <div p-data style="display: flex; gap: 0.75rem;">
               <input class="input-demo" p-ref="demoInput" value="Initial Text" />
-              <button class="btn-demo" @click="$refs.demoInput.value = 'Cleared!'; $refs.demoInput.focus()">Clear & Focus with $refs</button>
+              <button class="btn-demo" @click="$refs.demoInput.value = 'Cleared!'; $refs.demoInput.focus()">Clear &
+                Focus with $refs</button>
             </div>
           </div>
         </div>
@@ -1182,8 +1290,10 @@
           <div class="demo-preview-header"><span>⚡ Live $store Example</span></div>
           <div class="demo-preview-body">
             <div p-data p-init="if (!Pine.store('bell')) Pine.store('bell', { count: 1 })">
-              <div>Global Store Unread: <strong style="color: var(--alpine-teal);" p-text="$store('bell')?.count || 0"></strong></div>
-              <button class="btn-demo" style="margin-top: 0.75rem;" @click="$store('bell').count++">Increment Global Store</button>
+              <div>Global Store Unread: <strong style="color: var(--alpine-teal);"
+                  p-text="$store('bell')?.count || 0"></strong></div>
+              <button class="btn-demo" style="margin-top: 0.75rem;" @click="$store('bell').count++">Increment Global
+                Store</button>
             </div>
           </div>
         </div>
@@ -1196,10 +1306,12 @@
         <div class="demo-card">
           <div class="demo-preview-header"><span>⚡ Live $watch Example</span></div>
           <div class="demo-preview-body">
-            <div p-data="{ counter: 1, history: [] }" p-init="$watch('counter', (n, o) => history.push(o + ' -> ' + n))">
+            <div p-data="{ counter: 1, history: [] }"
+              p-init="$watch('counter', (n, o) => history.push(o + ' -> ' + n))">
               <button class="btn-demo" @click="counter++">Increment (<span p-text="counter"></span>)</button>
               <div style="margin-top: 0.75rem; font-size: 0.88rem;">
-                Watch Logs: <span style="color: var(--alpine-teal);" p-text="history.slice(-3).join(' | ') || 'No mutations yet'"></span>
+                Watch Logs: <span style="color: var(--alpine-teal);"
+                  p-text="history.slice(-3).join(' | ') || 'No mutations yet'"></span>
               </div>
             </div>
           </div>
@@ -1214,7 +1326,9 @@
           <div class="demo-preview-header"><span>⚡ Live $dispatch Example</span></div>
           <div class="demo-preview-body">
             <div p-data="{ message: 'Waiting for event...' }" @notify.window="message = $event.detail">
-              <button class="btn-demo" @click="$dispatch('notify', 'Event dispatched at ' + new Date().toLocaleTimeString())">Dispatch 'notify'</button>
+              <button class="btn-demo"
+                @click="$dispatch('notify', 'Event dispatched at ' + new Date().toLocaleTimeString())">Dispatch
+                'notify'</button>
               <div style="margin-top: 0.75rem;" p-text="message"></div>
             </div>
           </div>
@@ -1229,7 +1343,8 @@
           <div class="demo-preview-header"><span>⚡ Live $nextTick Example</span></div>
           <div class="demo-preview-body">
             <div p-data="{ count: 0, domText: '' }">
-              <button class="btn-demo" @click="count++; $nextTick(() => domText = $refs.display.textContent)">Increment & Read DOM</button>
+              <button class="btn-demo" @click="count++; $nextTick(() => domText = $refs.display.textContent)">Increment
+                & Read DOM</button>
               <div style="margin-top: 0.75rem;">
                 Rendered DOM Value: <strong style="color: var(--alpine-teal);" p-ref="display" p-text="count">0</strong>
                 (Read by $nextTick: <span p-text="domText"></span>)
@@ -1261,7 +1376,8 @@
           <div class="demo-preview-header"><span>⚡ Live $data Object Preview</span></div>
           <div class="demo-preview-body">
             <div p-data="{ user: 'Dev', score: 95 }">
-              <pre style="background: var(--bg-code); padding: 0.75rem; border-radius: 6px;"><code p-text="JSON.stringify($data, null, 2)"></code></pre>
+              <pre
+                style="background: var(--bg-code); padding: 0.75rem; border-radius: 6px;"><code p-text="JSON.stringify($data, null, 2)"></code></pre>
             </div>
           </div>
         </div>
@@ -1296,7 +1412,8 @@
           <div class="demo-preview-header"><span>⚡ Live $signal Primitive</span></div>
           <div class="demo-preview-body">
             <div p-data="{ rawSig: $signal(100) }">
-              <button class="btn-demo" @click="rawSig.value += 10">Increment Signal (<span p-text="rawSig.value"></span>)</button>
+              <button class="btn-demo" @click="rawSig.value += 10">Increment Signal (<span
+                  p-text="rawSig.value"></span>)</button>
             </div>
           </div>
         </div>
@@ -1326,7 +1443,8 @@
 
       <section id="magic-history" class="doc-section">
         <h1 class="doc-h1"><code>$history</code></h1>
-        <p class="lead-p">Synchronizes reactive signal state bidirectionally with browser URL search parameters and listens to <code>popstate</code> back/forward navigation.</p>
+        <p class="lead-p">Synchronizes reactive signal state bidirectionally with browser URL search parameters and
+          listens to <code>popstate</code> back/forward navigation.</p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -1346,7 +1464,8 @@
                 <button class="btn-demo-outline" @click="query.value = ''">Clear Query</button>
               </div>
               <div style="margin-top: 0.75rem; font-size: 0.9rem; color: var(--text-muted);">
-                URL Query Parameter: <code style="color: var(--alpine-cyan);" p-text="'?docs_q=' + encodeURIComponent(query.value)"></code>
+                URL Query Parameter: <code style="color: var(--alpine-cyan);"
+                  p-text="'?docs_q=' + encodeURIComponent(query.value)"></code>
               </div>
             </div>
           </div>
@@ -1355,7 +1474,10 @@
 
       <section id="magic-fetch" class="doc-section">
         <h1 class="doc-h1"><code>$fetch</code></h1>
-        <p class="lead-p">Full-featured reactive HTTP client supporting REST verbs (<code>$fetch.get</code>, <code>$fetch.post</code>, etc.), auto-JSON serialization, query params, manual <code>.refetch()</code>, and cancellation via <code>.abort()</code>.</p>
+        <p class="lead-p">Full-featured reactive HTTP client supporting REST verbs (<code>$fetch.get</code>,
+          <code>$fetch.post</code>, etc.), auto-JSON serialization, query params, manual <code>.refetch()</code>, and
+          cancellation via <code>.abort()</code>.
+        </p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -1393,13 +1515,18 @@
                 ⏳ Connecting to remote endpoint...
               </div>
 
-              <div p-show="req.data && !req.loading" style="padding: 1.25rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px;">
-                <p style="font-style: italic; font-size: 1.05rem; margin-bottom: 0.5rem;" p-text="'“' + (req.data?.quote || '') + '”'"></p>
-                <div style="font-weight: 700; color: var(--alpine-teal);" p-text="'— ' + (req.data?.author || '')"></div>
-                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;" p-text="'HTTP Status: ' + req.status + ' • OK: ' + req.ok"></div>
+              <div p-show="req.data && !req.loading"
+                style="padding: 1.25rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px;">
+                <p style="font-style: italic; font-size: 1.05rem; margin-bottom: 0.5rem;"
+                  p-text="'“' + (req.data?.quote || '') + '”'"></p>
+                <div style="font-weight: 700; color: var(--alpine-teal);" p-text="'— ' + (req.data?.author || '')">
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;"
+                  p-text="'HTTP Status: ' + req.status + ' • OK: ' + req.ok"></div>
               </div>
 
-              <div p-show="req.error" style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; color: #ef4444;">
+              <div p-show="req.error"
+                style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; color: #ef4444;">
                 Error: <span p-text="req.error"></span>
               </div>
             </div>
@@ -1412,7 +1539,8 @@
            =================================================================== -->
       <section id="magic-broadcast" class="doc-section">
         <h1 class="doc-h1"><code>$broadcast</code></h1>
-        <p class="lead-p">Seamless real-time state synchronization across multiple browser tabs and windows using the browser's native <code>BroadcastChannel</code> API.</p>
+        <p class="lead-p">Seamless real-time state synchronization across multiple browser tabs and windows using the
+          browser's native <code>BroadcastChannel</code> API.</p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -1444,7 +1572,8 @@
            =================================================================== -->
       <section id="magic-viewtransition" class="doc-section">
         <h1 class="doc-h1"><code>$viewTransition</code></h1>
-        <p class="lead-p">Wraps reactive DOM modifications with <code>document.startViewTransition()</code> for app-like fluid screen animations.</p>
+        <p class="lead-p">Wraps reactive DOM modifications with <code>document.startViewTransition()</code> for app-like
+          fluid screen animations.</p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
@@ -1462,22 +1591,28 @@
           <div class="demo-preview-body">
             <div p-data="{ currentTab: 'overview' }">
               <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                <button class="btn-demo" :class="{ 'btn-demo-outline': currentTab !== 'overview' }" @click="$viewTransition(() => currentTab = 'overview')">
+                <button class="btn-demo" :class="{ 'btn-demo-outline': currentTab !== 'overview' }"
+                  @click="$viewTransition(() => currentTab = 'overview')">
                   Overview Panel
                 </button>
-                <button class="btn-demo" :class="{ 'btn-demo-outline': currentTab !== 'metrics' }" @click="$viewTransition(() => currentTab = 'metrics')">
+                <button class="btn-demo" :class="{ 'btn-demo-outline': currentTab !== 'metrics' }"
+                  @click="$viewTransition(() => currentTab = 'metrics')">
                   Metrics & Charts
                 </button>
               </div>
 
-              <div p-show="currentTab === 'overview'" style="padding: 1.25rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px;">
+              <div p-show="currentTab === 'overview'"
+                style="padding: 1.25rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px;">
                 <h4>📊 System Overview</h4>
-                <p style="margin-top: 0.5rem; color: var(--text-secondary);">PineJS v1.5.0 fine-grained engine running with 0ms transition latency.</p>
+                <p style="margin-top: 0.5rem; color: var(--text-secondary);">PineJS v1.5.1 fine-grained engine running
+                  with 0ms transition latency.</p>
               </div>
 
-              <div p-show="currentTab === 'metrics'" style="padding: 1.25rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px;">
+              <div p-show="currentTab === 'metrics'"
+                style="padding: 1.25rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px;">
                 <h4>📈 Live Performance Metrics</h4>
-                <p style="margin-top: 0.5rem; color: var(--text-secondary);">100% signal execution efficiency, sub-millisecond atomic DOM updates.</p>
+                <p style="margin-top: 0.5rem; color: var(--text-secondary);">100% signal execution efficiency,
+                  sub-millisecond atomic DOM updates.</p>
               </div>
             </div>
           </div>
@@ -1486,13 +1621,16 @@
 
       <section id="magic-intersect" class="doc-section">
         <h1 class="doc-h1"><code>$intersect</code></h1>
-        <p class="lead-p">Observes when an element scrolls into the browser viewport using <code>IntersectionObserver</code>.</p>
+        <p class="lead-p">Observes when an element scrolls into the browser viewport using
+          <code>IntersectionObserver</code>.
+        </p>
 
         <div class="demo-card">
           <div class="demo-preview-header"><span>⚡ Live $intersect Example</span></div>
           <div class="demo-preview-body">
             <div p-data="{ isVisible: false }" p-init="$intersect((shown) => isVisible = shown)">
-              Viewport Visibility: <strong style="color: var(--alpine-teal);" p-text="isVisible ? 'Visible in Viewport ✓' : 'Hidden'"></strong>
+              Viewport Visibility: <strong style="color: var(--alpine-teal);"
+                p-text="isVisible ? 'Visible in Viewport ✓' : 'Hidden'"></strong>
             </div>
           </div>
         </div>
@@ -1524,8 +1662,10 @@
           <div class="demo-preview-header"><span>⚡ Live Pine.store Example</span></div>
           <div class="demo-preview-body">
             <div p-data p-init="Pine.store('cart', { totalItems: 2 })">
-              Global Cart Items: <strong style="color: var(--alpine-teal);" p-text="$store('cart')?.totalItems"></strong>
-              <button class="btn-demo" style="margin-left: 1rem;" @click="$store('cart').totalItems++">Add Item to Store</button>
+              Global Cart Items: <strong style="color: var(--alpine-teal);"
+                p-text="$store('cart')?.totalItems"></strong>
+              <button class="btn-demo" style="margin-left: 1rem;" @click="$store('cart').totalItems++">Add Item to
+                Store</button>
             </div>
           </div>
         </div>
@@ -1539,7 +1679,8 @@
           <div class="demo-preview-header"><span>⚡ Live Pine.bind Example</span></div>
           <div class="demo-preview-body">
             <div p-data="{ clicks: 0 }" p-init="Pine.bind('reusableAction', () => ({ '@click': 'clicks++' }))">
-              <button class="btn-demo" p-bind="reusableAction">Bound Action Button (<span p-text="clicks"></span>)</button>
+              <button class="btn-demo" p-bind="reusableAction">Bound Action Button (<span
+                  p-text="clicks"></span>)</button>
             </div>
           </div>
         </div>
@@ -1552,7 +1693,8 @@
         <div class="demo-card">
           <div class="demo-preview-header"><span>⚡ Live Custom Directive</span></div>
           <div class="demo-preview-body">
-            <div p-data p-init="Pine.directive('highlight', (el) => el.style.backgroundColor = 'rgba(45,212,191,0.15)')">
+            <div p-data
+              p-init="Pine.directive('highlight', (el) => el.style.backgroundColor = 'rgba(45,212,191,0.15)')">
               <div p-highlight style="padding: 0.75rem; border-radius: 6px; border: 1px solid var(--alpine-teal);">
                 Styled via custom <code>p-highlight</code> directive!
               </div>
@@ -1580,7 +1722,8 @@
            =================================================================== -->
       <section id="global-html" class="doc-section">
         <h1 class="doc-h1"><code>Pine.html()</code></h1>
-        <p class="lead-p">Compiler-less declarative component template engine. Creates reactive DOM fragments directly from JavaScript template literals with full signal interpolation.</p>
+        <p class="lead-p">Compiler-less declarative component template engine. Creates reactive DOM fragments directly
+          from JavaScript template literals with full signal interpolation.</p>
 
         <div class="code-box">
           <div class="code-header"><span>JavaScript</span><button class="code-copy-btn">Copy</button></div>
@@ -1621,7 +1764,8 @@ document.getElementById('app').appendChild(Card({ title: 'Dynamic Widget', count
            =================================================================== -->
       <section id="global-worker" class="doc-section">
         <h1 class="doc-h1"><code>Pine.worker()</code></h1>
-        <p class="lead-p">Executes heavy calculations, cryptographic hashing, and data processing in background Web Workers with automatic fine-grained reactive signals.</p>
+        <p class="lead-p">Executes heavy calculations, cryptographic hashing, and data processing in background Web
+          Workers with automatic fine-grained reactive signals.</p>
 
         <div class="code-box">
           <div class="code-header"><span>JavaScript</span><button class="code-copy-btn">Copy</button></div>
@@ -1657,7 +1801,8 @@ worker.compute(1000000);</code></pre>
                 ⚙️ Executing on background worker thread (main UI thread remains 60fps)...
               </div>
 
-              <div p-show="w.data !== null && !w.loading" style="padding: 1rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px;">
+              <div p-show="w.data !== null && !w.loading"
+                style="padding: 1rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px;">
                 Result from Background Thread: <strong style="color: var(--alpine-teal);" p-text="w.data"></strong>
               </div>
             </div>
@@ -1698,7 +1843,9 @@ worker.compute(1000000);</code></pre>
            =================================================================== -->
       <section id="plugin-mask" class="doc-section">
         <h1 class="doc-h1">Plugin: Mask (<code>p-mask</code>)</h1>
-        <p class="lead-p">Formats text inputs dynamically according to a pattern (e.g. <code>p-mask="'(999) 999-9999'"</code>).</p>
+        <p class="lead-p">Formats text inputs dynamically according to a pattern (e.g.
+          <code>p-mask="'(999) 999-9999'"</code>).
+        </p>
 
         <div class="demo-card">
           <div class="demo-preview-header"><span>⚡ Live Phone Mask</span></div>
@@ -1732,7 +1879,8 @@ worker.compute(1000000);</code></pre>
         <div class="demo-card">
           <div class="demo-preview-header"><span>⚡ Live Dimension Tracker</span></div>
           <div class="demo-preview-body">
-            <div p-data="{ width: window.innerWidth }" p-init="window.addEventListener('resize', () => width = window.innerWidth)">
+            <div p-data="{ width: window.innerWidth }"
+              p-init="window.addEventListener('resize', () => width = window.innerWidth)">
               Current Window Width: <strong style="color: var(--alpine-teal);" p-text="width + 'px'"></strong>
             </div>
           </div>
@@ -1777,7 +1925,8 @@ worker.compute(1000000);</code></pre>
           <div class="demo-preview-body">
             <div p-data="{ isOpen: false }">
               <button class="btn-demo" @click="isOpen = !isOpen">Toggle Collapse</button>
-              <div p-show="isOpen" p-collapse style="margin-top: 0.75rem; padding: 1rem; background: var(--bg-surface-elevated); border-radius: 8px;">
+              <div p-show="isOpen" p-collapse
+                style="margin-top: 0.75rem; padding: 1rem; background: var(--bg-surface-elevated); border-radius: 8px;">
                 🌲 Smoothly expanded height animation powered by <code>p-collapse</code>!
               </div>
             </div>
@@ -1793,8 +1942,10 @@ worker.compute(1000000);</code></pre>
           <div class="demo-preview-header"><span>⚡ Live Anchor Tooltip</span></div>
           <div class="demo-preview-body">
             <div p-data="{ showTip: false }">
-              <button class="btn-demo" @mouseenter="showTip = true" @mouseleave="showTip = false">Hover for Popover</button>
-              <div p-show="showTip" style="margin-top: 0.5rem; background: var(--bg-code); border: 1px solid var(--alpine-teal); padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.85rem; width: 180px;">
+              <button class="btn-demo" @mouseenter="showTip = true" @mouseleave="showTip = false">Hover for
+                Popover</button>
+              <div p-show="showTip"
+                style="margin-top: 0.5rem; background: var(--bg-code); border: 1px solid var(--alpine-teal); padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.85rem; width: 180px;">
                 Anchored Popover Box
               </div>
             </div>
@@ -1804,16 +1955,20 @@ worker.compute(1000000);</code></pre>
 
       <section id="plugin-morph" class="doc-section">
         <h1 class="doc-h1">Plugin: Morph (<code>Pine.morph</code>)</h1>
-        <p class="lead-p">Patches and morphs server-rendered HTML into the live DOM without breaking inputs or focus state.</p>
+        <p class="lead-p">Patches and morphs server-rendered HTML into the live DOM without breaking inputs or focus
+          state.</p>
 
         <div class="demo-card">
           <div class="demo-preview-header"><span>⚡ Live DOM Morphing</span></div>
           <div class="demo-preview-body">
             <div p-data>
-              <div id="morph-target-demo" style="padding: 1rem; background: var(--bg-surface-elevated); border-radius: 6px; margin-bottom: 0.75rem;">
+              <div id="morph-target-demo"
+                style="padding: 1rem; background: var(--bg-surface-elevated); border-radius: 6px; margin-bottom: 0.75rem;">
                 <p>Original Server HTML Content</p>
               </div>
-              <button class="btn-demo" @click="Pine.morph(document.querySelector('#morph-target-demo'), '<div id=\'morph-target-demo\' style=\'padding:1rem;background:rgba(45,212,191,0.15);border-radius:6px;\'><p style=\'color:var(--alpine-teal);font-weight:bold;\'>✨ Morphed with Pine.morph()!</p></div>')">Morph Target DOM</button>
+              <button class="btn-demo"
+                @click="Pine.morph(document.querySelector('#morph-target-demo'), '<div id=\'morph-target-demo\' style=\'padding:1rem;background:rgba(45,212,191,0.15);border-radius:6px;\'><p style=\'color:var(--alpine-teal);font-weight:bold;\'>✨ Morphed with Pine.morph()!</p></div>')">Morph
+                Target DOM</button>
             </div>
           </div>
         </div>
@@ -1836,9 +1991,11 @@ worker.compute(1000000);</code></pre>
               }
             }">
               <template p-for="(item, i) in list">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: var(--bg-surface-elevated); margin-bottom: 0.4rem; border-radius: 6px;">
+                <div
+                  style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: var(--bg-surface-elevated); margin-bottom: 0.4rem; border-radius: 6px;">
                   <span p-text="item"></span>
-                  <button class="btn-demo-outline" style="padding: 0.2rem 0.5rem;" @click="moveUp(i)" p-show="i > 0">▲ Up</button>
+                  <button class="btn-demo-outline" style="padding: 0.2rem 0.5rem;" @click="moveUp(i)" p-show="i > 0">▲
+                    Up</button>
                 </div>
               </template>
             </div>
@@ -1869,7 +2026,8 @@ worker.compute(1000000);</code></pre>
 
       <section id="advanced-reactivity" class="doc-section">
         <h1 class="doc-h1">Advanced: Reactivity & Signals Deep-Dive</h1>
-        <p class="lead-p">How the internal fine-grained signal graph and dependency tracking outperform microtask tree loops.</p>
+        <p class="lead-p">How the internal fine-grained signal graph and dependency tracking outperform microtask tree
+          loops.</p>
 
         <div class="demo-card">
           <div class="demo-preview-header"><span>⚡ Live Signal Batch Transaction</span></div>
@@ -1884,8 +2042,10 @@ worker.compute(1000000);</code></pre>
                 });
               }
             }">
-              <div>a: <span p-text="a"></span> | b: <span p-text="b"></span> | Total: <strong style="color: var(--alpine-teal);" p-text="a + b"></strong></div>
-              <button class="btn-demo" style="margin-top: 0.75rem;" @click="mutateBatched()">Atomic Batch Mutation</button>
+              <div>a: <span p-text="a"></span> | b: <span p-text="b"></span> | Total: <strong
+                  style="color: var(--alpine-teal);" p-text="a + b"></strong></div>
+              <button class="btn-demo" style="margin-top: 0.75rem;" @click="mutateBatched()">Atomic Batch
+                Mutation</button>
             </div>
           </div>
         </div>
@@ -1893,7 +2053,8 @@ worker.compute(1000000);</code></pre>
 
       <section id="advanced-typescript" class="doc-section">
         <h1 class="doc-h1">Advanced: TypeScript Support & Typings</h1>
-        <p class="lead-p">PineJS ships with first-class TypeScript ambient declaration definitions (<code>dist/pine.d.ts</code>) covering reactive primitives, directives, and magics.</p>
+        <p class="lead-p">PineJS ships with first-class TypeScript ambient declaration definitions
+          (<code>dist/pine.d.ts</code>) covering reactive primitives, directives, and magics.</p>
 
         <div class="code-box">
           <div class="code-header"><span>TypeScript</span><button class="code-copy-btn">Copy</button></div>
@@ -1922,7 +2083,9 @@ Pine.data('userProfile', () => ({
               status: 'dist/pine.d.ts active'
             }">
               <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
-                <span class="sidebar-tag" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6;" p-text="'TS ' + typedVersion"></span>
+                <span class="sidebar-tag"
+                  style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6;"
+                  p-text="'TS ' + typedVersion"></span>
                 <span style="color: var(--alpine-teal); font-weight: 600;" p-text="name"></span>
                 <span style="font-size: 0.85rem; color: var(--text-muted);" p-text="'(' + status + ')'"></span>
               </div>
@@ -1989,80 +2152,51 @@ Pine.data('userProfile', () => ({
                   tag: '🔮 Next Planned Release',
                   date: 'Upcoming',
                   highlights: [
-                    'Configurable multi-prefix engine: Pine.prefix("pine") or Pine.prefix(["p-", "x-", ""])',
-                    'Pure prefix-free semantic HTML syntax (state, text, show, model, loop)',
-                    'Expressive symbol & emoji shorthands (🌲 for root, ⚡ for text, ~ for model, ? for show, * for loop)',
-                    'Universal Chameleon Drop-in Mode: Run existing Alpine.js x- code on Signals with 0 migration edits',
-                    'Unified $-attribute shorthands ($data, $text, $show, $model) and Pine.timeline WAAPI orchestrator'
-                  ]
-                },
-                {
-                  ver: '1.3.0',
-                  name: 'Cedar',
-                  tag: 'Latest Stable',
-                  date: '2026-09-15',
-                  highlights: [
-                    'p-animate directive with WAAPI spring physics & presets (.spring, .bounce, .shake, .pulse, .loop)',
-                    'Pine.devtools runtime diagnostics API (getRoots, getScope, getSignalMap, inspect)',
-                    'Computed getter proxy receiver binding for reliable nested array/object signal tracking',
-                    'Updated TypeScript typings (dist/pine.d.ts) for devtools and p-animate',
-                    'Interactive playground shopping cart and live demo suite optimizations'
-                  ]
-                },
-                {
-                  ver: '1.2.0',
-                  name: 'Redwood',
-                  tag: 'Previous Stable',
-                  date: '2026-09-14',
-                  highlights: [
-                    'Official TypeScript typings (dist/pine.d.ts) for signals, directives & magics',
-                    '$history magic for bidirectional URL query search param synchronization & popstate',
-                    'p-hydrate SSR directive for seamless server-side rendering activation',
-                    'Fine-Grained Signals reactivity with near-zero latency DOM updates',
-                    '100% test suite pass rate across all automated unit & integration tests'
-                  ]
-                },
-                {
-                  ver: '1.1.0',
-                  name: 'Sequoia',
-                  tag: 'Previous Stable',
-                  date: '2026-09-14',
-                  highlights: [
-                    'Hierarchical Scope Proxy inheritance across nested components & templates',
-                    'Two-way p-modelable reentrancy mutex to prevent loop feedback',
-                    'Array mutation auto-sync on .push(), .pop(), .splice(), .sort(), etc.',
-                    'Debounced click.outside appearance threshold for instant floating menus',
-                    'Added Pine.$data(element) and element.__pine_scope__ runtime access',
-                    '16/16 Test Suites fully passing (100%)',
-                    'Automated build & minification pipeline (npm run build)'
-                  ]
-                },
-                {
-                  ver: '1.0.0',
-                  name: 'Evergreen',
-                  tag: 'Initial Release',
-                  date: '2026-09-10',
-                  highlights: [
-                    'Initial release with 100% Alpine.js syntax & API parity',
-                    'Fine-Grained Signals reactivity engine (Signal, Computed, Effect, Batch)',
-                    'Built-in Morphing, Masks, Collapse, and CSS Presets',
-                    'Full documentation with 60+ interactive live demo components'
-                  ]
-                }
-              ]
-            }">
+                    'Configurable multi-prefix engine: Pine.prefix(" pine") or Pine.prefix(["p-", "x-" , ""
+              ])', 'Pure prefix-free semantic HTML syntax (state, text, show, model, loop)'
+              , 'Expressive symbol & emoji shorthands (🌲 for root, ⚡ for text, ~ for model, ? for show, * for loop)'
+              , 'Universal Chameleon Drop-in Mode: Run existing Alpine.js x- code on Signals with 0 migration edits'
+              , 'Unified $-attribute shorthands ($data, $text, $show, $model) and Pine.timeline WAAPI orchestrator' ] },
+              { ver: '1.3.0' , name: 'Cedar' , tag: 'Latest Stable' , date: '2026-09-15' , highlights:
+              [ 'p-animate directive with WAAPI spring physics & presets (.spring, .bounce, .shake, .pulse, .loop)'
+              , 'Pine.devtools runtime diagnostics API (getRoots, getScope, getSignalMap, inspect)'
+              , 'Computed getter proxy receiver binding for reliable nested array/object signal tracking'
+              , 'Updated TypeScript typings (dist/pine.d.ts) for devtools and p-animate'
+              , 'Interactive playground shopping cart and live demo suite optimizations' ] }, { ver: '1.2.0' ,
+              name: 'Redwood' , tag: 'Previous Stable' , date: '2026-09-14' , highlights:
+              [ 'Official TypeScript typings (dist/pine.d.ts) for signals, directives & magics'
+              , '$history magic for bidirectional URL query search param synchronization & popstate'
+              , 'p-hydrate SSR directive for seamless server-side rendering activation'
+              , 'Fine-Grained Signals reactivity with near-zero latency DOM updates'
+              , '100% test suite pass rate across all automated unit & integration tests' ] }, { ver: '1.1.0' ,
+              name: 'Sequoia' , tag: 'Previous Stable' , date: '2026-09-14' , highlights:
+              [ 'Hierarchical Scope Proxy inheritance across nested components & templates'
+              , 'Two-way p-modelable reentrancy mutex to prevent loop feedback'
+              , 'Array mutation auto-sync on .push(), .pop(), .splice(), .sort(), etc.'
+              , 'Debounced click.outside appearance threshold for instant floating menus'
+              , 'Added Pine.$data(element) and element.__pine_scope__ runtime access'
+              , '16/16 Test Suites fully passing (100%)' , 'Automated build & minification pipeline (npm run build)' ]
+              }, { ver: '1.0.0' , name: 'Evergreen' , tag: 'Initial Release' , date: '2026-09-10' , highlights:
+              [ 'Initial release with 100% Alpine.js syntax & API parity'
+              , 'Fine-Grained Signals reactivity engine (Signal, Computed, Effect, Batch)'
+              , 'Built-in Morphing, Masks, Collapse, and CSS Presets'
+              , 'Full documentation with 60+ interactive live demo components' ] } ] }">
               <div style="display: flex; gap: 0.75rem; margin-bottom: 1.25rem;">
                 <template p-for="item in versions">
-                  <button class="btn-demo" :class="{ 'btn-demo-outline': selectedVer !== item.ver }" @click="selectedVer = item.ver" p-text="'v' + item.ver + ' (' + item.name + ')'"></button>
+                  <button class="btn-demo" :class="{ 'btn-demo-outline': selectedVer !== item.ver }"
+                    @click="selectedVer = item.ver" p-text="'v' + item.ver + ' (' + item.name + ')'"></button>
                 </template>
               </div>
 
               <template p-for="item in versions">
-                <div p-show="selectedVer === item.ver" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                <div p-show="selectedVer === item.ver"
+                  style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
+                  <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
                     <div>
                       <h3 style="margin: 0; font-size: 1.2rem;" p-text="'PineJS v' + item.ver + ' — ' + item.name"></h3>
-                      <span style="font-size: 0.85rem; color: var(--text-muted);" p-text="'Released on ' + item.date"></span>
+                      <span style="font-size: 0.85rem; color: var(--text-muted);"
+                        p-text="'Released on ' + item.date"></span>
                     </div>
                     <span class="sidebar-tag" p-text="item.tag"></span>
                   </div>
@@ -2085,12 +2219,17 @@ Pine.data('userProfile', () => ({
   <div id="search-modal-backdrop" class="search-modal-backdrop">
     <div class="search-modal">
       <div class="search-input-wrapper">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-        <input id="search-input" class="search-modal-input" placeholder="Search documentation, directives, magics..." autocomplete="off" />
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input id="search-input" class="search-modal-input" placeholder="Search documentation, directives, magics..."
+          autocomplete="off" />
       </div>
       <div id="search-results" class="search-results-list"></div>
     </div>
   </div>
 
 </body>
+
 </html>

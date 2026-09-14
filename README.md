@@ -7,7 +7,7 @@
 > **Next-Generation Fine-Grained Reactive Declarative Micro-Framework for Modern Web Apps**  
 > *As simple and ergonomic as Alpine.js, fast as Solid signals, ultra-lightweight (&lt; 8 KB minified).*
 
-[![Version](https://img.shields.io/badge/version-1.5.0%20%22Larch%22-10b981.svg)](https://github.com)
+[![Version](https://img.shields.io/badge/version-1.5.1%20%22Larch%22-10b981.svg)](https://github.com)
 [![Reactivity](https://img.shields.io/badge/reactivity-fine--grained%20signals-06b6d4.svg)](https://github.com)
 [![Size](https://img.shields.io/badge/bundle%20size-%3C%2010%20KB%20min-8b5cf6.svg)](https://github.com)
 [![License](https://img.shields.io/badge/license-MIT-emerald.svg)](LICENSE)
@@ -20,11 +20,11 @@
 
 Unlike Alpine.js (which uses proxy-based polling and coarse microtask tree evaluations), **PineJS is powered by true Fine-Grained Signals**. Every reactive binding (`p-text`, `:class`, `p-model`, `p-show`, `p-validate`) directly subscribes to atomic signal changes, updating DOM nodes with near-zero latency.
 
-### 🌲 4 Expressive Syntax Flavors in v1.5.0 ("Larch"):
+### 🌲 4 Expressive Syntax Flavors in v1.5.1 ("Larch"):
 
 ```html
 <!-- Include via CDN -->
-<script src="https://unpkg.com/pinejs-core@1.5.0/dist/pine.min.js" defer></script>
+<script src="https://unpkg.com/pinejs-core@1.5.1/dist/pine.min.js" defer></script>
 
 <!-- Flavor 1: Standard Pine Directives -->
 <div p-data="{ count: 0 }">
@@ -163,7 +163,7 @@ Pine.batch(() => {
 
 | Version | Codename | Release Date | Status | Key Features |
 | :--- | :--- | :--- | :--- | :--- |
-| **`v1.5.0`** | **Larch** | 2026-09-15 | **Latest Stable** | Tagged Template Components (`Pine.html`), Form Validation (`p-validate`), Cross-Tab Broadcast Sync (`$broadcast`), Native View Transitions (`$viewTransition`), Web Worker Signal Bridge (`Pine.worker`). |
+| **`v1.5.1`** | **Larch** | 2026-09-15 | **Latest Stable** | Tagged Template Components (`Pine.html`), Form Validation (`p-validate`), Cross-Tab Broadcast Sync (`$broadcast`), Native View Transitions (`$viewTransition`), Web Worker Signal Bridge (`Pine.worker`). |
 | **`v1.4.0`** | **Spruce** | 2026-09-15 | Previous Stable | Configurable multi-prefix engine (`Pine.prefix`), prefix-free semantic HTML (`state`, `text`, `show`, `model`, `loop`), symbol shorthands (`🌲`, `⚡`, `~`, `?`, `*`), WAAPI timeline orchestrator (`Pine.timeline`), chameleon drop-in mode. |
 | **`v1.3.0`** | **Cedar** | 2026-09-15 | Stable | `p-animate` spring physics & keyframe animations, `Pine.devtools` runtime diagnostics bridge, getter receiver proxy binding. |
 | **`v1.2.0`** | **Redwood** | 2026-09-14 | Stable | Official TypeScript typings (`dist/pine.d.ts`), `$history` URL query sync magic, `p-hydrate` SSR directive, fine-grained reactivity. |

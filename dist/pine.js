@@ -1,5 +1,5 @@
 /**
- * PineJS v1.5.0 "Larch"
+ * PineJS v1.5.1 "Larch"
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * Complete Alpine.js Parity + True Fine-Grained Signals + Built-in Plugins
  * (c) 2026 PineJS Core Team - MIT License
@@ -2413,7 +2413,7 @@
   // 14. PUBLIC PINE API
   // =========================================================================
   const Pine = {
-    version: '1.5.0',
+    version: '1.5.1',
     versionName: 'Larch',
 
     // Prefix Configuration

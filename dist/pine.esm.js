@@ -1,5 +1,5 @@
 /**
- * PineJS v1.5.0 "Larch" (ES Module)
+ * PineJS v1.5.1 "Larch" (ES Module)
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * (c) 2026 PineJS Core Team - MIT License
  */

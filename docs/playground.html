@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
       height: calc(100vh - var(--header-height));
       margin-top: var(--header-height);
     }
+
     .editor-pane {
       flex: 1;
       display: flex;
@@ -19,12 +21,14 @@
       border-right: 1px solid var(--border-color);
       background: var(--bg-surface);
     }
+
     .preview-pane {
       flex: 1;
       display: flex;
       flex-direction: column;
       background: var(--bg-main);
     }
+
     .pane-toolbar {
       display: flex;
       justify-content: space-between;
@@ -35,6 +39,7 @@
       font-size: 0.85rem;
       font-weight: 600;
     }
+
     .code-editor {
       flex: 1;
       width: 100%;
@@ -49,6 +54,7 @@
       outline: none;
       white-space: pre;
     }
+
     .preview-frame {
       flex: 1;
       border: none;
@@ -56,6 +62,7 @@
       height: 100%;
       background: #ffffff;
     }
+
     .preset-select {
       background: var(--bg-surface);
       border: 1px solid var(--border-color);
@@ -67,6 +74,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <!-- Top Header Navigation -->
@@ -108,7 +116,8 @@
     <div class="preview-pane">
       <div class="pane-toolbar">
         <span>Live Preview Output</span>
-        <button id="refresh-btn" class="btn-demo-outline" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">Reload Preview</button>
+        <button id="refresh-btn" class="btn-demo-outline" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">Reload
+          Preview</button>
       </div>
       <iframe id="preview-frame" class="preview-frame"></iframe>
     </div>
@@ -396,4 +405,5 @@
     updatePreview();
   </script>
 </body>
+
 </html>

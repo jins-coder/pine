@@ -1,5 +1,5 @@
 /**
- * PineJS v1.4.2 "Spruce"
+ * PineJS v1.5.1 "Larch"
  * TypeScript Declaration File
  * (c) 2026 PineJS Core Team - MIT License
  */
@@ -132,7 +132,7 @@ export interface WorkerSignal<T = any> {
 }
 
 export interface PineAPI {
-  version: '1.5.0';
+  version: '1.5.1';
   versionName: 'Larch';
 
   // Prefix Configuration

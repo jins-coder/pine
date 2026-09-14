@@ -631,8 +631,8 @@
       await p;
     });
 
-    test("v1.5.0 Larch: Engine Version & Identity", "Verifies Pine.version === '1.5.0' and Pine.versionName === 'Larch'", async () => {
-      if (Pine.version !== "1.5.0") throw new Error(`Expected Pine.version to be '1.5.0', got '${Pine.version}'`);
+    test("v1.5.1 Larch: Engine Version & Identity", "Verifies Pine.version === '1.5.1' and Pine.versionName === 'Larch'", async () => {
+      if (Pine.version !== "1.5.1") throw new Error(`Expected Pine.version to be '1.5.1', got '${Pine.version}'`);
       if (Pine.versionName !== "Larch") throw new Error(`Expected Pine.versionName to be 'Larch', got '${Pine.versionName}'`);
       if (typeof Pine.html !== "function") throw new Error("Pine.html is not a function");
       if (typeof Pine.worker !== "function") throw new Error("Pine.worker is not a function");
