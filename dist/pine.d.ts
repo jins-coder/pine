@@ -1,5 +1,5 @@
 /**
- * PineJS v1.4.0 "Spruce"
+ * PineJS v1.4.2 "Spruce"
  * TypeScript Declaration File
  * (c) 2026 PineJS Core Team - MIT License
  */

@@ -1,5 +1,5 @@
 /**
- * PineJS v1.3.0 "Cedar"
+ * PineJS v1.4.2 "Spruce"
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * Complete Alpine.js Parity + True Fine-Grained Signals + Built-in Plugins
  * (c) 2026 PineJS Core Team - MIT License
@@ -2132,7 +2132,7 @@
   // 12. PUBLIC PINE API
   // =========================================================================
   const Pine = {
-    version: '1.4.0',
+    version: '1.4.2',
     versionName: 'Spruce',
 
     // Prefix Configuration

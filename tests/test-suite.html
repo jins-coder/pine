@@ -520,8 +520,8 @@
       }
     });
 
-    test("v1.4.0 Spruce: Engine Version & Identity", "Verifies Pine.version === '1.4.0' and Pine.versionName === 'Spruce'", async () => {
-      if (Pine.version !== "1.4.0") throw new Error(`Expected Pine.version to be '1.4.0', got '${Pine.version}'`);
+    test("v1.4.2 Spruce: Engine Version & Identity", "Verifies Pine.version === '1.4.2' and Pine.versionName === 'Spruce'", async () => {
+      if (Pine.version !== "1.4.2") throw new Error(`Expected Pine.version to be '1.4.2', got '${Pine.version}'`);
       if (Pine.versionName !== "Spruce") throw new Error(`Expected Pine.versionName to be 'Spruce', got '${Pine.versionName}'`);
       if (typeof Pine.prefix !== "function") throw new Error("Pine.prefix is not a function");
       if (typeof Pine.timeline !== "function") throw new Error("Pine.timeline is not a function");

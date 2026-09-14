@@ -1,5 +1,5 @@
 /**
- * PineJS v1.4.0 "Spruce" (ES Module)
+ * PineJS v1.4.2 "Spruce" (ES Module)
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * (c) 2026 PineJS Core Team - MIT License
  */
