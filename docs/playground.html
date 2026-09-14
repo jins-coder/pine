@@ -80,6 +80,7 @@
       </a>
       <select id="preset-picker" class="preset-select">
         <option value="counter">Preset: Interactive Counter</option>
+        <option value="forloop">Preset: p-for Loops & Filtering</option>
         <option value="todo">Preset: Fine-Grained Todo App</option>
         <option value="cart">Preset: Reactive Shopping Cart</option>
         <option value="tabs">Preset: Dynamic Tabs & Modals</option>
@@ -127,6 +128,87 @@
 
   <div style="color: #64748b; font-size: 0.9rem;">
     Step Size: <input type="number" p-model.number="step" style="width: 50px; padding: 0.3rem; border: 1px solid #cbd5e1; border-radius: 4px;" />
+  </div>
+</div>`,
+
+      forloop: `<div p-data="{
+  search: '',
+  sortBy: 'name',
+  techStack: [
+    { id: 1, name: 'PineJS', category: 'Micro-Framework', rating: 5 },
+    { id: 2, name: 'Vite', category: 'Build Tool', rating: 5 },
+    { id: 3, name: 'TypeScript', category: 'Language', rating: 5 },
+    { id: 4, name: 'ESBuild', category: 'Bundler', rating: 4 },
+    { id: 5, name: 'Terser', category: 'Minifier', rating: 4 }
+  ],
+  newItem: '',
+  newCat: 'Tool',
+  get filteredList() {
+    return this.techStack
+      .filter(item => item.name.toLowerCase().includes(this.search.toLowerCase()) || item.category.toLowerCase().includes(this.search.toLowerCase()))
+      .sort((a, b) => this.sortBy === 'rating' ? (b.rating - a.rating) : a.name.localeCompare(b.name));
+  },
+  add() {
+    if (this.newItem.trim()) {
+      this.techStack.push({
+        id: Date.now(),
+        name: this.newItem.trim(),
+        category: this.newCat,
+        rating: 5
+      });
+      this.newItem = '';
+    }
+  },
+  remove(id) {
+    this.techStack = this.techStack.filter(it => it.id !== id);
+  }
+}" style="font-family: system-ui, sans-serif; padding: 2rem; max-width: 520px; margin: 0 auto; color: #0f172a;">
+  <h2 style="color: #10b981; margin-top: 0; display: flex; align-items: center; justify-content: space-between;">
+    <span>⚡ p-for Keyed Loop</span>
+    <span style="font-size: 0.85rem; color: #64748b;" p-text="filteredList.length + ' items'"></span>
+  </h2>
+  <p style="color: #64748b; font-size: 0.95rem;">Fine-grained declarative list rendering with real-time search filtering & sorting.</p>
+
+  <!-- Controls & Search -->
+  <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+    <input p-model="search" placeholder="Filter items..." style="flex: 1; min-width: 160px; padding: 0.5rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+    <select p-model="sortBy" style="padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; background: white;">
+      <option value="name">Sort by Name</option>
+      <option value="rating">Sort by Rating</option>
+    </select>
+  </div>
+
+  <!-- Add New Item -->
+  <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+    <input p-model="newItem" @keydown.enter="add()" placeholder="Add new technology..." style="flex: 1; padding: 0.5rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+    <button @click="add()" style="padding: 0.5rem 1rem; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">+ Add</button>
+  </div>
+
+  <!-- p-for Loop on Array with Index -->
+  <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem 0;">
+    <template p-for="(item, idx) in filteredList">
+      <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 0.5rem;">
+        <div>
+          <span style="color: #94a3b8; font-size: 0.8rem; margin-right: 0.4rem;" p-text="(idx + 1) + '.'"></span>
+          <strong p-text="item.name"></strong>
+          <span style="font-size: 0.75rem; background: rgba(16, 185, 129, 0.15); color: #059669; padding: 0.15rem 0.45rem; border-radius: 4px; margin-left: 0.5rem;" p-text="item.category"></span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="color: #f59e0b;" p-text="'★'.repeat(item.rating)"></span>
+          <button @click="remove(item.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.1rem; padding: 0 0.3rem;">✕</button>
+        </div>
+      </li>
+    </template>
+  </ul>
+
+  <!-- Range Loop Demo -->
+  <div style="background: #f1f5f9; padding: 0.85rem 1rem; border-radius: 8px; font-size: 0.88rem;">
+    <strong>Numeric Range Loop (1 to 5):</strong>
+    <div style="display: flex; gap: 0.4rem; margin-top: 0.4rem;">
+      <template p-for="n in 5">
+        <span style="background: white; border: 1px solid #cbd5e1; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 600; color: #0d9488;" p-text="'Step ' + n"></span>
+      </template>
+    </div>
   </div>
 </div>`,
 
