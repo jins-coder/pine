@@ -1833,26 +1833,72 @@
   }
 
   // =========================================================================
-  // 9. DIRECTIVE PARSER
+  // 9. MULTI-PREFIX & DIRECTIVE PARSER
   // =========================================================================
-  function parseDirective(attrName) {
-    if (attrName.startsWith('p-')) {
-      const parts = attrName.split('.');
-      const mainPart = parts[0];
-      const modifiers = parts.slice(1);
+  let configuredPrefixes = ['p-', 'x-', 'pine-'];
 
-      let directive = mainPart;
-      let arg = null;
+  const semanticKeywords = {
+    'state': 'p-data',
+    'scope': 'p-data',
+    'data': 'p-data',
+    'text': 'p-text',
+    'html': 'p-html',
+    'show': 'p-show',
+    'model': 'p-model',
+    'modelable': 'p-modelable',
+    'loop': 'p-for',
+    'for': 'p-for',
+    'when': 'p-if',
+    'if': 'p-if',
+    'teleport': 'p-teleport',
+    'effect': 'p-effect',
+    'ref': 'p-ref',
+    'mask': 'p-mask',
+    'collapse': 'p-collapse',
+    'animate': 'p-animate',
+    'hydrate': 'p-hydrate',
+    'id': 'p-id',
+    'bind': 'p-bind',
+    'on': 'p-on',
+    'init': 'p-init',
+    'transition': 'p-transition'
+  };
 
-      if (mainPart.includes(':')) {
-        const colonIdx = mainPart.indexOf(':');
-        directive = mainPart.slice(0, colonIdx);
-        arg = mainPart.slice(colonIdx + 1);
+  const symbolDirectives = {
+    '🌲': 'p-data',
+    '⚡': 'p-text',
+    '~': 'p-model',
+    '?': 'p-show',
+    '*': 'p-for'
+  };
+
+  function setPrefix(pfx) {
+    if (Array.isArray(pfx)) {
+      configuredPrefixes = pfx.map((p) => {
+        if (!p) return '';
+        return p.endsWith('-') || p.endsWith(':') ? p : `${p}-`;
+      });
+    } else if (typeof pfx === 'string') {
+      if (!pfx) {
+        configuredPrefixes = [''];
+      } else {
+        configuredPrefixes = [pfx.endsWith('-') || pfx.endsWith(':') ? pfx : `${pfx}-`];
       }
+    }
+  }
 
-      return { directive, arg, modifiers };
+  function parseDirective(attrName) {
+    // 1. Symbol shorthands (🌲, ⚡, ~, ?, *)
+    if (symbolDirectives[attrName]) {
+      return { directive: symbolDirectives[attrName], arg: null, modifiers: [] };
+    }
+    for (const [sym, dir] of Object.entries(symbolDirectives)) {
+      if (attrName.startsWith(`${sym}.`)) {
+        return { directive: dir, arg: null, modifiers: attrName.slice(sym.length + 1).split('.') };
+      }
     }
 
+    // 2. Shorthands: :bind and @event
     if (attrName.startsWith(':')) {
       const parts = attrName.slice(1).split('.');
       return {
@@ -1871,15 +1917,72 @@
       };
     }
 
+    // 3. Dollar prefix ($data, $text, $show, $animate, etc.)
+    if (attrName.startsWith('$')) {
+      const parts = attrName.slice(1).split('.');
+      const mainPart = parts[0];
+      const modifiers = parts.slice(1);
+      let directive = `p-${mainPart}`;
+      let arg = null;
+      if (mainPart.includes(':')) {
+        const colonIdx = mainPart.indexOf(':');
+        directive = `p-${mainPart.slice(0, colonIdx)}`;
+        arg = mainPart.slice(colonIdx + 1);
+      }
+      return { directive, arg, modifiers };
+    }
+
+    // 4. Configured prefixes (p-, x-, pine-, etc.)
+    for (const pfx of configuredPrefixes) {
+      if (pfx && attrName.startsWith(pfx)) {
+        const rest = attrName.slice(pfx.length);
+        const parts = rest.split('.');
+        const mainPart = parts[0];
+        const modifiers = parts.slice(1);
+
+        let directive = `p-${mainPart}`;
+        let arg = null;
+
+        if (mainPart.includes(':')) {
+          const colonIdx = mainPart.indexOf(':');
+          directive = `p-${mainPart.slice(0, colonIdx)}`;
+          arg = mainPart.slice(colonIdx + 1);
+        }
+
+        return { directive, arg, modifiers };
+      }
+    }
+
+    // 5. Semantic prefix-free keywords (state, text, show, model, loop, etc.)
+    const dotIdx = attrName.indexOf('.');
+    const baseName = dotIdx > -1 ? attrName.slice(0, dotIdx) : attrName;
+    const modifiers = dotIdx > -1 ? attrName.slice(dotIdx + 1).split('.') : [];
+
+    let keyword = baseName;
+    let arg = null;
+    if (baseName.includes(':')) {
+      const colonIdx = baseName.indexOf(':');
+      keyword = baseName.slice(0, colonIdx);
+      arg = baseName.slice(colonIdx + 1);
+    }
+
+    if (semanticKeywords[keyword]) {
+      return {
+        directive: semanticKeywords[keyword],
+        arg,
+        modifiers
+      };
+    }
+
     return null;
   }
 
   // =========================================================================
-  // 9. DOM COMPILER & TREE WALKER
+  // 10. DOM COMPILER & TREE WALKER
   // =========================================================================
   function initElement(el) {
     if (!el || el.nodeType !== Node.ELEMENT_NODE) return;
-    if (el.hasAttribute && el.hasAttribute('p-ignore')) return;
+    if (el.hasAttribute && (el.hasAttribute('p-ignore') || el.hasAttribute('x-ignore') || el.hasAttribute('ignore'))) return;
 
     const attrs = Array.from(el.attributes || []);
     const parsedDirectives = [];
@@ -1931,25 +2034,26 @@
 
   function initTree(root) {
     if (!root || root.nodeType !== Node.ELEMENT_NODE) return;
-    if (root.hasAttribute && root.hasAttribute('p-ignore')) return;
+    if (root.hasAttribute && (root.hasAttribute('p-ignore') || root.hasAttribute('x-ignore') || root.hasAttribute('ignore'))) return;
 
     if (root.tagName && root.tagName.toLowerCase() === 'template') {
       const attrs = Array.from(root.attributes || []);
-      const ifAttr = attrs.find((a) => a.name === 'p-if');
-      const forAttr = attrs.find((a) => a.name === 'p-for');
-      const teleportAttr = attrs.find((a) => a.name === 'p-teleport');
-
-      if (ifAttr) {
-        directives['p-if'](root, { expression: ifAttr.value });
-        return;
-      }
-      if (forAttr) {
-        directives['p-for'](root, { expression: forAttr.value });
-        return;
-      }
-      if (teleportAttr) {
-        directives['p-teleport'](root, { expression: teleportAttr.value });
-        return;
+      for (const attr of attrs) {
+        const parsed = parseDirective(attr.name);
+        if (parsed) {
+          if (parsed.directive === 'p-if') {
+            directives['p-if'](root, { expression: attr.value, modifiers: parsed.modifiers });
+            return;
+          }
+          if (parsed.directive === 'p-for') {
+            directives['p-for'](root, { expression: attr.value, modifiers: parsed.modifiers });
+            return;
+          }
+          if (parsed.directive === 'p-teleport') {
+            directives['p-teleport'](root, { expression: attr.value, modifiers: parsed.modifiers });
+            return;
+          }
+        }
       }
     }
 
@@ -1963,12 +2067,81 @@
     }
   }
 
+  function findRoots() {
+    if (typeof document === 'undefined') return [];
+    const roots = new Set();
+    const all = document.querySelectorAll('*');
+    for (let i = 0; i < all.length; i++) {
+      const el = all[i];
+      if (el.attributes) {
+        for (let j = 0; j < el.attributes.length; j++) {
+          const parsed = parseDirective(el.attributes[j].name);
+          if (parsed && parsed.directive === 'p-data') {
+            roots.add(el);
+            break;
+          }
+        }
+      }
+    }
+    return Array.from(roots);
+  }
+
   // =========================================================================
-  // 10. PUBLIC PINE API
+  // 11. TIMELINE ANIMATION ORCHESTRATOR
+  // =========================================================================
+  function timeline(steps = [], globalOptions = {}) {
+    let currentTime = 0;
+    const animations = [];
+
+    for (const step of steps) {
+      const el = typeof step.el === 'string' && typeof document !== 'undefined'
+        ? document.querySelector(step.el)
+        : step.el;
+      if (!el || typeof el.animate !== 'function') continue;
+
+      const delay = (step.delay !== undefined ? step.delay : 0) + (step.at !== undefined ? step.at : currentTime);
+      const duration = step.duration || (step.options && step.options.duration) || 350;
+      const easing = step.easing || (step.options && step.options.easing) || 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+      const keyframes = step.keyframes || step.frames || [];
+
+      const anim = el.animate(keyframes, {
+        ...globalOptions,
+        ...step.options,
+        duration,
+        delay,
+        easing,
+        fill: 'forwards'
+      });
+
+      animations.push(anim);
+      currentTime = delay + duration;
+    }
+
+    return {
+      animations,
+      duration: currentTime,
+      play() { animations.forEach((a) => a.play()); },
+      pause() { animations.forEach((a) => a.pause()); },
+      reverse() { animations.forEach((a) => a.reverse()); },
+      finish() { animations.forEach((a) => a.finish()); },
+      cancel() { animations.forEach((a) => a.cancel()); }
+    };
+  }
+
+  // =========================================================================
+  // 12. PUBLIC PINE API
   // =========================================================================
   const Pine = {
-    version: '1.3.0',
-    versionName: 'Cedar',
+    version: '1.4.0',
+    versionName: 'Spruce',
+
+    // Prefix Configuration
+    prefix(newPrefix) {
+      if (newPrefix !== undefined) {
+        setPrefix(newPrefix);
+      }
+      return configuredPrefixes;
+    },
 
     // Signals Engine
     signal,
@@ -1979,11 +2152,12 @@
     reactive,
     raw,
     fetch: createFetchResource,
+    timeline,
 
     // DevTools & Diagnostic Runtime Bridge
     devtools: {
       getRoots() {
-        return typeof document !== 'undefined' ? Array.from(document.querySelectorAll('[p-data]')) : [];
+        return findRoots();
       },
       getScope(element) {
         return getScope(element);
@@ -2050,16 +2224,20 @@
 
     // Initialization & Lifecycle
     start() {
-      const roots = document.querySelectorAll('[p-data]');
+      const roots = findRoots();
       if (roots.length > 0) {
         roots.forEach((root) => initTree(root));
       } else {
         initTree(document.body);
       }
 
-      document.querySelectorAll('[p-cloak]').forEach((el) => {
-        el.removeAttribute('p-cloak');
-      });
+      if (typeof document !== 'undefined') {
+        document.querySelectorAll('[p-cloak], [x-cloak], [cloak]').forEach((el) => {
+          el.removeAttribute('p-cloak');
+          el.removeAttribute('x-cloak');
+          el.removeAttribute('cloak');
+        });
+      }
     },
 
     initTree(element) {

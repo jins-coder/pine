@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 📦 Releases
 
-- [v1.3.0 — "Cedar" (2026-09-15)](#v130--cedar-2026-09-15) — **Latest Stable**
+- [v1.4.0 — "Spruce" (2026-09-15)](#v140--spruce-2026-09-15) — **Latest Stable**
+- [v1.3.0 — "Cedar" (2026-09-15)](#v130--cedar-2026-09-15)
 - [v1.2.0 — "Redwood" (2026-09-14)](#v120--redwood-2026-09-14)
 - [v1.1.0 — "Sequoia" (2026-09-14)](#v110--sequoia-2026-09-14)
 - [v1.0.0 — "Evergreen" (2026-09-10)](#v100--evergreen-2026-09-10) — Initial Release
@@ -16,11 +17,48 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [v1.4.0] — "Spruce" (2026-09-15)
+
+> **Codename**: Spruce  
+> **Status**: Latest Stable  
+> **Bundle Size**: ~27.4 KB minified (~8.90 KB gzipped)  
+> **CDN Link**: `https://unpkg.com/pinejs-core@1.4.0/dist/pine.min.js`
+
+### 🚀 Major Enhancements
+
+#### 1. Configurable Multi-Prefix Engine (`Pine.prefix`)
+- **Custom Prefixes**: Dynamically configure framework prefixes globally via `Pine.prefix('pine')` or `Pine.prefix('app')`.
+- **Multi-Prefix Array Support**: Supports multiple prefixes simultaneously (e.g. `Pine.prefix(['p-', 'x-', 'pine-', ''])`) for frictionless gradual adoption.
+
+#### 2. Pure Prefix-Free Semantic HTML Attributes
+- **Zero-Prefix Syntax**: First micro-framework to support clean HTML5 attribute bindings with zero framework prefixes:
+  - `<div state="{ count: 0 }">` (Component state root)
+  - `<span text="count"></span>` (Reactive text)
+  - `<input model="query" />` (Two-way model binding)
+  - `<div show="isOpen"></div>` (Conditional display)
+  - `<template loop="item in items">` (Keyed list iteration)
+
+#### 3. Expressive Symbol & Emoji Directives
+- **Ultra-Compact Shorthands**:
+  - `🌲="{ count: 0 }"` (Pine state root)
+  - `⚡="count"` (Signal-speed text)
+  - `~="query"` (Two-way model binding)
+  - `?="isOpen"` (Conditional display)
+  - `*="item in items"` (Loop iteration)
+
+#### 4. Universal "Chameleon" Drop-in Compatibility
+- **Zero-Migration Upgrade**: Natively detects and runs legacy Alpine.js `x-` attributes (`x-data`, `x-show`, `x-text`, `x-model`, `x-for`, `x-if`, etc.) on Fine-Grained Signals with 0 code changes.
+
+#### 5. Web Animations API Timeline Orchestration (`Pine.timeline`)
+- **Choreographed Animations**: Multi-element sequenced animations with `.play()`, `.pause()`, `.reverse()`, `.finish()`, and `.cancel()` controls.
+
+---
+
 ## [v1.3.0] — "Cedar" (2026-09-15)
 
 > **Codename**: Cedar  
-> **Status**: Latest Stable  
-> **Bundle Size**: ~36.1 KB minified (~9.68 KB gzipped)  
+> **Status**: Previous Stable  
+> **Bundle Size**: ~26.7 KB minified (~8.90 KB gzipped)  
 > **CDN Link**: `https://unpkg.com/pinejs-core@1.3.0/dist/pine.min.js`
 
 ### 🚀 Major Enhancements

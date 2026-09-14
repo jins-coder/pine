@@ -8,7 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="docs.css">
   <!-- Load PineJS library via CDN with local fallback -->
-  <script src="https://unpkg.com/pinejs-core@1.3.0/dist/pine.min.js"></script>
+  <script src="https://unpkg.com/pinejs-core@1.4.0/dist/pine.min.js"></script>
   <script>window.Pine || document.write('<script src="../dist/pine.min.js"><\/script>')</script>
   <script src="docs.js" defer></script>
 </head>
@@ -22,7 +22,7 @@
           <img src="logo.svg" alt="PineJS Logo" width="24" height="24" style="display: block;">
         </div>
         <div class="brand-title">PineJS</div>
-        <span class="brand-version" title="Codename: Cedar">v1.3.0 (Cedar)</span>
+        <span class="brand-version" title="Codename: Spruce">v1.4.0 (Spruce)</span>
       </a>
 
       <button id="search-trigger" class="search-trigger">
@@ -190,7 +190,7 @@
         <h2 class="doc-h2">Quick Example</h2>
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
-          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.3.0/dist/pine.min.js" defer&gt;&lt;/script&gt;
+          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.4.0/dist/pine.min.js" defer&gt;&lt;/script&gt;
 
 &lt;div p-data="{ count: 0 }"&gt;
   &lt;button @click="count++"&gt;Increment&lt;/button&gt;
@@ -219,31 +219,105 @@
            =================================================================== -->
       <section id="upgrade-guide" class="doc-section">
         <h1 class="doc-h1">Upgrade From Alpine.js</h1>
-        <p class="lead-p">Transition existing Alpine.js applications in 60 seconds by replacing <code>x-</code> with <code>p-</code>.</p>
+        <p class="lead-p">Transition existing Alpine.js applications with <strong>0 migration edits</strong> via Chameleon Mode, or standardize on <code>p-</code> or prefix-free semantic HTML.</p>
 
-        <h2 class="doc-h2">Syntax Equivalency</h2>
+        <h2 class="doc-h2">4 Flavor Equivalency (v1.4.0 Spruce)</h2>
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
-          <pre><code>&lt;!-- Alpine.js: --&gt;
-&lt;div x-data="{ open: false }"&gt;
-  &lt;button @click="open = !open" :class="{ 'active': open }"&gt;Toggle&lt;/button&gt;
-  &lt;span x-show="open" x-text="'Visible!'"&gt;&lt;/span&gt;
+          <pre><code>&lt;!-- Flavor 1: Standard Pine --&gt;
+&lt;div p-data="{ count: 0 }"&gt;
+  &lt;button @click="count++"&gt;+1&lt;/button&gt;
+  &lt;span p-text="count"&gt;&lt;/span&gt;
 &lt;/div&gt;
 
-&lt;!-- PineJS: --&gt;
-&lt;div p-data="{ open: false }"&gt;
-  &lt;button @click="open = !open" :class="{ 'active': open }"&gt;Toggle&lt;/button&gt;
-  &lt;span p-show="open" p-text="'Visible!'"&gt;&lt;/span&gt;
+&lt;!-- Flavor 2: Prefix-Free Semantic HTML --&gt;
+&lt;div state="{ count: 0 }"&gt;
+  &lt;button @click="count++"&gt;+1&lt;/button&gt;
+  &lt;span text="count"&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;!-- Flavor 3: Ultra-Concise Symbols / Emojis --&gt;
+&lt;div 🌲="{ count: 0 }"&gt;
+  &lt;button @click="count++"&gt;+1&lt;/button&gt;
+  &lt;span ⚡="count"&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;!-- Flavor 4: 100% Alpine.js Chameleon Drop-in (Zero edits!) --&gt;
+&lt;div x-data="{ count: 0 }"&gt;
+  &lt;button @click="count++"&gt;+1&lt;/button&gt;
+  &lt;span x-text="count"&gt;&lt;/span&gt;
 &lt;/div&gt;</code></pre>
         </div>
 
         <div class="demo-card">
-          <div class="demo-preview-header"><span>⚡ Live Migration Test</span></div>
+          <div class="demo-preview-header"><span>⚡ Live 4-Flavor Demo</span></div>
           <div class="demo-preview-body">
-            <div p-data="{ active: true }">
-              <button class="btn-demo" @click="active = !active" p-text="active ? 'State: Active (Click to toggle)' : 'State: Inactive (Click to toggle)'"></button>
-              <p style="margin-top: 0.75rem;" p-text="active ? '🌲 PineJS signal active!' : 'Paused.'"></p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+              <div p-data="{ count: 0 }" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: var(--alpine-teal); margin-bottom: 0.5rem;">Standard <code>p-</code></div>
+                <button class="btn-demo" @click="count++">Increment</button>
+                <div style="margin-top: 0.5rem;">Count: <strong p-text="count">0</strong></div>
+              </div>
+              <div state="{ count: 0 }" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: #8b5cf6; margin-bottom: 0.5rem;">Semantic <code>state/text</code></div>
+                <button class="btn-demo" @click="count++">Increment</button>
+                <div style="margin-top: 0.5rem;">Count: <strong text="count">0</strong></div>
+              </div>
+              <div 🌲="{ count: 0 }" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: #ec4899; margin-bottom: 0.5rem;">Emoji <code>🌲/⚡</code></div>
+                <button class="btn-demo" @click="count++">Increment</button>
+                <div style="margin-top: 0.5rem;">Count: <strong ⚡="count">0</strong></div>
+              </div>
+              <div x-data="{ count: 0 }" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: #06b6d4; margin-bottom: 0.5rem;">Alpine <code>x-</code> Chameleon</div>
+                <button class="btn-demo" @click="count++">Increment</button>
+                <div style="margin-top: 0.5rem;">Count: <strong x-text="count">0</strong></div>
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           2.5. RELEASES & VERSIONS EXPLORER
+           =================================================================== -->
+      <section id="releases" class="doc-section">
+        <h1 class="doc-h1">Releases & Version History</h1>
+        <p class="lead-p">Explore PineJS releases, codenames, and release highlights.</p>
+
+        <div class="demo-card" p-data="{
+          selectedVer: '1.4.0',
+          releases: [
+            { ver: '1.4.0', name: 'Spruce', date: '2026-09-15', status: 'Latest Stable', badge: 'stable', desc: 'Configurable multi-prefix engine (Pine.prefix), prefix-free semantic HTML (state, text, show, model, loop), symbol & emoji shorthands (🌲, ⚡, ~, ?, *), WAAPI timeline orchestrator (Pine.timeline), and 100% Alpine Chameleon drop-in mode.' },
+            { ver: '1.3.0', name: 'Cedar', date: '2026-09-15', status: 'Previous Stable', badge: 'prev', desc: 'p-animate spring physics & WAAPI keyframes, Pine.devtools diagnostic bridge, and proxy receiver binding.' },
+            { ver: '1.2.0', name: 'Redwood', date: '2026-09-14', status: 'Stable', badge: 'prev', desc: 'Official TypeScript typings (dist/pine.d.ts), $history URL sync magic, and p-hydrate SSR hydration activation.' },
+            { ver: '1.1.0', name: 'Sequoia', date: '2026-09-14', status: 'Stable', badge: 'prev', desc: 'Hierarchical Scope Proxy, p-modelable component binding, reactive array auto-sync, debounced outside clicks, Pine.$data() API.' },
+            { ver: '1.0.0', name: 'Evergreen', date: '2026-09-10', status: 'Initial Release', badge: 'prev', desc: 'Initial release with full Alpine.js API parity, Fine-Grained Signals, built-in morphing & plugins, and 60+ interactive docs components.' }
+          ]
+        }">
+          <div class="demo-preview-header"><span>🌲 Version Explorer</span></div>
+          <div class="demo-preview-body">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+              <template p-for="rel in releases">
+                <button class="btn-demo-outline"
+                  :style="selectedVer === rel.ver ? 'background: var(--alpine-teal); color: white; border-color: var(--alpine-teal);' : ''"
+                  @click="selectedVer = rel.ver"
+                  p-text="'v' + rel.ver + ' (' + rel.name + ')'"></button>
+              </template>
+            </div>
+
+            <template p-for="rel in releases">
+              <div p-show="selectedVer === rel.ver" style="padding: 1.25rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-surface);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                  <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700;" p-text="'🌲 v' + rel.ver + ' — ' + rel.name"></h3>
+                  <span style="font-size: 0.8rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 9999px;"
+                    :style="rel.badge === 'stable' ? 'background: #10b981; color: white;' : 'background: #64748b; color: white;'"
+                    p-text="rel.status"></span>
+                </div>
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem;" p-text="'Released on: ' + rel.date"></div>
+                <p style="margin: 0; line-height: 1.6;" p-text="rel.desc"></p>
+              </div>
+            </template>
           </div>
         </div>
       </section>
@@ -257,7 +331,7 @@
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
-          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.3.0/dist/pine.min.js" defer&gt;&lt;/script&gt;</code></pre>
+          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.4.0/dist/pine.min.js" defer&gt;&lt;/script&gt;</code></pre>
         </div>
 
         <div class="demo-card">

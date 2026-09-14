@@ -1,7 +1,7 @@
 {
   "name": "pinejs-core",
-  "version": "1.3.0",
-  "versionName": "Cedar",
+  "version": "1.4.0",
+  "versionName": "Spruce",
   "description": "Next-generation fine-grained reactive declarative micro-framework for the modern web with CDN support, signals, and ultra-fast DOM updates.",
   "main": "dist/pine.js",
   "module": "dist/pine.esm.js",

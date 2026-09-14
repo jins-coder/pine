@@ -1,11 +1,12 @@
 /**
- * PineJS v1.3.0 "Cedar" (ES Module)
+ * PineJS v1.4.0 "Spruce" (ES Module)
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * (c) 2026 PineJS Core Team - MIT License
  */
 import Pine from './pine.js';
 
 export const {
+  prefix,
   signal,
   computed,
   effect,
@@ -14,6 +15,7 @@ export const {
   reactive,
   raw,
   fetch,
+  timeline,
   devtools,
   data,
   bind,

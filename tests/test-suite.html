@@ -520,6 +520,117 @@
       }
     });
 
+    test("v1.4.0 Spruce: Engine Version & Identity", "Verifies Pine.version === '1.4.0' and Pine.versionName === 'Spruce'", async () => {
+      if (Pine.version !== "1.4.0") throw new Error(`Expected Pine.version to be '1.4.0', got '${Pine.version}'`);
+      if (Pine.versionName !== "Spruce") throw new Error(`Expected Pine.versionName to be 'Spruce', got '${Pine.versionName}'`);
+      if (typeof Pine.prefix !== "function") throw new Error("Pine.prefix is not a function");
+      if (typeof Pine.timeline !== "function") throw new Error("Pine.timeline is not a function");
+    });
+
+    test("v1.4.0 Spruce: Prefix-Free Semantic HTML Directives", "Tests 'state', 'text', 'show', 'model', and 'loop'", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-semantic" state="{ name: 'PineJS', visible: true, count: 5, items: ['Alpha', 'Beta'] }">
+          <span id="sem-text" text="name"></span>
+          <div id="sem-show" show="visible">Visible Content</div>
+          <button id="sem-btn" @click="name = 'Spruce'"></button>
+          <ul id="sem-list">
+            <template loop="item in items">
+              <li class="sem-item" text="item"></li>
+            </template>
+          </ul>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-semantic"));
+      const textSpan = sandbox.querySelector("#sem-text");
+      const btn = sandbox.querySelector("#sem-btn");
+      const items = sandbox.querySelectorAll(".sem-item");
+
+      if (textSpan.textContent !== "PineJS") throw new Error(`Expected 'PineJS', got '${textSpan.textContent}'`);
+      if (items.length !== 2 || items[0].textContent !== "Alpha") throw new Error(`Semantic loop failed to render items properly`);
+      
+      btn.click();
+      if (textSpan.textContent !== "Spruce") throw new Error(`Expected 'Spruce' after click, got '${textSpan.textContent}'`);
+    });
+
+    test("v1.4.0 Spruce: Symbol & Emoji Directives", "Tests 🌲 (state), ⚡ (text), ~ (model), ? (show), * (loop)", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-symbol" 🌲="{ title: 'Emoji Power', show: true, tags: ['signal', 'speed'] }">
+          <span id="sym-text" ⚡="title"></span>
+          <div id="sym-show" ?="show">Active</div>
+          <button id="sym-btn" @click="title = 'Fast'"></button>
+          <ul id="sym-tags">
+            <template *="tag in tags">
+              <li class="sym-item" ⚡="tag"></li>
+            </template>
+          </ul>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-symbol"));
+      const symText = sandbox.querySelector("#sym-text");
+      const symBtn = sandbox.querySelector("#sym-btn");
+      const symItems = sandbox.querySelectorAll(".sym-item");
+
+      if (symText.textContent !== "Emoji Power") throw new Error(`Expected 'Emoji Power', got '${symText.textContent}'`);
+      if (symItems.length !== 2 || symItems[1].textContent !== "speed") throw new Error(`Symbol * loop failed to render items`);
+
+      symBtn.click();
+      if (symText.textContent !== "Fast") throw new Error(`Expected 'Fast' after click, got '${symText.textContent}'`);
+    });
+
+    test("v1.4.0 Spruce: Alpine.js Chameleon Drop-in Mode", "Verifies x-data, x-text, x-show, x-for, and @click run natively without migration edits", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-alpine" x-data="{ count: 10, list: ['one', 'two'] }">
+          <span id="alp-text" x-text="'Value: ' + count"></span>
+          <button id="alp-btn" @click="count++">Increment</button>
+          <ul id="alp-list">
+            <template x-for="item in list">
+              <li class="alp-item" x-text="item"></li>
+            </template>
+          </ul>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-alpine"));
+      const alpText = sandbox.querySelector("#alp-text");
+      const alpBtn = sandbox.querySelector("#alp-btn");
+      const alpItems = sandbox.querySelectorAll(".alp-item");
+
+      if (alpText.textContent !== "Value: 10") throw new Error(`Expected 'Value: 10', got '${alpText.textContent}'`);
+      if (alpItems.length !== 2) throw new Error(`x-for failed to render items`);
+
+      alpBtn.click();
+      if (alpText.textContent !== "Value: 11") throw new Error(`Expected 'Value: 11', got '${alpText.textContent}'`);
+    });
+
+    test("v1.4.0 Spruce: Web Animations API Timeline Orchestration", "Verifies Pine.timeline() step creation, execution, and chaining", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-timeline">
+          <div id="box-1" style="width: 20px; height: 20px; background: red;"></div>
+          <div id="box-2" style="width: 20px; height: 20px; background: blue;"></div>
+        </div>
+      `;
+      
+      const tl = Pine.timeline()
+        .add(sandbox.querySelector("#box-1"), [{ opacity: 0 }, { opacity: 1 }], { duration: 50 })
+        .add(sandbox.querySelector("#box-2"), [{ transform: 'scale(0.5)' }, { transform: 'scale(1)' }], { duration: 50 });
+
+      if (typeof tl.play !== "function" || typeof tl.pause !== "function" || typeof tl.reverse !== "function") {
+        throw new Error("Timeline instance is missing playback controls");
+      }
+      if (typeof tl.then !== "function") {
+        throw new Error("Timeline instance is not Promise-like (missing .then)");
+      }
+
+      const p = tl.play();
+      if (!p || typeof p.then !== "function") {
+        throw new Error("tl.play() did not return a Promise");
+      }
+      await p;
+    });
+
     // Run tests & render report
     async function runAllTests() {
       const list = document.getElementById("results-list");

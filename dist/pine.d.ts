@@ -1,5 +1,5 @@
 /**
- * PineJS v1.3.0 "Cedar"
+ * PineJS v1.4.0 "Spruce"
  * TypeScript Declaration File
  * (c) 2026 PineJS Core Team - MIT License
  */
@@ -103,11 +103,34 @@ export interface DevToolsAPI {
   inspect: (element: HTMLElement) => DevToolsInspection;
 }
 
-export interface PineAPI {
-  version: '1.3.0';
-  versionName: 'Cedar';
+export interface TimelineStep {
+  el: HTMLElement | string;
+  keyframes: Keyframe[] | PropertyIndexedKeyframes;
+  duration?: number;
+  delay?: number;
+  at?: number;
+  easing?: string;
+  options?: KeyframeAnimationOptions;
+}
 
-  // Signals
+export interface TimelineInstance {
+  animations: Animation[];
+  duration: number;
+  play(): void;
+  pause(): void;
+  reverse(): void;
+  finish(): void;
+  cancel(): void;
+}
+
+export interface PineAPI {
+  version: '1.4.0';
+  versionName: 'Spruce';
+
+  // Prefix Configuration
+  prefix: (newPrefix?: string | string[]) => string[];
+
+  // Signals & Fetch
   signal: typeof signal;
   computed: typeof computed;
   effect: typeof effect;
@@ -116,6 +139,7 @@ export interface PineAPI {
   reactive: typeof reactive;
   raw: typeof raw;
   fetch: FetchClient;
+  timeline: (steps: TimelineStep[], globalOptions?: KeyframeAnimationOptions) => TimelineInstance;
 
   // Diagnostics & DevTools
   devtools: DevToolsAPI;
