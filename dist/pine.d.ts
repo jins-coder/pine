@@ -28,6 +28,37 @@ export function untrack<T>(fn: () => T): T;
 export function reactive<T extends object>(target: T): T;
 export function raw<T>(proxyObj: T): T;
 
+export interface FetchOptions extends Omit<RequestInit, 'body'> {
+  body?: any;
+  params?: Record<string, any>;
+  query?: Record<string, any>;
+  timeout?: number;
+  responseType?: 'json' | 'text' | 'blob' | 'auto';
+  ignoreStatus?: boolean;
+}
+
+export interface FetchResource<T = any> extends PromiseLike<T> {
+  loading: boolean;
+  data: T | null;
+  error: string | null;
+  status: number | null;
+  ok: boolean;
+  headers: Record<string, string>;
+  response: Response | null;
+  abort(): void;
+  refetch(overrideOptions?: Partial<FetchOptions>): Promise<T>;
+}
+
+export interface FetchClient {
+  <T = any>(url: string | (() => string), options?: FetchOptions | (() => FetchOptions)): FetchResource<T>;
+  get<T = any>(url: string | (() => string), options?: FetchOptions): FetchResource<T>;
+  post<T = any>(url: string | (() => string), body?: any, options?: FetchOptions): FetchResource<T>;
+  put<T = any>(url: string | (() => string), body?: any, options?: FetchOptions): FetchResource<T>;
+  patch<T = any>(url: string | (() => string), body?: any, options?: FetchOptions): FetchResource<T>;
+  delete<T = any>(url: string | (() => string), options?: FetchOptions): FetchResource<T>;
+  json<T = any>(url: string | (() => string), options?: FetchOptions): Promise<T>;
+}
+
 export interface MagicScope {
   $el: HTMLElement;
   $root: HTMLElement;
@@ -41,7 +72,7 @@ export interface MagicScope {
   $signal: <T>(val: T) => Signal<T>;
   $persist: <T>(initialValue: T, keyName?: string) => { value: T };
   $history: <T>(initialValue: T, paramName?: string) => { value: T };
-  $fetch: (url: string, options?: RequestInit) => { loading: boolean; data: any; error: string | null; status: number | null };
+  $fetch: FetchClient;
   $intersect: (callback: (isIntersecting: boolean, entry: IntersectionObserverEntry) => void, options?: IntersectionObserverInit) => void;
   $focus: { focus: (target?: string | HTMLElement) => void; trap: (container?: string | HTMLElement) => void };
 }
@@ -84,6 +115,7 @@ export interface PineAPI {
   untrack: typeof untrack;
   reactive: typeof reactive;
   raw: typeof raw;
+  fetch: FetchClient;
 
   // Diagnostics & DevTools
   devtools: DevToolsAPI;

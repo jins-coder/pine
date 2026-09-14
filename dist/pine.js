@@ -524,7 +524,185 @@
   let globalIdCounter = 0;
 
   // =========================================================================
-  // 5. MAGIC PROPERTIES ENGINE
+  // 5. REACTIVE FETCH CLIENT ENGINE ($fetch & Pine.fetch)
+  // =========================================================================
+  function createFetchResource(urlInput, optionsInput = {}, el = null) {
+    let abortCtrl = null;
+    let currentPromise = null;
+
+    const state = reactive({
+      loading: true,
+      data: null,
+      error: null,
+      status: null,
+      ok: false,
+      headers: {},
+      response: null,
+      abort() {
+        if (abortCtrl) {
+          abortCtrl.abort();
+          state.loading = false;
+        }
+      },
+      async refetch(overrideOptions = {}) {
+        return execute(overrideOptions);
+      },
+      then(onFulfilled, onRejected) {
+        return (currentPromise || execute()).then(onFulfilled, onRejected);
+      },
+      catch(onRejected) {
+        return (currentPromise || execute()).catch(onRejected);
+      },
+      finally(onFinally) {
+        return (currentPromise || execute()).finally(onFinally);
+      }
+    });
+
+    async function execute(extraOpts = {}) {
+      if (abortCtrl) {
+        abortCtrl.abort();
+      }
+      abortCtrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+
+      let targetUrl = typeof urlInput === 'function' ? urlInput() : urlInput;
+      const baseOpts = typeof optionsInput === 'function' ? optionsInput() : optionsInput;
+      const mergedOpts = { ...baseOpts, ...extraOpts };
+
+      // Query param serialization from params/query object
+      const params = mergedOpts.params || mergedOpts.query;
+      if (params && typeof params === 'object') {
+        const baseHref = typeof window !== 'undefined' && window.location && window.location.href ? window.location.href : 'http://localhost';
+        const urlObj = new URL(targetUrl, baseHref);
+        for (const [k, v] of Object.entries(params)) {
+          if (v !== undefined && v !== null) {
+            urlObj.searchParams.set(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+          }
+        }
+        targetUrl = targetUrl.startsWith('http://') || targetUrl.startsWith('https://') || targetUrl.startsWith('//')
+          ? urlObj.toString()
+          : (urlObj.pathname + urlObj.search + urlObj.hash);
+      }
+
+      // Headers construction
+      const headers = typeof Headers !== 'undefined' && mergedOpts.headers instanceof Headers
+        ? mergedOpts.headers
+        : new Headers(mergedOpts.headers || {});
+
+      // Auto-serialize JSON body
+      let body = mergedOpts.body;
+      if (body && typeof body === 'object' && !(typeof FormData !== 'undefined' && body instanceof FormData) && !(typeof Blob !== 'undefined' && body instanceof Blob) && !(typeof URLSearchParams !== 'undefined' && body instanceof URLSearchParams)) {
+        body = JSON.stringify(body);
+        if (!headers.has('Content-Type') && !headers.has('content-type')) {
+          headers.set('Content-Type', 'application/json');
+        }
+      }
+
+      const fetchConfig = {
+        ...mergedOpts,
+        headers,
+        body,
+        signal: abortCtrl ? abortCtrl.signal : undefined
+      };
+      delete fetchConfig.params;
+      delete fetchConfig.query;
+      delete fetchConfig.timeout;
+      delete fetchConfig.responseType;
+      delete fetchConfig.ignoreStatus;
+
+      let timeoutId = null;
+      if (mergedOpts.timeout && typeof mergedOpts.timeout === 'number') {
+        timeoutId = setTimeout(() => {
+          if (abortCtrl) abortCtrl.abort(new Error(`Fetch timed out after ${mergedOpts.timeout}ms`));
+        }, mergedOpts.timeout);
+      }
+
+      state.loading = true;
+      state.error = null;
+
+      currentPromise = (async () => {
+        try {
+          const res = await fetch(targetUrl, fetchConfig);
+          if (timeoutId) clearTimeout(timeoutId);
+
+          state.status = res.status;
+          state.ok = res.ok;
+          state.response = res;
+
+          const hdrMap = {};
+          if (res.headers && typeof res.headers.forEach === 'function') {
+            res.headers.forEach((val, key) => { hdrMap[key] = val; });
+          }
+          state.headers = hdrMap;
+
+          if (!res.ok && !mergedOpts.ignoreStatus) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText || 'Fetch request failed'}`);
+          }
+
+          const contentType = res.headers ? (res.headers.get('content-type') || '') : '';
+          let parsedData;
+          if (mergedOpts.responseType === 'blob') {
+            parsedData = await res.blob();
+          } else if (mergedOpts.responseType === 'text') {
+            parsedData = await res.text();
+          } else if (mergedOpts.responseType === 'json' || contentType.includes('application/json')) {
+            parsedData = await res.json();
+          } else {
+            parsedData = await res.text();
+          }
+
+          state.data = parsedData;
+          return parsedData;
+        } catch (err) {
+          if (timeoutId) clearTimeout(timeoutId);
+          if (err.name === 'AbortError') {
+            state.error = 'Request aborted';
+          } else {
+            state.error = err.message || 'Fetch failed';
+          }
+          state.data = null;
+          throw err;
+        } finally {
+          state.loading = false;
+        }
+      })();
+
+      return currentPromise;
+    }
+
+    // Trigger initial request
+    execute().catch(() => {});
+
+    // Component lifecycle cleanup
+    if (el) {
+      const scope = getScope(el);
+      if (scope) {
+        scope.addCleanup(() => {
+          if (abortCtrl) abortCtrl.abort();
+        });
+      }
+    }
+
+    return state;
+  }
+
+  function buildFetchMagic(el) {
+    const fn = (url, options = {}) => createFetchResource(url, options, el);
+
+    fn.get = (url, options = {}) => createFetchResource(url, { ...options, method: 'GET' }, el);
+    fn.post = (url, body, options = {}) => createFetchResource(url, { ...options, method: 'POST', body }, el);
+    fn.put = (url, body, options = {}) => createFetchResource(url, { ...options, method: 'PUT', body }, el);
+    fn.patch = (url, body, options = {}) => createFetchResource(url, { ...options, method: 'PATCH', body }, el);
+    fn.delete = (url, options = {}) => createFetchResource(url, { ...options, method: 'DELETE' }, el);
+    fn.json = async (url, options = {}) => {
+      const res = await createFetchResource(url, { ...options, responseType: 'json' }, el);
+      return res.data;
+    };
+
+    return fn;
+  }
+
+  // =========================================================================
+  // 6. MAGIC PROPERTIES ENGINE
   // =========================================================================
   const builtInMagics = {
     $el(el) {
@@ -634,35 +812,8 @@
         }
       };
     },
-    $fetch() {
-      return (url, options = {}) => {
-        const state = reactive({
-          loading: true,
-          data: null,
-          error: null,
-          status: null
-        });
-
-        fetch(url, options)
-          .then(async (res) => {
-            state.status = res.status;
-            if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            const contentType = res.headers.get('content-type') || '';
-            if (contentType.includes('application/json')) {
-              state.data = await res.json();
-            } else {
-              state.data = await res.text();
-            }
-          })
-          .catch((err) => {
-            state.error = err.message || 'Fetch failed';
-          })
-          .finally(() => {
-            state.loading = false;
-          });
-
-        return state;
-      };
+    $fetch(el) {
+      return buildFetchMagic(el);
     },
     $persist(el) {
       return (initialValue, keyName) => {
@@ -1827,6 +1978,7 @@
     untrack,
     reactive,
     raw,
+    fetch: createFetchResource,
 
     // DevTools & Diagnostic Runtime Bridge
     devtools: {

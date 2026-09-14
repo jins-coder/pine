@@ -13,6 +13,7 @@ export const {
   untrack,
   reactive,
   raw,
+  fetch,
   devtools,
   data,
   bind,

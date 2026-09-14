@@ -1222,23 +1222,52 @@
 
       <section id="magic-fetch" class="doc-section">
         <h1 class="doc-h1"><code>$fetch</code></h1>
-        <p class="lead-p">Reactive HTTP client with automated <code>loading</code>, <code>data</code>, and <code>error</code> states.</p>
+        <p class="lead-p">Full-featured reactive HTTP client supporting REST verbs (<code>$fetch.get</code>, <code>$fetch.post</code>, etc.), auto-JSON serialization, query params, manual <code>.refetch()</code>, and cancellation via <code>.abort()</code>.</p>
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
-          <pre><code>&lt;div p-data="{ req: $fetch('https://api.github.com/repos/pinejs/core') }"&gt;
-  &lt;span p-show="req.loading"&gt;Loading...&lt;/span&gt;
-  &lt;div p-show="req.data" p-text="req.data?.full_name"&gt;&lt;/div&gt;
-&lt;/div&gt;</code></pre>
+          <pre><code>&lt;!-- Reactive Resource with Query Params & Refetch --&gt;
+&lt;div p-data="{ req: $fetch('https://dummyjson.com/quotes/random', { timeout: 5000 }) }"&gt;
+  &lt;div p-show="req.loading"&gt;Loading fresh quote...&lt;/div&gt;
+  &lt;div p-show="req.data"&gt;
+    &lt;blockquote p-text="'“' + req.data?.quote + '”'"&gt;&lt;/blockquote&gt;
+    &lt;cite p-text="'— ' + req.data?.author"&gt;&lt;/cite&gt;
+  &lt;/div&gt;
+  &lt;div p-show="req.error" style="color: red;" p-text="req.error"&gt;&lt;/div&gt;
+  &lt;button @click="req.refetch()"&gt;Fetch New Quote 🔄&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- Direct REST API Mutation Helpers --&gt;
+&lt;button @click="await $fetch.post('/api/users', { name: 'Elena', role: 'Staff' })"&gt;
+  Create User
+&lt;/button&gt;</code></pre>
         </div>
 
         <div class="demo-card">
-          <div class="demo-preview-header"><span>⚡ Live $fetch Example</span></div>
+          <div class="demo-preview-header"><span>⚡ Live $fetch Resource Demo</span></div>
           <div class="demo-preview-body">
-            <div p-data="{ req: $fetch('https://jsonplaceholder.typicode.com/todos/1') }">
-              <div p-show="req.loading">Fetching remote resource...</div>
-              <div p-show="req.data" style="padding: 0.75rem; background: var(--bg-code); border-radius: 6px;">
-                Title: <strong style="color: var(--alpine-teal);" p-text="req.data?.title"></strong>
+            <div p-data="{
+              req: $fetch('https://dummyjson.com/quotes/random', { timeout: 6000 })
+            }">
+              <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem;">
+                <button class="btn-demo" :disabled="req.loading" @click="req.refetch()">
+                  <span p-text="req.loading ? 'Fetching Quote...' : 'Get Random Quote 🔄'"></span>
+                </button>
+                <button class="btn-demo-outline" p-show="req.loading" @click="req.abort()">Cancel (Abort)</button>
+              </div>
+
+              <div p-show="req.loading" style="padding: 1rem; color: var(--text-muted);">
+                ⏳ Connecting to remote endpoint...
+              </div>
+
+              <div p-show="req.data && !req.loading" style="padding: 1.25rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px;">
+                <p style="font-style: italic; font-size: 1.05rem; margin-bottom: 0.5rem;" p-text="'“' + (req.data?.quote || '') + '”'"></p>
+                <div style="font-weight: 700; color: var(--alpine-teal);" p-text="'— ' + (req.data?.author || '')"></div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;" p-text="'HTTP Status: ' + req.status + ' • OK: ' + req.ok"></div>
+              </div>
+
+              <div p-show="req.error" style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; color: #ef4444;">
+                Error: <span p-text="req.error"></span>
               </div>
             </div>
           </div>

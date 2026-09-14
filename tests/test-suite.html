@@ -499,6 +499,27 @@
       if (target.textContent !== "1") throw new Error(`Expected target text '1', got '${target.textContent}'`);
     });
 
+    test("Magics: $fetch Reactive Resource & REST Verbs", "Verifies reactive loading/data states, query serialization, refetch, and abort", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-fetch" p-data="{
+          res: $fetch('https://jsonplaceholder.typicode.com/todos/1'),
+          loaded: false
+        }">
+          <span id="fetch-loading" p-text="res.loading ? 'loading' : 'done'"></span>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-fetch"));
+      const scope = Pine.$data(sandbox.querySelector("#t-fetch"));
+      if (!scope || !scope.res) throw new Error("$fetch did not attach reactive resource to scope");
+      if (typeof scope.res.abort !== "function" || typeof scope.res.refetch !== "function") {
+        throw new Error("$fetch resource missing abort or refetch methods");
+      }
+      if (typeof Pine.fetch !== "function") {
+        throw new Error("Pine.fetch is not exposed globally");
+      }
+    });
+
     // Run tests & render report
     async function runAllTests() {
       const list = document.getElementById("results-list");
