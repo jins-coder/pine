@@ -20,6 +20,8 @@
   ],
   "files": [
     "dist",
+    "docs/logo.svg",
+    "docs/favicon.svg",
     "README.md",
     "LICENSE"
   ],
