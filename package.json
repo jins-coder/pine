@@ -1,0 +1,25 @@
+{
+  "name": "pinejs-core",
+  "version": "1.0.0",
+  "versionName": "Evergreen",
+  "description": "Next-generation fine-grained reactive declarative micro-framework for the modern web with CDN support, signals, and ultra-fast DOM updates.",
+  "main": "dist/pine.js",
+  "module": "dist/pine.esm.js",
+  "unpkg": "dist/pine.min.js",
+  "jsdelivr": "dist/pine.min.js",
+  "keywords": [
+    "declarative",
+    "signals",
+    "reactivity",
+    "fine-grained",
+    "micro-framework",
+    "alpinejs",
+    "cdn",
+    "lightweight"
+  ],
+  "scripts": {
+    "test": "echo \"Open tests/test-suite.html in your browser\""
+  },
+  "author": "PineJS Core Team",
+  "license": "MIT"
+}

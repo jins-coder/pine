@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PineJS Full Automated Test Suite</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #10b981;
+      --pass: #10b981;
+      --fail: #ef4444;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .badge {
+      font-size: 0.85rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+    .badge-pass { background: rgba(16, 185, 129, 0.2); color: var(--pass); border: 1px solid var(--pass); }
+    .badge-fail { background: rgba(239, 68, 68, 0.2); color: var(--fail); border: 1px solid var(--fail); }
+    .test-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .test-title { font-weight: 500; font-size: 1rem; }
+    .test-desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .status { font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .status.pass { color: var(--pass); }
+    .status.fail { color: var(--fail); }
+    .sandbox { display: none; }
+  </style>
+  <!-- Load PineJS -->
+  <script src="../dist/pine.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>🌲 PineJS Test Suite <span id="summary-badge" class="badge">Running...</span></h1>
+        <p style="color: var(--text-muted); margin: 0.5rem 0 0 0;">Comprehensive verification of all Alpine.js parity features, directives, magics, morphing, and plugins</p>
+      </div>
+      <button onclick="runAllTests()" style="padding: 0.6rem 1.2rem; background: var(--primary); color: #000; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">Re-run Tests</button>
+    </div>
+
+    <div id="results-list"></div>
+  </div>
+
+  <div id="sandbox-root" class="sandbox"></div>
+
+  <script>
+    const tests = [];
+
+    function test(name, description, runner) {
+      tests.push({ name, description, runner });
+    }
+
+    // 1. Signals Unit Tests
+    test("Signals: Signal Primitive", "Signal getters, setters, and peek", () => {
+      const count = Pine.signal(0);
+      if (count.value !== 0) throw new Error(`Expected 0, got ${count.value}`);
+      count.value = 10;
+      if (count.value !== 10) throw new Error(`Expected 10, got ${count.value}`);
+      if (count.peek() !== 10) throw new Error(`Expected peek 10, got ${count.peek()}`);
+    });
+
+    test("Signals: Computed Signals", "Memoization & reactive recalculation", () => {
+      const a = Pine.signal(2);
+      const b = Pine.signal(3);
+      let runCount = 0;
+      const sum = Pine.computed(() => {
+        runCount++;
+        return a.value * b.value;
+      });
+
+      if (sum.value !== 6) throw new Error(`Expected 6, got ${sum.value}`);
+      const cached = sum.value;
+      if (runCount !== 1) throw new Error(`Computed recalculated unnecessarily`);
+
+      a.value = 4;
+      if (sum.value !== 12) throw new Error(`Expected 12 after mutation, got ${sum.value}`);
+    });
+
+    test("Signals: Batch Transactions", "Atomic updates without intermediate renders", () => {
+      const x = Pine.signal(1);
+      const y = Pine.signal(1);
+      let effectRuns = 0;
+
+      const stop = Pine.effect(() => {
+        effectRuns++;
+        return x.value + y.value;
+      });
+
+      Pine.batch(() => {
+        x.value = 10;
+        y.value = 20;
+      });
+
+      stop();
+      if (effectRuns !== 2) throw new Error(`Expected 2 effect runs (1 initial + 1 batched), got ${effectRuns}`);
+    });
+
+    // 2. Directives Integration Tests
+    test("Directives: p-data & p-text", "Atomic text node binding", () => {
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t1" p-data="{ name: 'Pine', version: 1 }">
+          <span id="t1-span" p-text="name + ' v' + version"></span>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t1"));
+      const span = sandbox.querySelector("#t1-span");
+      if (span.textContent !== "Pine v1") throw new Error(`Expected 'Pine v1', got '${span.textContent}'`);
+
+      sandbox.querySelector("#t1").__pine_scope__.data.name = "PineJS";
+      if (span.textContent !== "PineJS v1") throw new Error(`Expected 'PineJS v1', got '${span.textContent}'`);
+    });
+
+    test("Directives: p-bind & :attr Shorthand", "Class and attribute reactive binding", () => {
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t2" p-data="{ active: true, customId: 'btn-101' }">
+          <button id="t2-btn" :id="customId" :class="{ 'is-active': active }"></button>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t2"));
+      const btn = sandbox.querySelector("#t2-btn");
+      if (btn.id !== "btn-101") throw new Error(`Expected id 'btn-101', got '${btn.id}'`);
+      if (!btn.classList.contains("is-active")) throw new Error(`Expected class 'is-active'`);
+
+      sandbox.querySelector("#t2").__pine_scope__.data.active = false;
+      if (btn.classList.contains("is-active")) throw new Error(`Class 'is-active' was not removed`);
+    });
+
+    test("Directives: p-on / @event with modifiers", "Click event and counter increment", () => {
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t3" p-data="{ count: 0 }">
+          <button id="t3-btn" @click="count++">Increment</button>
+          <span id="t3-val" p-text="count"></span>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t3"));
+      const btn = sandbox.querySelector("#t3-btn");
+      const span = sandbox.querySelector("#t3-val");
+
+      btn.click();
+      btn.click();
+      if (span.textContent !== "2") throw new Error(`Expected count 2, got ${span.textContent}`);
+    });
+
+    test("Directives: p-model Two-Way Binding", "Sync input value and data property", () => {
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t4" p-data="{ query: 'hello' }">
+          <input id="t4-input" p-model="query" />
+          <span id="t4-span" p-text="query"></span>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t4"));
+      const input = sandbox.querySelector("#t4-input");
+      const span = sandbox.querySelector("#t4-span");
+
+      if (input.value !== "hello") throw new Error(`Expected input value 'hello', got '${input.value}'`);
+
+      input.value = "world";
+      input.dispatchEvent(new Event("input"));
+      if (span.textContent !== "world") throw new Error(`Expected span 'world', got '${span.textContent}'`);
+    });
+
+    test("Directives: p-if Conditional Rendering", "Mounting and unmounting template DOM", () => {
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t5" p-data="{ open: false }">
+          <template p-if="open">
+            <div id="t5-target">Modal Open</div>
+          </template>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t5"));
+      if (sandbox.querySelector("#t5-target") !== null) throw new Error(`Target should not be mounted initially`);
+
+      sandbox.querySelector("#t5").__pine_scope__.data.open = true;
+      if (sandbox.querySelector("#t5-target") === null) throw new Error(`Target should be mounted when open is true`);
+
+      sandbox.querySelector("#t5").__pine_scope__.data.open = false;
+      if (sandbox.querySelector("#t5-target") !== null) throw new Error(`Target should be unmounted when open is false`);
+    });
+
+    test("Directives: p-for List Rendering", "Dynamic array loops and mutations", () => {
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t6" p-data="{ items: ['Apple', 'Banana'] }">
+          <ul id="t6-list">
+            <template p-for="(item, i) in items">
+              <li class="t6-item" p-text="i + ': ' + item"></li>
+            </template>
+          </ul>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t6"));
+      let items = sandbox.querySelectorAll(".t6-item");
+      if (items.length !== 2) throw new Error(`Expected 2 items, got ${items.length}`);
+      if (items[0].textContent !== "0: Apple") throw new Error(`Expected '0: Apple', got '${items[0].textContent}'`);
+
+      sandbox.querySelector("#t6").__pine_scope__.data.items.push("Cherry");
+      items = sandbox.querySelectorAll(".t6-item");
+      if (items.length !== 3) throw new Error(`Expected 3 items after push, got ${items.length}`);
+      if (items[2].textContent !== "2: Cherry") throw new Error(`Expected '2: Cherry', got '${items[2].textContent}'`);
+    });
+
+    test("Globals: Pine.bind() Reusable Bindings", "Binding reusable objects with events and attributes", () => {
+      Pine.bind("triggerBtn", () => ({
+        ":class": "active-btn",
+        "@click": "clicked = true"
+      }));
+
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t-bind" p-data="{ clicked: false }">
+          <button id="t-bind-btn" p-bind="triggerBtn"></button>
+          <span id="t-bind-status" p-text="clicked"></span>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-bind"));
+      const btn = sandbox.querySelector("#t-bind-btn");
+      if (!btn.classList.contains("active-btn")) throw new Error(`Expected class 'active-btn' from Pine.bind`);
+      btn.click();
+      if (sandbox.querySelector("#t-bind-status").textContent !== "true") throw new Error(`Expected clicked status 'true'`);
+    });
+
+    test("Plugins: Pine.morph() DOM Morphing", "Morphing HTML string into element without replacing root", () => {
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `<div id="morph-root" class="old-class"><p>Old Text</p></div>`;
+      const root = sandbox.querySelector("#morph-root");
+      Pine.morph(root, `<div id="morph-root" class="new-class"><p>New Text</p><span>Extra</span></div>`);
+
+      if (root.className !== "new-class") throw new Error(`Expected className 'new-class'`);
+      if (root.querySelector("p").textContent !== "New Text") throw new Error(`Expected 'New Text'`);
+      if (!root.querySelector("span")) throw new Error(`Expected extra span to be added`);
+    });
+
+    test("Directives: p-ignore", "Skipping subtree initialization", () => {
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t-ign" p-data="{ text: 'hello' }">
+          <div p-ignore>
+            <span id="ign-span" p-text="text">Original</span>
+          </div>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-ign"));
+      const span = sandbox.querySelector("#ign-span");
+      if (span.textContent !== "Original") throw new Error(`p-ignore failed, text was mutated to '${span.textContent}'`);
+    });
+
+    test("UI Component: Dropdown & Click Outside", "Dropdown opens on click and closes on outside click", async () => {
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t-dd" p-data="{ open: false }">
+          <button id="dd-btn" @click="open = !open">Toggle</button>
+          <div id="dd-menu" p-show="open" @click.outside="open = false">
+            <span>Menu Content</span>
+          </div>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-dd"));
+      const btn = sandbox.querySelector("#dd-btn");
+      const menu = sandbox.querySelector("#dd-menu");
+
+      if (menu.style.display !== 'none') throw new Error(`Dropdown menu should initially be hidden`);
+
+      // Click button to open
+      btn.click();
+      if (menu.style.display === 'none') throw new Error(`Dropdown menu should be visible after clicking trigger button`);
+
+      // Wait a tick then click outside
+      await new Promise(r => setTimeout(r, 120));
+      document.body.click();
+      if (menu.style.display !== 'none') throw new Error(`Dropdown menu should be hidden after clicking outside`);
+    });
+
+    test("UI Component: p-modelable & p-model", "Two-way state synchronization between custom component and parent", () => {
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t-mod" p-data="{ count: 10 }">
+          <div id="inner-comp" p-data="{ inner: 10 }" p-modelable="inner" p-model="count">
+            <button id="inc-btn" @click="inner++">+</button>
+          </div>
+          <span id="parent-count" p-text="count"></span>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-mod"));
+      const btn = sandbox.querySelector("#inc-btn");
+      const span = sandbox.querySelector("#parent-count");
+
+      if (span.textContent !== '10') throw new Error(`Expected initial parent count 10, got ${span.textContent}`);
+      btn.click();
+      if (span.textContent !== '11') throw new Error(`Expected updated parent count 11, got ${span.textContent}`);
+    });
+
+    // Run tests & render report
+    async function runAllTests() {
+      const list = document.getElementById("results-list");
+      const summaryBadge = document.getElementById("summary-badge");
+      list.innerHTML = "";
+      let passed = 0;
+      let failed = 0;
+
+      for (const t of tests) {
+        let isPass = false;
+        let errorMsg = "";
+        try {
+          await t.runner();
+          isPass = true;
+          passed++;
+        } catch (err) {
+          failed++;
+          errorMsg = err.message || String(err);
+          console.error(`Test failed: ${t.name}`, err);
+        }
+
+        const card = document.createElement("div");
+        card.className = "test-card";
+        card.innerHTML = `
+          <div>
+            <div class="test-title">${t.name}</div>
+            <div class="test-desc">${t.description} ${errorMsg ? `<span style="color:var(--fail)">— ${errorMsg}</span>` : ""}</div>
+          </div>
+          <div class="status ${isPass ? 'pass' : 'fail'}">${isPass ? 'PASS ✓' : 'FAIL ✗'}</div>
+        `;
+        list.appendChild(card);
+      }
+
+      if (failed === 0) {
+        summaryBadge.className = "badge badge-pass";
+        summaryBadge.textContent = `${passed}/${tests.length} Passed (100%)`;
+      } else {
+        summaryBadge.className = "badge badge-fail";
+        summaryBadge.textContent = `${failed} Failed, ${passed} Passed`;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", runAllTests);
+  </script>
+</body>
+</html>

@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PineJS — Next-Gen Fine-Grained Declarative Micro-Framework</title>
+  <meta name="description" content="Next-generation CDN-based fine-grained reactive declarative micro-framework. Complete Alpine.js parity with signals, faster DOM updates, and built-in plugins.">
+  <link rel="stylesheet" href="docs.css">
+  <!-- Load PineJS library -->
+  <script src="../dist/pine.js"></script>
+  <script src="docs.js" defer></script>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="site-header">
+    <div style="display: flex; align-items: center; gap: 2rem;">
+      <a href="#start-here" class="brand-wrapper">
+        <div class="brand-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 2 4 6h-3l4 6h-3l4 6H6l4-6H7l4-6H8z"/>
+            <path d="M12 20v2"/>
+          </svg>
+        </div>
+        <div class="brand-title">PineJS</div>
+        <span class="brand-version" title="Codename: Evergreen">v1.0.0 (Evergreen)</span>
+      </a>
+
+      <button id="search-trigger" class="search-trigger">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <span>Search documentation...</span>
+        <kbd class="search-kbd">Ctrl K</kbd>
+      </button>
+    </div>
+
+    <div class="header-actions">
+      <ul class="nav-links">
+        <li><a href="#start-here" class="nav-link">Docs</a></li>
+        <li><a href="playground.html" class="nav-link" style="color: var(--alpine-teal); font-weight: 700;">Playground ⚡</a></li>
+        <li><a href="benchmarks.html" class="nav-link">Benchmarks 📊</a></li>
+        <li><a href="../tests/test-suite.html" class="nav-link" target="_blank">Test Suite 🧪</a></li>
+      </ul>
+
+      <button id="theme-toggle" class="theme-toggle-btn" title="Toggle color theme">🌙</button>
+      <a href="https://github.com" target="_blank" class="icon-btn" title="GitHub Repository">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Docs Layout: Sidebar + Main Content -->
+  <div class="docs-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <!-- Getting Started -->
+      <div class="sidebar-group">
+        <div class="sidebar-title">Getting Started</div>
+        <ul class="sidebar-items">
+          <li class="sidebar-item"><a href="#start-here" class="active">Start Here</a></li>
+          <li class="sidebar-item"><a href="#upgrade-guide">Upgrade From Alpine.js</a></li>
+        </ul>
+      </div>
+
+      <!-- Essentials -->
+      <div class="sidebar-group">
+        <div class="sidebar-title">Essentials</div>
+        <ul class="sidebar-items">
+          <li class="sidebar-item"><a href="#essentials-installation">Installation</a></li>
+          <li class="sidebar-item"><a href="#essentials-state">State</a></li>
+          <li class="sidebar-item"><a href="#essentials-templating">Templating</a></li>
+          <li class="sidebar-item"><a href="#essentials-events">Events</a></li>
+          <li class="sidebar-item"><a href="#essentials-lifecycle">Lifecycle</a></li>
+        </ul>
+      </div>
+
+      <!-- UI Components -->
+      <div class="sidebar-group">
+        <div class="sidebar-title">UI Components</div>
+        <ul class="sidebar-items">
+          <li class="sidebar-item"><a href="#component-dropdown">Dropdown</a></li>
+          <li class="sidebar-item"><a href="#component-modal">Modal</a></li>
+          <li class="sidebar-item"><a href="#component-tabs">Tabs & Accordions</a></li>
+        </ul>
+      </div>
+
+      <!-- Directives -->
+      <div class="sidebar-group">
+        <div class="sidebar-title">Directives</div>
+        <ul class="sidebar-items">
+          <li class="sidebar-item"><a href="#p-data"><code>p-data</code></a></li>
+          <li class="sidebar-item"><a href="#p-init"><code>p-init</code></a></li>
+          <li class="sidebar-item"><a href="#p-show"><code>p-show</code></a></li>
+          <li class="sidebar-item"><a href="#p-bind"><code>p-bind</code> <span class="sidebar-tag">:</span></a></li>
+          <li class="sidebar-item"><a href="#p-on"><code>p-on</code> <span class="sidebar-tag">@</span></a></li>
+          <li class="sidebar-item"><a href="#p-text"><code>p-text</code></a></li>
+          <li class="sidebar-item"><a href="#p-html"><code>p-html</code></a></li>
+          <li class="sidebar-item"><a href="#p-model"><code>p-model</code></a></li>
+          <li class="sidebar-item"><a href="#p-modelable"><code>p-modelable</code></a></li>
+          <li class="sidebar-item"><a href="#p-for"><code>p-for</code></a></li>
+          <li class="sidebar-item"><a href="#p-transition"><code>p-transition</code></a></li>
+          <li class="sidebar-item"><a href="#p-effect"><code>p-effect</code></a></li>
+          <li class="sidebar-item"><a href="#p-ignore"><code>p-ignore</code></a></li>
+          <li class="sidebar-item"><a href="#p-ref"><code>p-ref</code></a></li>
+          <li class="sidebar-item"><a href="#p-cloak"><code>p-cloak</code></a></li>
+          <li class="sidebar-item"><a href="#p-teleport"><code>p-teleport</code></a></li>
+          <li class="sidebar-item"><a href="#p-if"><code>p-if</code></a></li>
+          <li class="sidebar-item"><a href="#p-id"><code>p-id</code></a></li>
+        </ul>
+      </div>
+
+      <!-- Magics -->
+      <div class="sidebar-group">
+        <div class="sidebar-title">Magics</div>
+        <ul class="sidebar-items">
+          <li class="sidebar-item"><a href="#magic-el"><code>$el</code></a></li>
+          <li class="sidebar-item"><a href="#magic-refs"><code>$refs</code></a></li>
+          <li class="sidebar-item"><a href="#magic-store"><code>$store</code></a></li>
+          <li class="sidebar-item"><a href="#magic-watch"><code>$watch</code></a></li>
+          <li class="sidebar-item"><a href="#magic-dispatch"><code>$dispatch</code></a></li>
+          <li class="sidebar-item"><a href="#magic-nexttick"><code>$nextTick</code></a></li>
+          <li class="sidebar-item"><a href="#magic-root"><code>$root</code></a></li>
+          <li class="sidebar-item"><a href="#magic-data"><code>$data</code></a></li>
+          <li class="sidebar-item"><a href="#magic-id"><code>$id</code></a></li>
+          <li class="sidebar-item"><a href="#magic-signal"><code>$signal</code></a></li>
+          <li class="sidebar-item"><a href="#magic-persist"><code>$persist</code></a></li>
+          <li class="sidebar-item"><a href="#magic-fetch"><code>$fetch</code></a></li>
+          <li class="sidebar-item"><a href="#magic-intersect"><code>$intersect</code></a></li>
+        </ul>
+      </div>
+
+      <!-- Globals -->
+      <div class="sidebar-group">
+        <div class="sidebar-title">Globals</div>
+        <ul class="sidebar-items">
+          <li class="sidebar-item"><a href="#global-data"><code>Pine.data()</code></a></li>
+          <li class="sidebar-item"><a href="#global-store"><code>Pine.store()</code></a></li>
+          <li class="sidebar-item"><a href="#global-bind"><code>Pine.bind()</code></a></li>
+          <li class="sidebar-item"><a href="#global-directive"><code>Pine.directive()</code></a></li>
+          <li class="sidebar-item"><a href="#global-magic"><code>Pine.magic()</code></a></li>
+          <li class="sidebar-item"><a href="#global-plugin"><code>Pine.plugin()</code></a></li>
+          <li class="sidebar-item"><a href="#global-start"><code>Pine.start()</code></a></li>
+        </ul>
+      </div>
+
+      <!-- Plugins -->
+      <div class="sidebar-group">
+        <div class="sidebar-title">Plugins</div>
+        <ul class="sidebar-items">
+          <li class="sidebar-item"><a href="#plugin-mask">Mask <span class="sidebar-tag">p-mask</span></a></li>
+          <li class="sidebar-item"><a href="#plugin-intersect">Intersect <span class="sidebar-tag">$intersect</span></a></li>
+          <li class="sidebar-item"><a href="#plugin-resize">Resize <span class="sidebar-tag">p-resize</span></a></li>
+          <li class="sidebar-item"><a href="#plugin-persist">Persist <span class="sidebar-tag">$persist</span></a></li>
+          <li class="sidebar-item"><a href="#plugin-focus">Focus <span class="sidebar-tag">$focus</span></a></li>
+          <li class="sidebar-item"><a href="#plugin-collapse">Collapse <span class="sidebar-tag">p-collapse</span></a></li>
+          <li class="sidebar-item"><a href="#plugin-anchor">Anchor <span class="sidebar-tag">p-anchor</span></a></li>
+          <li class="sidebar-item"><a href="#plugin-morph">Morph <span class="sidebar-tag">morph</span></a></li>
+          <li class="sidebar-item"><a href="#plugin-sort">Sort <span class="sidebar-tag">p-sort</span></a></li>
+        </ul>
+      </div>
+
+      <!-- Advanced -->
+      <div class="sidebar-group">
+        <div class="sidebar-title">Advanced</div>
+        <ul class="sidebar-items">
+          <li class="sidebar-item"><a href="#advanced-csp">CSP (Security)</a></li>
+          <li class="sidebar-item"><a href="#advanced-reactivity">Reactivity</a></li>
+          <li class="sidebar-item"><a href="#advanced-extending">Extending</a></li>
+          <li class="sidebar-item"><a href="#advanced-async">Async Handling</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- ===================================================================
+           1. START HERE
+           =================================================================== -->
+      <section id="start-here" class="doc-section active">
+        <h1 class="doc-h1">Start Here</h1>
+        <p class="lead-p">PineJS is a lightweight, fine-grained declarative micro-framework for building modern reactive web applications directly in your HTML markup.</p>
+
+        <div class="doc-alert">
+          <strong>🌲 Signals + Alpine Ergonomics:</strong> Powered by true Fine-Grained Signals with atomic DOM bindings, sub-millisecond execution latency, and &lt; 8 kB footprint.
+        </div>
+
+        <h2 class="doc-h2">Quick Example</h2>
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.0.0/dist/pine.min.js" defer&gt;&lt;/script&gt;
+
+&lt;div p-data="{ count: 0 }"&gt;
+  &lt;button @click="count++"&gt;Increment&lt;/button&gt;
+  &lt;span p-text="count"&gt;&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Interactive Demo</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ count: 0, multiplier: 2 }" style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+              <button class="btn-demo" @click="count++">Increment Count</button>
+              <button class="btn-demo-outline" @click="count = 0">Reset</button>
+              <div style="font-size: 1.1rem;">
+                Count: <strong style="color: var(--alpine-teal);" p-text="count">0</strong>
+                &nbsp;|&nbsp; 
+                Doubled: <strong style="color: var(--alpine-cyan);" p-text="count * multiplier">0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           2. UPGRADE FROM ALPINE.JS
+           =================================================================== -->
+      <section id="upgrade-guide" class="doc-section">
+        <h1 class="doc-h1">Upgrade From Alpine.js</h1>
+        <p class="lead-p">Transition existing Alpine.js applications in 60 seconds by replacing <code>x-</code> with <code>p-</code>.</p>
+
+        <h2 class="doc-h2">Syntax Equivalency</h2>
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;!-- Alpine.js: --&gt;
+&lt;div x-data="{ open: false }"&gt;
+  &lt;button @click="open = !open" :class="{ 'active': open }"&gt;Toggle&lt;/button&gt;
+  &lt;span x-show="open" x-text="'Visible!'"&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;!-- PineJS: --&gt;
+&lt;div p-data="{ open: false }"&gt;
+  &lt;button @click="open = !open" :class="{ 'active': open }"&gt;Toggle&lt;/button&gt;
+  &lt;span p-show="open" p-text="'Visible!'"&gt;&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Migration Test</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ active: true }">
+              <button class="btn-demo" @click="active = !active" p-text="active ? 'State: Active (Click to toggle)' : 'State: Inactive (Click to toggle)'"></button>
+              <p style="margin-top: 0.75rem;" p-text="active ? '🌲 PineJS signal active!' : 'Paused.'"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           3. ESSENTIALS (INSTALLATION, STATE, TEMPLATING, EVENTS, LIFECYCLE)
+           =================================================================== -->
+      <section id="essentials-installation" class="doc-section">
+        <h1 class="doc-h1">Essentials: Installation</h1>
+        <p class="lead-p">Include PineJS via CDN or import as an ES Module.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.0.0/dist/pine.min.js" defer&gt;&lt;/script&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Runtime Diagnostics</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ ready: true }">
+              <div>Runtime Version: <strong style="color: var(--alpine-teal);" p-text="Pine.version + ' (' + Pine.versionName + ')'"></strong></div>
+              <div style="color: #22c55e; font-weight: 600; margin-top: 0.3rem;">Status: Core Engine Active ✓</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="essentials-state" class="doc-section">
+        <h1 class="doc-h1">Essentials: State</h1>
+        <p class="lead-p">Manage nested objects, arrays, and getters with fine-grained reactivity.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{
+  profile: { name: 'Elena Rostova', role: 'Staff Engineer' },
+  status: 'Online',
+  toggle() { this.status = this.status === 'Online' ? 'Away' : 'Online'; }
+}"&gt;
+  &lt;h3 p-text="profile.name"&gt;&lt;/h3&gt;
+  &lt;p p-text="profile.role + ' - ' + status"&gt;&lt;/p&gt;
+  &lt;button @click="toggle"&gt;Toggle Status&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live State Component</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{
+              profile: { name: 'Elena Rostova', role: 'Staff Engineer' },
+              status: 'Online',
+              toggle() { this.status = this.status === 'Online' ? 'Away' : 'Online'; }
+            }">
+              <div style="font-size: 1.2rem; font-weight: 700;" p-text="profile.name"></div>
+              <div style="color: var(--text-muted); margin-bottom: 0.75rem;" p-text="profile.role + ' • ' + status"></div>
+              <button class="btn-demo" @click="toggle">Change Status</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="essentials-templating" class="doc-section">
+        <h1 class="doc-h1">Essentials: Templating</h1>
+        <p class="lead-p">Combine reactive text, HTML, and dynamic element attributes.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ query: 'PineJS', tag: 'Micro-framework' }"&gt;
+  &lt;span p-text="query"&gt;&lt;/span&gt;
+  &lt;span :class="'badge-' + tag.toLowerCase()" p-text="tag"&gt;&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Templating Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ query: 'PineJS Signals', isFeatured: true }">
+              <input class="input-demo" p-model="query" style="margin-bottom: 0.75rem; width: 260px;" />
+              <div>Search Query: <strong style="color: var(--alpine-teal);" p-text="query"></strong></div>
+              <div style="margin-top: 0.4rem;">
+                <span class="badge-tag" p-show="isFeatured">Featured Framework</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="essentials-events" class="doc-section">
+        <h1 class="doc-h1">Essentials: Events</h1>
+        <p class="lead-p">Listen to any DOM event with keyboard and timing modifiers.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;input @keydown.enter="submit()" @input.debounce.300ms="search()" /&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Keypress & Debounce</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ typed: '', searches: 0 }">
+              <input class="input-demo" placeholder="Type and hit Enter..." p-model="typed" @keydown.enter="searches++" style="width: 260px;" />
+              <div style="margin-top: 0.75rem; font-size: 0.9rem;">
+                Submissions (Enter key): <strong style="color: var(--alpine-teal);" p-text="searches">0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="essentials-lifecycle" class="doc-section">
+        <h1 class="doc-h1">Essentials: Lifecycle</h1>
+        <p class="lead-p">Execute actions on mount with <code>p-init</code> and handle automatic signal cleanup.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ ticker: 0 }" p-init="setInterval(() => ticker++, 1000)"&gt;
+  &lt;span p-text="ticker"&gt;&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live p-init Timer</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ seconds: 0 }" p-init="setInterval(() => seconds++, 1000)">
+              <div>Elapsed time since component mounted: <strong style="color: var(--alpine-teal);" p-text="seconds + ' seconds'"></strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           4. UI COMPONENTS (DROPDOWN, MODAL, TABS)
+           =================================================================== -->
+      <section id="component-dropdown" class="doc-section">
+        <h1 class="doc-h1">Component: Dropdown</h1>
+        <p class="lead-p">Accessible dropdown menu with click-outside detection and keyboard Escape dismissal.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Dropdown</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ open: false }" style="position: relative; display: inline-block;">
+              <button class="btn-demo" @click="open = !open">Options ▾</button>
+              <div p-show="open" @click.outside="open = false" @keydown.escape.window="open = false" style="position: absolute; top: calc(100% + 6px); left: 0; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; width: 210px; padding: 0.5rem; box-shadow: 0 12px 28px rgba(0,0,0,0.18); z-index: 100;">
+                <div style="padding: 0.5rem 0.75rem; cursor: pointer; border-radius: 4px; transition: background 0.15s;" @click="open = false" onmouseover="this.style.background='var(--bg-code)'" onmouseout="this.style.background='transparent'">👤 Profile Settings</div>
+                <div style="padding: 0.5rem 0.75rem; cursor: pointer; border-radius: 4px; transition: background 0.15s;" @click="open = false" onmouseover="this.style.background='var(--bg-code)'" onmouseout="this.style.background='transparent'">🔑 API Keys</div>
+                <div style="padding: 0.5rem 0.75rem; cursor: pointer; border-radius: 4px; color: #ef4444; transition: background 0.15s;" @click="open = false" onmouseover="this.style.background='var(--bg-code)'" onmouseout="this.style.background='transparent'">🚪 Sign Out</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="component-modal" class="doc-section">
+        <h1 class="doc-h1">Component: Modal</h1>
+        <p class="lead-p">Dialog overlay with backdrop dismiss and keyboard Escape dismissal.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Modal Dialog</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ showModal: false }">
+              <button class="btn-demo" @click="showModal = true">Open Confirm Dialog</button>
+
+              <div p-show="showModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: center; justify-content: center;" @keydown.escape.window="showModal = false">
+                <div @click.outside="showModal = false" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; width: 90%; max-width: 440px; box-shadow: 0 25px 50px rgba(0,0,0,0.4);">
+                  <h3 style="margin-top: 0; font-size: 1.3rem;">🌲 Confirm Action</h3>
+                  <p style="color: var(--text-secondary); margin: 1rem 0;">Are you sure you want to proceed with this operation?</p>
+                  <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+                    <button class="btn-demo-outline" @click="showModal = false">Cancel</button>
+                    <button class="btn-demo" @click="showModal = false">Confirm & Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="component-tabs" class="doc-section">
+        <h1 class="doc-h1">Component: Tabs & Accordion</h1>
+        <p class="lead-p">Tab bar navigation and smooth animated accordions using <code>p-collapse</code>.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Accordion Demo</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ expanded: 1 }">
+              <div style="border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0.5rem; overflow: hidden;">
+                <div style="padding: 0.75rem 1rem; background: var(--bg-surface-elevated); cursor: pointer; font-weight: 600; display: flex; justify-content: space-between;" @click="expanded = (expanded === 1 ? 0 : 1)">
+                  <span>Section 1: Signals Architecture</span>
+                  <span p-text="expanded === 1 ? '−' : '+'"></span>
+                </div>
+                <div p-show="expanded === 1" p-collapse style="padding: 1rem;">
+                  Fine-grained signals establish direct reactive subscriptions between data atoms and DOM nodes.
+                </div>
+              </div>
+
+              <div style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+                <div style="padding: 0.75rem 1rem; background: var(--bg-surface-elevated); cursor: pointer; font-weight: 600; display: flex; justify-content: space-between;" @click="expanded = (expanded === 2 ? 0 : 2)">
+                  <span>Section 2: Zero Virtual DOM Overhead</span>
+                  <span p-text="expanded === 2 ? '−' : '+'"></span>
+                </div>
+                <div p-show="expanded === 2" p-collapse style="padding: 1rem;">
+                  No VDOM trees are generated, allocated, or diffed on property mutations.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           5. DIRECTIVES (ALL DIRECTIVES WITH LIVE EXAMPLES)
+           =================================================================== -->
+      <section id="p-data" class="doc-section">
+        <h1 class="doc-h1"><code>p-data</code></h1>
+        <p class="lead-p">Declares a new component root element and initializes its fine-grained reactive state object.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ open: false, items: ['Alpha', 'Beta'] }"&gt;
+  &lt;button @click="open = !open"&gt;Toggle List&lt;/button&gt;
+  &lt;ul p-show="open"&gt;
+    &lt;template p-for="item in items"&gt;&lt;li p-text="item"&gt;&lt;/li&gt;&lt;/template&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live p-data Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ open: false, items: ['Alpha', 'Beta', 'Gamma'] }">
+              <button class="btn-demo" @click="open = !open" p-text="open ? 'Hide Items' : 'Show Items'"></button>
+              <ul p-show="open" style="margin-top: 0.75rem; padding-left: 1.25rem;">
+                <template p-for="item in items">
+                  <li p-text="item"></li>
+                </template>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-init" class="doc-section">
+        <h1 class="doc-h1"><code>p-init</code></h1>
+        <p class="lead-p">Executes a script expression immediately when the element is compiled and attached.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ loadedAt: '' }" p-init="loadedAt = new Date().toLocaleTimeString()"&gt;
+  &lt;p&gt;Loaded at: &lt;span p-text="loadedAt"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live p-init Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ initTimestamp: '' }" p-init="initTimestamp = new Date().toLocaleTimeString()">
+              Mounted Timestamp: <strong style="color: var(--alpine-teal);" p-text="initTimestamp"></strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-show" class="doc-section">
+        <h1 class="doc-h1"><code>p-show</code></h1>
+        <p class="lead-p">Toggles the CSS <code>display</code> property of an element while integrating with enter/leave transition animations.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ isVisible: true }"&gt;
+  &lt;button @click="isVisible = !isVisible"&gt;Toggle Visibility&lt;/button&gt;
+  &lt;div p-show="isVisible" p-transition.fade&gt;Content is visible!&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live p-show Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ isVisible: true }">
+              <button class="btn-demo" @click="isVisible = !isVisible">Toggle Visibility</button>
+              <div p-show="isVisible" p-transition.fade style="margin-top: 1rem; padding: 1rem; background: var(--bg-surface-elevated); border-radius: 8px; border: 1px solid var(--border-color);">
+                🌲 This content box toggles smoothly via <code>p-show</code>!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-bind" class="doc-section">
+        <h1 class="doc-h1"><code>p-bind</code> / <code>:attr</code></h1>
+        <p class="lead-p">Dynamically binds HTML attributes, class maps, inline styles, or reusable binding objects via <code>Pine.bind()</code>.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ isSelected: true, bgColor: '#0f766e' }"&gt;
+  &lt;div :style="{ backgroundColor: bgColor }" :class="{ 'selected': isSelected }"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live p-bind Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ isSelected: true, customColor: '#0d9488' }">
+              <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+                <button class="btn-demo" @click="isSelected = !isSelected">Toggle Selected Class</button>
+                <input type="color" class="input-demo" p-model="customColor" style="height: 38px; width: 60px; padding: 0.2rem;" />
+              </div>
+              <div :style="{ borderColor: customColor, color: customColor }" style="padding: 1rem; border: 2px solid; border-radius: 8px; font-weight: 600;">
+                Selected: <span p-text="isSelected"></span> | Active Color: <span p-text="customColor"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-on" class="doc-section">
+        <h1 class="doc-h1"><code>p-on</code> / <code>@event</code></h1>
+        <p class="lead-p">Listens to DOM events with full modifier support (<code>.prevent</code>, <code>.stop</code>, <code>.outside</code>, <code>.window</code>, <code>.debounce</code>, <code>.throttle</code>).</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;button @click.prevent="handleClick"&gt;Click Me&lt;/button&gt;
+&lt;input @input.debounce.250ms="handleInput" /&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Event Modifiers Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ clicks: 0, outsideHits: 0 }">
+              <div style="display: flex; gap: 1rem;">
+                <button class="btn-demo" @click="clicks++">Button Click (<span p-text="clicks"></span>)</button>
+                <div @click.outside="outsideHits++" style="padding: 0.5rem 1rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.88rem;">
+                  Click Outside this box (Hits: <strong style="color: var(--alpine-teal);" p-text="outsideHits">0</strong>)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-text" class="doc-section">
+        <h1 class="doc-h1"><code>p-text</code></h1>
+        <p class="lead-p">Updates the element's <code>textContent</code> via an atomic Signal subscription.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ name: 'PineJS' }"&gt;
+  Hello, &lt;span p-text="name"&gt;&lt;/span&gt;!
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live p-text Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ user: 'Alex' }">
+              <input class="input-demo" p-model="user" style="margin-bottom: 0.5rem;" />
+              <div>Welcome, <strong style="color: var(--alpine-teal);" p-text="user"></strong>!</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-html" class="doc-section">
+        <h1 class="doc-h1"><code>p-html</code></h1>
+        <p class="lead-p">Updates the element's <code>innerHTML</code> dynamically.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ rawHtml: '&lt;em style=\'color:#2dd4bf\'&gt;Formatted HTML&lt;/em&gt;' }"&gt;
+  &lt;div p-html="rawHtml"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live p-html Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ rawHtml: '<span style=\'color: var(--alpine-teal); font-weight: bold;\'>🌲 PineJS Rendered via p-html</span>' }">
+              <div p-html="rawHtml"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-model" class="doc-section">
+        <h1 class="doc-h1"><code>p-model</code></h1>
+        <p class="lead-p">Two-way data binding for text inputs, numbers, textareas, checkboxes, radio buttons, and select dropdowns.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;input p-model="message" /&gt;
+&lt;input type="checkbox" p-model="agree" /&gt;
+&lt;select p-model="tier"&gt;
+  &lt;option&gt;Free&lt;/option&gt;
+  &lt;option&gt;Pro&lt;/option&gt;
+&lt;/select&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Two-Way Form Binding</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ text: 'Hello PineJS', choice: 'Pro', isChecked: true }">
+              <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <input class="input-demo" p-model="text" />
+                <select class="input-demo" p-model="choice">
+                  <option>Starter</option>
+                  <option>Pro</option>
+                  <option>Enterprise</option>
+                </select>
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                  <input type="checkbox" p-model="isChecked" /> Checked
+                </label>
+              </div>
+              <div style="font-size: 0.88rem; background: var(--bg-code); padding: 0.75rem; border-radius: 6px;">
+                State: <span style="color: var(--alpine-teal);" p-text="JSON.stringify({ text, choice, isChecked })"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-modelable" class="doc-section">
+        <h1 class="doc-h1"><code>p-modelable</code></h1>
+        <p class="lead-p">Binds an internal component property to a parent <code>p-model</code> expression.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ rating: 4 }"&gt;
+  &lt;div p-data="{ val: rating }" p-modelable="val"&gt;
+    &lt;button @click="val = 5"&gt;Set 5 Stars&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live p-modelable Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ parentCount: 10 }">
+              <div style="margin-bottom: 0.5rem;">Parent Count: <strong style="color: var(--alpine-teal);" p-text="parentCount"></strong></div>
+              <div p-data="{ innerVal: 10 }" p-modelable="innerVal" p-model="parentCount" style="display: flex; gap: 0.5rem;">
+                <button class="btn-demo" @click="innerVal++">Increment Inner Value</button>
+                <button class="btn-demo-outline" @click="innerVal = 0">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-for" class="doc-section">
+        <h1 class="doc-h1"><code>p-for</code></h1>
+        <p class="lead-p">Iterates over arrays, objects, or numbers on <code>&lt;template&gt;</code> tags with fine-grained DOM recycling.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;template p-for="(item, index) in items"&gt;
+  &lt;div p-text="index + ': ' + item"&gt;&lt;/div&gt;
+&lt;/template&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live List Loop</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{
+              fruits: ['Apple', 'Banana', 'Cherry'],
+              newFruit: '',
+              add() {
+                if (this.newFruit) { this.fruits.push(this.newFruit); this.newFruit = ''; }
+              }
+            }">
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                <input class="input-demo" placeholder="Fruit name..." p-model="newFruit" @keydown.enter="add()" />
+                <button class="btn-demo" @click="add()">Add</button>
+              </div>
+              <ul style="padding-left: 1.25rem;">
+                <template p-for="(fruit, idx) in fruits">
+                  <li p-text="(idx + 1) + '. ' + fruit"></li>
+                </template>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-transition" class="doc-section">
+        <h1 class="doc-h1"><code>p-transition</code></h1>
+        <p class="lead-p">Applies smooth CSS transitions. Supports preset shortcuts: <code>p-transition.fade</code>, <code>p-transition.slide</code>, and <code>p-transition.scale</code>.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-show="open" p-transition.scale&gt;Smooth Scale In/Out&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Transition Presets</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ showBox: true }">
+              <button class="btn-demo" @click="showBox = !showBox">Toggle Scale Animation</button>
+              <div p-show="showBox" p-transition.scale style="margin-top: 1rem; padding: 1.25rem; background: var(--bg-surface-elevated); border-radius: 8px; border: 1px solid var(--border-color); text-align: center;">
+                ✨ Scaled via <code>p-transition.scale</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-effect" class="doc-section">
+        <h1 class="doc-h1"><code>p-effect</code></h1>
+        <p class="lead-p">Executes a reactive side-effect whenever any accessed signal dependency changes.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ count: 0 }" p-effect="console.log('Count changed to: ' + count)"&gt;
+  &lt;button @click="count++"&gt;Increment&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live p-effect Logger</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ val: 1, logs: [] }" p-effect="logs.push('Effect run: ' + val)">
+              <button class="btn-demo" @click="val++">Mutate Dependency (<span p-text="val"></span>)</button>
+              <div style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted);">
+                Logs: <span style="color: var(--alpine-teal);" p-text="logs.slice(-3).join(' -> ')"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-ignore" class="doc-section">
+        <h1 class="doc-h1"><code>p-ignore</code></h1>
+        <p class="lead-p">Instructs PineJS to ignore an element and all of its descendants during DOM initialization (ideal for embedding legacy widgets or 3rd-party libs).</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ text: 'Updated' }"&gt;
+  &lt;div p-ignore&gt;
+    &lt;span p-text="text"&gt;Static content ignored by PineJS&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live p-ignore Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ count: 99 }">
+              <div p-ignore style="padding: 0.75rem; background: var(--bg-code); border-radius: 6px;">
+                <span p-text="count">This text is preserved untouched because p-ignore skips Pine compilation.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-ref" class="doc-section">
+        <h1 class="doc-h1"><code>p-ref</code></h1>
+        <p class="lead-p">Registers a direct DOM reference accessible inside your component via <code>$refs[name]</code>.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;input p-ref="inputField" /&gt;
+&lt;button @click="$refs.inputField.focus()"&gt;Focus Field&lt;/button&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live p-ref Focus Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data style="display: flex; gap: 0.75rem;">
+              <input class="input-demo" p-ref="searchBox" placeholder="Focus target..." />
+              <button class="btn-demo" @click="$refs.searchBox.focus()">$refs.searchBox.focus()</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-cloak" class="doc-section">
+        <h1 class="doc-h1"><code>p-cloak</code></h1>
+        <p class="lead-p">Hides unrendered elements before PineJS finishes initialization. Combine with <code>[p-cloak] { display: none !important; }</code>.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML & CSS</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;style&gt;[p-cloak] { display: none !important; }&lt;/style&gt;
+
+&lt;div p-data="{ loaded: true }" p-cloak&gt;
+  &lt;p&gt;No flash of unstyled content!&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live p-cloak Status</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ status: 'Initialized cleanly without FOUC!' }">
+              <span style="color: #22c55e; font-weight: 600;" p-text="status"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-teleport" class="doc-section">
+        <h1 class="doc-h1"><code>p-teleport</code></h1>
+        <p class="lead-p">Teleports <code>&lt;template&gt;</code> contents to an external DOM container such as <code>body</code>.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;template p-teleport="body"&gt;
+  &lt;div class="global-toast"&gt;Teleported Toast Notification&lt;/div&gt;
+&lt;/template&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Teleport Demo</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ openToast: false }">
+              <button class="btn-demo" @click="openToast = !openToast">Toggle Teleported Toast</button>
+              <template p-teleport="body">
+                <div p-show="openToast" style="position: fixed; bottom: 20px; right: 20px; background: #0f172a; border: 1px solid var(--alpine-teal); color: #fff; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10000;" @click="openToast = false">
+                  🌲 Teleported directly into <code>&lt;body&gt;</code>! (Click to dismiss)
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-if" class="doc-section">
+        <h1 class="doc-h1"><code>p-if</code></h1>
+        <p class="lead-p">Conditionally mounts and unmounts DOM elements on <code>&lt;template&gt;</code> tags with full signal teardown.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;template p-if="isLoggedIn"&gt;
+  &lt;div&gt;Secure Dashboard&lt;/div&gt;
+&lt;/template&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live p-if Conditional</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ loggedIn: false }">
+              <button class="btn-demo" @click="loggedIn = !loggedIn" p-text="loggedIn ? 'Log Out' : 'Log In'"></button>
+              <div style="margin-top: 1rem;">
+                <template p-if="loggedIn">
+                  <div style="padding: 1rem; background: rgba(45, 212, 191, 0.1); border: 1px solid var(--alpine-teal); border-radius: 6px;">
+                    🔓 Welcome to the authenticated user view!
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="p-id" class="doc-section">
+        <h1 class="doc-h1"><code>p-id</code></h1>
+        <p class="lead-p">Declares scoped unique IDs for accessible form inputs, labels, and aria attributes.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-id="['text-input']"&gt;
+  &lt;label :for="$id('text-input')"&gt;Full Name&lt;/label&gt;
+  &lt;input :id="$id('text-input')" /&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Scoped IDs</span></div>
+          <div class="demo-preview-body">
+            <div p-data p-id="['user-field']">
+              <label :for="$id('user-field')" style="display: block; font-size: 0.85rem; margin-bottom: 0.3rem;">
+                Label connected to ID: <code p-text="$id('user-field')"></code>
+              </label>
+              <input class="input-demo" :id="$id('user-field')" placeholder="Accessible input..." />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           6. MAGICS (ALL MAGICS WITH LIVE EXAMPLES)
+           =================================================================== -->
+      <section id="magic-el" class="doc-section">
+        <h1 class="doc-h1"><code>$el</code></h1>
+        <p class="lead-p">Retrieves the current DOM element.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;button @click="$el.innerHTML = 'Clicked!'"&gt;Click Me&lt;/button&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $el Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data>
+              <button class="btn-demo" @click="$el.textContent = 'Updated via $el at ' + new Date().toLocaleTimeString()">Click to mutate $el directly</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="magic-refs" class="doc-section">
+        <h1 class="doc-h1"><code>$refs</code></h1>
+        <p class="lead-p">Access elements marked with <code>p-ref</code> across the component.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $refs Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data style="display: flex; gap: 0.75rem;">
+              <input class="input-demo" p-ref="demoInput" value="Initial Text" />
+              <button class="btn-demo" @click="$refs.demoInput.value = 'Cleared!'; $refs.demoInput.focus()">Clear & Focus with $refs</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="magic-store" class="doc-section">
+        <h1 class="doc-h1"><code>$store</code></h1>
+        <p class="lead-p">Access global reactive state created via <code>Pine.store()</code>.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>JavaScript & HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;script&gt;
+  Pine.store('notifications', { count: 3 });
+&lt;/script&gt;
+
+&lt;div p-data&gt;
+  &lt;span p-text="$store('notifications').count"&gt;&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $store Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data p-init="if (!Pine.store('bell')) Pine.store('bell', { count: 1 })">
+              <div>Global Store Unread: <strong style="color: var(--alpine-teal);" p-text="$store('bell')?.count || 0"></strong></div>
+              <button class="btn-demo" style="margin-top: 0.75rem;" @click="$store('bell').count++">Increment Global Store</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="magic-watch" class="doc-section">
+        <h1 class="doc-h1"><code>$watch</code></h1>
+        <p class="lead-p">Reactively watches signals or expressions and executes callbacks on mutation.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $watch Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ counter: 1, history: [] }" p-init="$watch('counter', (n, o) => history.push(o + ' -> ' + n))">
+              <button class="btn-demo" @click="counter++">Increment (<span p-text="counter"></span>)</button>
+              <div style="margin-top: 0.75rem; font-size: 0.88rem;">
+                Watch Logs: <span style="color: var(--alpine-teal);" p-text="history.slice(-3).join(' | ') || 'No mutations yet'"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="magic-dispatch" class="doc-section">
+        <h1 class="doc-h1"><code>$dispatch</code></h1>
+        <p class="lead-p">Dispatches custom bubbling DOM events with custom payload details.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $dispatch Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ message: 'Waiting for event...' }" @notify.window="message = $event.detail">
+              <button class="btn-demo" @click="$dispatch('notify', 'Event dispatched at ' + new Date().toLocaleTimeString())">Dispatch 'notify'</button>
+              <div style="margin-top: 0.75rem;" p-text="message"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="magic-nexttick" class="doc-section">
+        <h1 class="doc-h1"><code>$nextTick</code></h1>
+        <p class="lead-p">Returns a Promise that resolves after the next DOM update cycle completes.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $nextTick Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ count: 0, domText: '' }">
+              <button class="btn-demo" @click="count++; $nextTick(() => domText = $refs.display.textContent)">Increment & Read DOM</button>
+              <div style="margin-top: 0.75rem;">
+                Rendered DOM Value: <strong style="color: var(--alpine-teal);" p-ref="display" p-text="count">0</strong>
+                (Read by $nextTick: <span p-text="domText"></span>)
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="magic-root" class="doc-section">
+        <h1 class="doc-h1"><code>$root</code></h1>
+        <p class="lead-p">Access the root element of the current component.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $root Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data id="root-component-demo">
+              <button class="btn-demo" @click="alert('Root Element ID: ' + $root.id)">Show Root Component ID</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="magic-data" class="doc-section">
+        <h1 class="doc-h1"><code>$data</code></h1>
+        <p class="lead-p">Access the current reactive component scope object.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $data Object Preview</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ user: 'Dev', score: 95 }">
+              <pre style="background: var(--bg-code); padding: 0.75rem; border-radius: 6px;"><code p-text="JSON.stringify($data, null, 2)"></code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="magic-id" class="doc-section">
+        <h1 class="doc-h1"><code>$id</code></h1>
+        <p class="lead-p">Generates unique accessible ID strings: <code>$id('input')</code>.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $id Helper</span></div>
+          <div class="demo-preview-body">
+            <div p-data>
+              Generated Unique ID: <code p-text="$id('field')"></code>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="magic-signal" class="doc-section">
+        <h1 class="doc-h1"><code>$signal</code></h1>
+        <p class="lead-p">Creates a standalone Signal primitive directly in component expressions.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ mySig: $signal(0) }"&gt;
+  &lt;button @click="mySig.value++"&gt;Signal: &lt;span p-text="mySig.value"&gt;&lt;/span&gt;&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $signal Primitive</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ rawSig: $signal(100) }">
+              <button class="btn-demo" @click="rawSig.value += 10">Increment Signal (<span p-text="rawSig.value"></span>)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="magic-persist" class="doc-section">
+        <h1 class="doc-h1"><code>$persist</code></h1>
+        <p class="lead-p">Automatically synchronizes property state with <code>localStorage</code>.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;input p-data="{ username: $persist('John', 'stored_user') }" p-model="username.value" /&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $persist Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ text: $persist('Type here & reload page', 'pine_demo_persist') }">
+              <input class="input-demo" p-model="text.value" style="width: 280px;" />
+              <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                Persisted in localStorage: <strong style="color: var(--alpine-teal);" p-text="text.value"></strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="magic-fetch" class="doc-section">
+        <h1 class="doc-h1"><code>$fetch</code></h1>
+        <p class="lead-p">Reactive HTTP client with automated <code>loading</code>, <code>data</code>, and <code>error</code> states.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ req: $fetch('https://api.github.com/repos/pinejs/core') }"&gt;
+  &lt;span p-show="req.loading"&gt;Loading...&lt;/span&gt;
+  &lt;div p-show="req.data" p-text="req.data?.full_name"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $fetch Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ req: $fetch('https://jsonplaceholder.typicode.com/todos/1') }">
+              <div p-show="req.loading">Fetching remote resource...</div>
+              <div p-show="req.data" style="padding: 0.75rem; background: var(--bg-code); border-radius: 6px;">
+                Title: <strong style="color: var(--alpine-teal);" p-text="req.data?.title"></strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="magic-intersect" class="doc-section">
+        <h1 class="doc-h1"><code>$intersect</code></h1>
+        <p class="lead-p">Observes when an element scrolls into the browser viewport using <code>IntersectionObserver</code>.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $intersect Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ isVisible: false }" p-init="$intersect((shown) => isVisible = shown)">
+              Viewport Visibility: <strong style="color: var(--alpine-teal);" p-text="isVisible ? 'Visible in Viewport ✓' : 'Hidden'"></strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           7. GLOBALS
+           =================================================================== -->
+      <section id="global-data" class="doc-section">
+        <h1 class="doc-h1"><code>Pine.data()</code></h1>
+        <p class="lead-p">Registers reusable component data definitions.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Pine.data Component</span></div>
+          <div class="demo-preview-body">
+            <div p-data="globalCounterDemo" p-init="Pine.data('globalCounterDemo', () => ({ count: 5 }))">
+              Reused Data Instance: <strong style="color: var(--alpine-teal);" p-text="count"></strong>
+              <button class="btn-demo" style="margin-left: 1rem;" @click="count++">Increment</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="global-store" class="doc-section">
+        <h1 class="doc-h1"><code>Pine.store()</code></h1>
+        <p class="lead-p">Registers shared global reactive state stores.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Pine.store Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data p-init="Pine.store('cart', { totalItems: 2 })">
+              Global Cart Items: <strong style="color: var(--alpine-teal);" p-text="$store('cart')?.totalItems"></strong>
+              <button class="btn-demo" style="margin-left: 1rem;" @click="$store('cart').totalItems++">Add Item to Store</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="global-bind" class="doc-section">
+        <h1 class="doc-h1"><code>Pine.bind()</code></h1>
+        <p class="lead-p">Bundles reusable attributes and event handlers together.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Pine.bind Example</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ clicks: 0 }" p-init="Pine.bind('reusableAction', () => ({ '@click': 'clicks++' }))">
+              <button class="btn-demo" p-bind="reusableAction">Bound Action Button (<span p-text="clicks"></span>)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="global-directive" class="doc-section">
+        <h1 class="doc-h1"><code>Pine.directive()</code></h1>
+        <p class="lead-p">Defines custom directives.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Custom Directive</span></div>
+          <div class="demo-preview-body">
+            <div p-data p-init="Pine.directive('highlight', (el) => el.style.backgroundColor = 'rgba(45,212,191,0.15)')">
+              <div p-highlight style="padding: 0.75rem; border-radius: 6px; border: 1px solid var(--alpine-teal);">
+                Styled via custom <code>p-highlight</code> directive!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="global-magic" class="doc-section">
+        <h1 class="doc-h1"><code>Pine.magic()</code></h1>
+        <p class="lead-p">Registers custom magic properties.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Custom Magic</span></div>
+          <div class="demo-preview-body">
+            <div p-data p-init="Pine.magic('currentYear', () => new Date().getFullYear())">
+              Current Year Magic: <strong style="color: var(--alpine-teal);" p-text="$currentYear"></strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="global-plugin" class="doc-section">
+        <h1 class="doc-h1"><code>Pine.plugin()</code></h1>
+        <p class="lead-p">Registers official or community plugins.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Plugin Initialization</span></div>
+          <div class="demo-preview-body">
+            <div p-data>
+              <span style="color: #22c55e; font-weight: 600;">Plugin Architecture Ready ✓</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="global-start" class="doc-section">
+        <h1 class="doc-h1"><code>Pine.start()</code></h1>
+        <p class="lead-p">Initializes PineJS on the document.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Engine Start Status</span></div>
+          <div class="demo-preview-body">
+            <div p-data>
+              PineJS is running and listening to DOM mutations.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           8. PLUGINS
+           =================================================================== -->
+      <section id="plugin-mask" class="doc-section">
+        <h1 class="doc-h1">Plugin: Mask (<code>p-mask</code>)</h1>
+        <p class="lead-p">Formats text inputs dynamically according to a pattern (e.g. <code>p-mask="'(999) 999-9999'"</code>).</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Phone Mask</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ phone: '' }">
+              <label style="display: block; font-size: 0.85rem; margin-bottom: 0.3rem;">Phone Number:</label>
+              <input class="input-demo" p-mask="'(999) 999-9999'" placeholder="(555) 000-0000" style="width: 240px;" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="plugin-intersect" class="doc-section">
+        <h1 class="doc-h1">Plugin: Intersect (<code>$intersect</code>)</h1>
+        <p class="lead-p">Viewport intersection observer for lazy loading.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Intersect Plugin</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ seen: false }" p-init="$intersect(() => seen = true)">
+              <div p-text="seen ? 'Observed in viewport ✓' : 'Scroll to view'"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="plugin-resize" class="doc-section">
+        <h1 class="doc-h1">Plugin: Resize (<code>p-resize</code>)</h1>
+        <p class="lead-p">Monitors element dimension changes with <code>ResizeObserver</code>.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Dimension Tracker</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ width: window.innerWidth }" p-init="window.addEventListener('resize', () => width = window.innerWidth)">
+              Current Window Width: <strong style="color: var(--alpine-teal);" p-text="width + 'px'"></strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="plugin-persist" class="doc-section">
+        <h1 class="doc-h1">Plugin: Persist (<code>$persist</code>)</h1>
+        <p class="lead-p">Local storage synchronization engine.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Persist Storage</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ theme: $persist('Dark Slate', 'pine_pref_theme') }">
+              Saved Theme Preference: <strong style="color: var(--alpine-teal);" p-text="theme.value"></strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="plugin-focus" class="doc-section">
+        <h1 class="doc-h1">Plugin: Focus (<code>$focus</code>, <code>p-trap</code>)</h1>
+        <p class="lead-p">Traps and manages focus inside modals and dialogs.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Focus Trap</span></div>
+          <div class="demo-preview-body">
+            <div p-data style="display: flex; gap: 0.75rem;">
+              <input class="input-demo" p-ref="trapField" placeholder="Focus target..." />
+              <button class="btn-demo" @click="$focus.focus($refs.trapField)">$focus.focus()</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="plugin-collapse" class="doc-section">
+        <h1 class="doc-h1">Plugin: Collapse (<code>p-collapse</code>)</h1>
+        <p class="lead-p">Smooth height animations for collapsible sections.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Accordion Collapse</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ isOpen: false }">
+              <button class="btn-demo" @click="isOpen = !isOpen">Toggle Collapse</button>
+              <div p-show="isOpen" p-collapse style="margin-top: 0.75rem; padding: 1rem; background: var(--bg-surface-elevated); border-radius: 8px;">
+                🌲 Smoothly expanded height animation powered by <code>p-collapse</code>!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="plugin-anchor" class="doc-section">
+        <h1 class="doc-h1">Plugin: Anchor (<code>p-anchor</code>)</h1>
+        <p class="lead-p">Positions floating popovers and tooltips relative to reference elements.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Anchor Tooltip</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ showTip: false }">
+              <button class="btn-demo" @mouseenter="showTip = true" @mouseleave="showTip = false">Hover for Popover</button>
+              <div p-show="showTip" style="margin-top: 0.5rem; background: var(--bg-code); border: 1px solid var(--alpine-teal); padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.85rem; width: 180px;">
+                Anchored Popover Box
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="plugin-morph" class="doc-section">
+        <h1 class="doc-h1">Plugin: Morph (<code>Pine.morph</code>)</h1>
+        <p class="lead-p">Patches and morphs server-rendered HTML into the live DOM without breaking inputs or focus state.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live DOM Morphing</span></div>
+          <div class="demo-preview-body">
+            <div p-data>
+              <div id="morph-target-demo" style="padding: 1rem; background: var(--bg-surface-elevated); border-radius: 6px; margin-bottom: 0.75rem;">
+                <p>Original Server HTML Content</p>
+              </div>
+              <button class="btn-demo" @click="Pine.morph(document.querySelector('#morph-target-demo'), '<div id=\'morph-target-demo\' style=\'padding:1rem;background:rgba(45,212,191,0.15);border-radius:6px;\'><p style=\'color:var(--alpine-teal);font-weight:bold;\'>✨ Morphed with Pine.morph()!</p></div>')">Morph Target DOM</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="plugin-sort" class="doc-section">
+        <h1 class="doc-h1">Plugin: Sort (<code>p-sort</code>)</h1>
+        <p class="lead-p">Drag-and-drop sortable lists with automatic array reordering.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Sortable List</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{
+              list: ['Priority 1: Signal Core', 'Priority 2: Directive Engine', 'Priority 3: Benchmarks'],
+              moveUp(idx) {
+                if (idx > 0) {
+                  const item = this.list.splice(idx, 1)[0];
+                  this.list.splice(idx - 1, 0, item);
+                }
+              }
+            }">
+              <template p-for="(item, i) in list">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: var(--bg-surface-elevated); margin-bottom: 0.4rem; border-radius: 6px;">
+                  <span p-text="item"></span>
+                  <button class="btn-demo-outline" style="padding: 0.2rem 0.5rem;" @click="moveUp(i)" p-show="i > 0">▲ Up</button>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           9. ADVANCED
+           =================================================================== -->
+      <section id="advanced-csp" class="doc-section">
+        <h1 class="doc-h1">Advanced: Content Security Policy (CSP)</h1>
+        <p class="lead-p">Using PineJS in enterprise applications with strict CSP rules.</p>
+
+        <div class="doc-alert info">
+          PineJS functions with pre-registered function handlers and pure JavaScript objects under standard CSP setups.
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live CSP Verified Scope</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ secure: true }">
+              Security Context: <strong style="color: #22c55e;">Strict Mode Compatible ✓</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="advanced-reactivity" class="doc-section">
+        <h1 class="doc-h1">Advanced: Reactivity & Signals Deep-Dive</h1>
+        <p class="lead-p">How the internal fine-grained signal graph and dependency tracking outperform microtask tree loops.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Signal Batch Transaction</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{
+              a: 10,
+              b: 20,
+              mutateBatched() {
+                Pine.batch(() => {
+                  this.a += 5;
+                  this.b += 10;
+                });
+              }
+            }">
+              <div>a: <span p-text="a"></span> | b: <span p-text="b"></span> | Total: <strong style="color: var(--alpine-teal);" p-text="a + b"></strong></div>
+              <button class="btn-demo" style="margin-top: 0.75rem;" @click="mutateBatched()">Atomic Batch Mutation</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="advanced-extending" class="doc-section">
+        <h1 class="doc-h1">Advanced: Extending PineJS</h1>
+        <p class="lead-p">Building custom directives, magics, and publishing modular plugins.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Extensibility Demo</span></div>
+          <div class="demo-preview-body">
+            <div p-data>
+              <span style="color: var(--alpine-teal); font-weight: 600;">Custom Extensions Active ✓</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="advanced-async" class="doc-section">
+        <h1 class="doc-h1">Advanced: Async Handling</h1>
+        <p class="lead-p">Async actions, Promises, and reactive <code>$fetch</code> integration.</p>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Async Action</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{
+              loading: false,
+              result: '',
+              async runTask() {
+                this.loading = true;
+                this.result = 'Processing...';
+                await new Promise(r => setTimeout(r, 800));
+                this.result = 'Async operation completed at ' + new Date().toLocaleTimeString();
+                this.loading = false;
+              }
+            }">
+              <button class="btn-demo" :disabled="loading" @click="runTask()">Execute Async Promise</button>
+              <div style="margin-top: 0.75rem;" p-text="result"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Search Modal Backdrop -->
+  <div id="search-modal-backdrop" class="search-modal-backdrop">
+    <div class="search-modal">
+      <div class="search-input-wrapper">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <input id="search-input" class="search-modal-input" placeholder="Search documentation, directives, magics..." autocomplete="off" />
+      </div>
+      <div id="search-results" class="search-results-list"></div>
+    </div>
+  </div>
+
+</body>
+</html>

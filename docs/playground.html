@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PineJS Interactive Playground & Sandbox</title>
+  <link rel="stylesheet" href="docs.css">
+  <style>
+    .playground-container {
+      display: flex;
+      height: calc(100vh - var(--header-height));
+      margin-top: var(--header-height);
+    }
+    .editor-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border-color);
+      background: var(--bg-surface);
+    }
+    .preview-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-main);
+    }
+    .pane-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 1.2rem;
+      background: var(--bg-surface-elevated);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .code-editor {
+      flex: 1;
+      width: 100%;
+      background: var(--bg-code);
+      color: #e2e8f0;
+      border: none;
+      padding: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+      white-space: pre;
+    }
+    .preview-frame {
+      flex: 1;
+      border: none;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+    }
+    .preset-select {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="site-header">
+    <div style="display: flex; align-items: center; gap: 1.5rem;">
+      <a href="index.html" class="brand-wrapper">
+        <div class="brand-logo">🌲</div>
+        <div class="brand-title">PineJS Playground</div>
+      </a>
+      <select id="preset-picker" class="preset-select">
+        <option value="counter">Preset: Interactive Counter</option>
+        <option value="todo">Preset: Fine-Grained Todo App</option>
+        <option value="cart">Preset: Reactive Shopping Cart</option>
+        <option value="tabs">Preset: Dynamic Tabs & Modals</option>
+        <option value="persist">Preset: $persist LocalStorage Sync</option>
+      </select>
+    </div>
+
+    <div class="header-actions">
+      <button id="run-btn" class="btn-demo" style="padding: 0.4rem 1rem;">▶ Run Code (Ctrl+Enter)</button>
+      <a href="index.html" class="nav-link">Back to Documentation</a>
+    </div>
+  </header>
+
+  <div class="playground-container">
+    <!-- Code Editor Pane -->
+    <div class="editor-pane">
+      <div class="pane-toolbar">
+        <span>HTML & PineJS Directives</span>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">Auto-executes on changes</span>
+      </div>
+      <textarea id="code-input" class="code-editor" spellcheck="false"></textarea>
+    </div>
+
+    <!-- Live Preview Pane -->
+    <div class="preview-pane">
+      <div class="pane-toolbar">
+        <span>Live Preview Output</span>
+        <button id="refresh-btn" class="btn-demo-outline" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">Reload Preview</button>
+      </div>
+      <iframe id="preview-frame" class="preview-frame"></iframe>
+    </div>
+  </div>
+
+  <script>
+    const presets = {
+      counter: `<div p-data="{ count: 0, step: 1 }" style="font-family: system-ui, sans-serif; padding: 2rem; max-width: 450px; margin: 0 auto;">
+  <h2 style="margin-top: 0; color: #10b981;">🌲 Fine-Grained Counter</h2>
+  <p>Count is updated via atomic Signals without Virtual DOM diffing.</p>
+  
+  <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem;">
+    <button @click="count -= step" style="padding: 0.5rem 1rem; background: #334155; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1.2rem;">-</button>
+    <div style="font-size: 2rem; font-weight: 700; width: 60px; text-align: center;" p-text="count"></div>
+    <button @click="count += step" style="padding: 0.5rem 1rem; background: #10b981; color: black; border: none; border-radius: 6px; cursor: pointer; font-size: 1.2rem;">+</button>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <label style="display: block; font-size: 0.85rem; margin-bottom: 0.3rem;">Step Multiplier:</label>
+    <input type="number" p-model.number="step" min="1" max="10" style="padding: 0.4rem 0.6rem; border-radius: 4px; border: 1px solid #cbd5e1; width: 80px;" />
+  </div>
+
+  <div style="background: #f1f5f9; padding: 1rem; border-radius: 8px; font-size: 0.9rem;">
+    Count × 2: <strong style="color: #059669;" p-text="count * 2"></strong>
+  </div>
+</div>`,
+
+      todo: `<div p-data="{
+  newText: '',
+  items: [
+    { id: 1, text: 'Try PineJS signals', done: true },
+    { id: 2, text: 'Deploy to CDN', done: false }
+  ],
+  add() {
+    if (!this.newText.trim()) return;
+    this.items.push({ id: Date.now(), text: this.newText.trim(), done: false });
+    this.newText = '';
+  },
+  remove(id) {
+    this.items = this.items.filter(it => it.id !== id);
+  }
+}" style="font-family: system-ui, sans-serif; padding: 2rem; max-width: 450px; margin: 0 auto;">
+  <h2 style="color: #10b981; margin-top: 0;">🌲 PineJS Todo List</h2>
+  
+  <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+    <input placeholder="Add item..." p-model="newText" @keydown.enter="add()" style="flex: 1; padding: 0.5rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px;" />
+    <button @click="add()" style="padding: 0.5rem 1rem; background: #10b981; color: black; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">Add</button>
+  </div>
+
+  <ul style="list-style: none; padding: 0; margin: 0;">
+    <template p-for="item in items">
+      <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 0.5rem;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" p-model="item.done" />
+          <span :style="{ textDecoration: item.done ? 'line-through' : 'none', opacity: item.done ? 0.5 : 1 }" p-text="item.text"></span>
+        </label>
+        <button @click="remove(item.id)" style="background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer;">✕</button>
+      </li>
+    </template>
+  </ul>
+</div>`,
+
+      cart: `<div p-data="{
+  items: [
+    { id: 1, name: 'Pro Earbuds', price: 79, qty: 1 },
+    { id: 2, name: 'Smart Stand', price: 39, qty: 2 }
+  ],
+  get total() {
+    return this.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+  }
+}" style="font-family: system-ui, sans-serif; padding: 2rem; max-width: 480px; margin: 0 auto;">
+  <h2 style="color: #10b981; margin-top: 0;">🛒 Live Shopping Cart</h2>
+  
+  <template p-for="item in items">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 0.5rem;">
+      <div>
+        <div style="font-weight: 600;" p-text="item.name"></div>
+        <div style="font-size: 0.85rem; color: #64748b;" p-text="'$' + item.price + ' each'"></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <button @click="if (item.qty > 1) item.qty--" style="padding: 0.2rem 0.6rem; border: 1px solid #cbd5e1; background: white; border-radius: 4px; cursor: pointer;">-</button>
+        <span style="font-weight: bold; width: 24px; text-align: center;" p-text="item.qty"></span>
+        <button @click="item.qty++" style="padding: 0.2rem 0.6rem; border: 1px solid #cbd5e1; background: white; border-radius: 4px; cursor: pointer;">+</button>
+      </div>
+    </div>
+  </template>
+
+  <div style="margin-top: 1.5rem; padding: 1rem; background: #f1f5f9; border-radius: 8px; display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold;">
+    <span>Total:</span>
+    <span style="color: #059669;" p-text="'$' + total.toFixed(2)"></span>
+  </div>
+</div>`,
+
+      tabs: `<div p-data="{ tab: 'home' }" style="font-family: system-ui, sans-serif; padding: 2rem; max-width: 450px; margin: 0 auto;">
+  <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">
+    <button @click="tab = 'home'" :style="{ fontWeight: tab === 'home' ? 'bold' : 'normal', color: tab === 'home' ? '#10b981' : '#64748b', border: 'none', background: 'none', cursor: 'pointer', fontSize: '1rem' }">Home</button>
+    <button @click="tab = 'profile'" :style="{ fontWeight: tab === 'profile' ? 'bold' : 'normal', color: tab === 'profile' ? '#10b981' : '#64748b', border: 'none', background: 'none', cursor: 'pointer', fontSize: '1rem' }">Profile</button>
+    <button @click="tab = 'settings'" :style="{ fontWeight: tab === 'settings' ? 'bold' : 'normal', color: tab === 'settings' ? '#10b981' : '#64748b', border: 'none', background: 'none', cursor: 'pointer', fontSize: '1rem' }">Settings</button>
+  </div>
+
+  <div p-show="tab === 'home'">
+    <h3>Welcome to Home</h3>
+    <p>Fine-grained reactive tab transitions in pure HTML!</p>
+  </div>
+  <div p-show="tab === 'profile'">
+    <h3>User Profile</h3>
+    <p>Name: Alex Dev<br>Framework: PineJS</p>
+  </div>
+  <div p-show="tab === 'settings'">
+    <h3>Application Settings</h3>
+    <p>Theme: Dark<br>Reactivity: Signals</p>
+  </div>
+</div>`,
+
+      persist: `<div p-data="{ user: $persist('John Pine', 'demo_user') }" style="font-family: system-ui, sans-serif; padding: 2rem; max-width: 450px; margin: 0 auto;">
+  <h2 style="color: #10b981; margin-top: 0;">💾 $persist LocalStorage</h2>
+  <p>Type in the input, refresh the page, and observe persisted state!</p>
+
+  <input p-model="user.value" style="width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 1rem;" />
+
+  <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 6px;">
+    Persisted Value: <strong style="color: #059669;" p-text="user.value"></strong>
+  </div>
+</div>`
+    };
+
+    const codeInput = document.getElementById('code-input');
+    const previewFrame = document.getElementById('preview-frame');
+    const presetPicker = document.getElementById('preset-picker');
+    const runBtn = document.getElementById('run-btn');
+    const refreshBtn = document.getElementById('refresh-btn');
+
+    function updatePreview() {
+      const userCode = codeInput.value;
+      const htmlDoc = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8" />
+          <script src="${window.location.origin}/dist/pine.js"><\/script>
+        </head>
+        <body>
+          ${userCode}
+        </body>
+        </html>
+      `;
+      previewFrame.srcdoc = htmlDoc;
+    }
+
+    presetPicker.addEventListener('change', (e) => {
+      codeInput.value = presets[e.target.value] || presets.counter;
+      updatePreview();
+    });
+
+    runBtn.addEventListener('click', updatePreview);
+    refreshBtn.addEventListener('click', updatePreview);
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        updatePreview();
+      }
+    });
+
+    // Auto update with debounce
+    let timer;
+    codeInput.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(updatePreview, 600);
+    });
+
+    // Init with counter preset
+    codeInput.value = presets.counter;
+    updatePreview();
+  </script>
+</body>
+</html>
