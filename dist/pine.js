@@ -1600,7 +1600,7 @@
     }
 
     const directiveOrder = [
-      'p-bind', 'p-model', 'p-modelable', 'p-text', 'p-html',
+      'p-bind', 'p-modelable', 'p-model', 'p-text', 'p-html',
       'p-show', 'p-collapse', 'p-mask', 'p-transition', 'p-effect',
       'p-ref', 'p-on', 'p-init'
     ];
