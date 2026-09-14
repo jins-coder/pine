@@ -1,5 +1,5 @@
 /**
- * PineJS v1.0.0 (ES Module)
+ * PineJS v1.1.0 "Sequoia" (ES Module)
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * (c) 2026 PineJS Core Team - MIT License
  */

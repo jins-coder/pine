@@ -6,6 +6,7 @@ const docIndex = [
   // Start & Upgrading
   { id: 'start-here', title: 'Start Here', category: 'Start', desc: 'Introduction and getting started with PineJS' },
   { id: 'upgrade-guide', title: 'Upgrade From Alpine.js / V2', category: 'Start', desc: 'Seamless 1:1 migration guide from Alpine.js to PineJS' },
+  { id: 'releases', title: 'Releases & Version History', category: 'Start', desc: 'Complete changelog, release codenames, and version list' },
 
   // Essentials
   { id: 'essentials-installation', title: 'Installation', category: 'Essentials', desc: 'Include PineJS via CDN script tag, npm, or ES Module' },

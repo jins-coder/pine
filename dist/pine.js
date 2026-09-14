@@ -1,5 +1,5 @@
 /**
- * PineJS v1.0.0
+ * PineJS v1.1.0 "Sequoia"
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * Complete Alpine.js Parity + True Fine-Grained Signals + Built-in Plugins
  * (c) 2026 PineJS Core Team - MIT License
@@ -1677,8 +1677,8 @@
   // 10. PUBLIC PINE API
   // =========================================================================
   const Pine = {
-    version: '1.0.0',
-    versionName: 'Evergreen',
+    version: '1.1.0',
+    versionName: 'Sequoia',
 
     // Signals Engine
     signal,

@@ -23,7 +23,7 @@
           </svg>
         </div>
         <div class="brand-title">PineJS</div>
-        <span class="brand-version" title="Codename: Evergreen">v1.0.0 (Evergreen)</span>
+        <span class="brand-version" title="Codename: Sequoia">v1.1.0 (Sequoia)</span>
       </a>
 
       <button id="search-trigger" class="search-trigger">
@@ -58,6 +58,7 @@
         <ul class="sidebar-items">
           <li class="sidebar-item"><a href="#start-here" class="active">Start Here</a></li>
           <li class="sidebar-item"><a href="#upgrade-guide">Upgrade From Alpine.js</a></li>
+          <li class="sidebar-item"><a href="#releases">Releases & Versions</a></li>
         </ul>
       </div>
 
@@ -187,7 +188,7 @@
         <h2 class="doc-h2">Quick Example</h2>
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
-          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.0.0/dist/pine.min.js" defer&gt;&lt;/script&gt;
+          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.1.0/dist/pine.min.js" defer&gt;&lt;/script&gt;
 
 &lt;div p-data="{ count: 0 }"&gt;
   &lt;button @click="count++"&gt;Increment&lt;/button&gt;
@@ -1489,6 +1490,75 @@
             }">
               <button class="btn-demo" :disabled="loading" @click="runTask()">Execute Async Promise</button>
               <div style="margin-top: 0.75rem;" p-text="result"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           RELEASES & VERSION HISTORY
+           =================================================================== -->
+      <section id="releases" class="doc-section">
+        <h1 class="doc-h1">Releases & Version History</h1>
+        <p class="lead-p">Complete changelog, release codenames, and upgrade notes for all PineJS versions.</p>
+
+        <div class="demo-card" style="margin-bottom: 2rem;">
+          <div class="demo-preview-header"><span>📦 Version Selector & Changelog Explorer</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{
+              selectedVer: '1.1.0',
+              versions: [
+                {
+                  ver: '1.1.0',
+                  name: 'Sequoia',
+                  tag: 'Latest Stable',
+                  date: '2026-09-14',
+                  highlights: [
+                    'Hierarchical Scope Proxy inheritance across nested components & templates',
+                    'Two-way p-modelable reentrancy mutex to prevent loop feedback',
+                    'Array mutation auto-sync on .push(), .pop(), .splice(), .sort(), etc.',
+                    'Debounced click.outside appearance threshold for instant floating menus',
+                    'Added Pine.$data(element) and element.__pine_scope__ runtime access',
+                    '16/16 Test Suites fully passing (100%)',
+                    'Automated build & minification pipeline (npm run build)'
+                  ]
+                },
+                {
+                  ver: '1.0.0',
+                  name: 'Evergreen',
+                  tag: 'Initial Release',
+                  date: '2026-09-10',
+                  highlights: [
+                    'Initial release with 100% Alpine.js syntax & API parity',
+                    'Fine-Grained Signals reactivity engine (Signal, Computed, Effect, Batch)',
+                    'Built-in Morphing, Masks, Collapse, and CSS Presets',
+                    'Full documentation with 60+ interactive live demo components'
+                  ]
+                }
+              ]
+            }">
+              <div style="display: flex; gap: 0.75rem; margin-bottom: 1.25rem;">
+                <template p-for="item in versions">
+                  <button class="btn-demo" :class="{ 'btn-demo-outline': selectedVer !== item.ver }" @click="selectedVer = item.ver" p-text="'v' + item.ver + ' (' + item.name + ')'"></button>
+                </template>
+              </div>
+
+              <template p-for="item in versions">
+                <div p-show="selectedVer === item.ver" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                      <h3 style="margin: 0; font-size: 1.2rem;" p-text="'PineJS v' + item.ver + ' — ' + item.name"></h3>
+                      <span style="font-size: 0.85rem; color: var(--text-muted);" p-text="'Released on ' + item.date"></span>
+                    </div>
+                    <span class="sidebar-tag" p-text="item.tag"></span>
+                  </div>
+                  <ul style="margin: 0; padding-left: 1.25rem; line-height: 1.7;">
+                    <template p-for="h in item.highlights">
+                      <li p-text="h"></li>
+                    </template>
+                  </ul>
+                </div>
+              </template>
             </div>
           </div>
         </div>

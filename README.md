@@ -3,9 +3,9 @@
 > **Next-Generation Fine-Grained Reactive Declarative Micro-Framework for Modern Web Apps**  
 > *As simple and ergonomic as Alpine.js, fast as Solid signals, ultra-lightweight (&lt; 8 KB minified).*
 
-[![Version](https://img.shields.io/badge/version-1.0.0%20%22Evergreen%22-10b981.svg)](https://github.com)
+[![Version](https://img.shields.io/badge/version-1.1.0%20%22Sequoia%22-10b981.svg)](https://github.com)
 [![Reactivity](https://img.shields.io/badge/reactivity-fine--grained%20signals-06b6d4.svg)](https://github.com)
-[![Size](https://img.shields.io/badge/bundle%20size-%3C%208%20KB%20min-8b5cf6.svg)](https://github.com)
+[![Size](https://img.shields.io/badge/bundle%20size-%3C%2010%20KB%20min-8b5cf6.svg)](https://github.com)
 [![License](https://img.shields.io/badge/license-MIT-emerald.svg)](LICENSE)
 
 ---
@@ -18,7 +18,7 @@ Unlike Alpine.js (which uses proxy-based polling and coarse microtask tree evalu
 
 ```html
 <!-- Include via CDN -->
-<script src="https://unpkg.com/pinejs-core@1.0.0/dist/pine.min.js" defer></script>
+<script src="https://unpkg.com/pinejs-core@1.1.0/dist/pine.min.js" defer></script>
 
 <!-- Declare fine-grained reactive components -->
 <div p-data="{ count: 0 }">
@@ -144,6 +144,15 @@ pinejs/
 2. Open `docs/playground.html` for the live interactive sandbox.
 3. Open `docs/benchmarks.html` to run fine-grained reactivity benchmarks.
 4. Open `tests/test-suite.html` to execute automated test assertions.
+
+---
+
+## 🏷️ Version History & Releases
+
+| Version | Codename | Release Date | Status | Key Features |
+| :--- | :--- | :--- | :--- | :--- |
+| **`v1.1.0`** | **Sequoia** | 2026-09-14 | **Latest Stable** | Hierarchical Scope Proxy inheritance, `p-modelable` mutex, reactive array auto-sync, debounced outside clicks, `Pine.$data()` API, minification pipeline. |
+| **`v1.0.0`** | **Evergreen** | 2026-09-10 | Stable | Initial release with full Alpine.js API parity, Fine-Grained Signals, built-in morphing & plugins, and 60+ interactive docs components. |
 
 ---
 

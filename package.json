@@ -1,7 +1,7 @@
 {
   "name": "pinejs-core",
-  "version": "1.0.0",
-  "versionName": "Evergreen",
+  "version": "1.1.0",
+  "versionName": "Sequoia",
   "description": "Next-generation fine-grained reactive declarative micro-framework for the modern web with CDN support, signals, and ultra-fast DOM updates.",
   "main": "dist/pine.js",
   "module": "dist/pine.esm.js",
