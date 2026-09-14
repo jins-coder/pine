@@ -154,6 +154,8 @@ pinejs/
 | **`v1.1.0`** | **Sequoia** | 2026-09-14 | **Latest Stable** | Hierarchical Scope Proxy inheritance, `p-modelable` mutex, reactive array auto-sync, debounced outside clicks, `Pine.$data()` API, minification pipeline. |
 | **`v1.0.0`** | **Evergreen** | 2026-09-10 | Stable | Initial release with full Alpine.js API parity, Fine-Grained Signals, built-in morphing & plugins, and 60+ interactive docs components. |
 
+👉 For full detailed release notes, breaking changes, and roadmap, see [CHANGELOG.md](file:///e:/afterquery/shopify/utility/pinejs/CHANGELOG.md).
+
 ---
 
 ## 📄 License

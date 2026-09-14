@@ -1,0 +1,153 @@
+# 🌲 PineJS Changelog & Version History
+
+All notable changes, architectural improvements, new directives, magics, and bug fixes for each release of PineJS are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## 📦 Releases
+
+- [v1.1.0 — "Sequoia" (2026-09-14)](#v110--sequoia-2026-09-14) — **Latest Stable**
+- [v1.0.0 — "Evergreen" (2026-09-10)](#v100--evergreen-2026-09-10) — Initial Release
+- [Roadmap & Upcoming Versions](#-future-roadmap)
+
+---
+
+## [v1.1.0] — "Sequoia" (2026-09-14)
+
+> **Codename**: Sequoia  
+> **Status**: Latest Stable  
+> **Bundle Size**: 34.66 KB minified (9.30 KB gzipped)  
+> **CDN Link**: `https://unpkg.com/pinejs-core@1.1.0/dist/pine.min.js`
+
+### 🚀 Major Enhancements
+
+#### 1. Hierarchical Scope Proxy Inheritance
+- **Nested Component State Access**: Child components and nested `<template p-for>` / `<template p-if>` sub-trees now inherit state from ancestor components transparently via a hierarchical `Scope` Proxy.
+- **Upward Mutation**: Programmatic and declarative assignments to ancestor state variables automatically resolve and notify parent subscribers without requiring explicit `$root` or `$data` navigation.
+
+#### 2. Reentrancy Mutex for `p-modelable` & `p-model`
+- **Bidirectional State Sync**: Resolved reentrant loop feedback between parent `p-model` and child `p-modelable` components with an `isSyncing` reentrancy mutex.
+- **Unidirectional Dispatch**: Prevents cascading circular updates while ensuring instant synchronization when either parent or child state changes.
+
+#### 3. Reactive Array Mutation Interceptors
+- **Auto-Syncing Mutators**: `.push()`, `.pop()`, `.shift()`, `.unshift()`, `.splice()`, `.sort()`, and `.reverse()` now automatically synchronize internal `lengthSig.value = obj.length` signals.
+- **Accurate Getter Resolution**: Direct element lookups in `p-for` and computed getters always return underlying target array indices and length atoms.
+
+#### 4. Debounced Floating Element Dismissal (`@click.outside`)
+- **Appearance Timestamp Protection**: Elements toggling from hidden to visible (`p-show`, dropdowns, modal dialogs) record an appearance timestamp (`el._pineJustShown`).
+- **Bubbling Event Suppression**: Prevents the opening trigger click from bubbling up to `document` and immediately dismissing the newly opened menu in the exact same event cycle.
+
+#### 5. Developer Ergonomics & Diagnostics
+- **`Pine.$data(element)`**: Public helper method to inspect or programmatically mutate any DOM element's reactive scope.
+- **`element.__pine_scope__` & `element._pineScope`**: Directly attached to component root nodes for easy browser console inspection and testing.
+
+#### 6. Automated Build & Minification Pipeline
+- **`npm run build`**: Automated build script (`build.js`) that strips comments, compresses whitespace, preserves strings/regexes, and calculates gzipped metrics.
+- **Test Suite Verification**: 16/16 automated test suites passing with 100% assertions.
+
+---
+
+## [v1.0.0] — "Evergreen" (2026-09-10)
+
+> **Codename**: Evergreen  
+> **Status**: Stable Initial Release  
+> **Bundle Size**: 33.98 KB minified (9.17 KB gzipped)  
+> **CDN Link**: `https://unpkg.com/pinejs-core@1.0.0/dist/pine.min.js`
+
+### 🌲 Core Architecture
+
+#### 1. Fine-Grained Signals Engine
+- **`Signal(initialValue)`**: Primitive reactive atoms with getter-based subscription tracking and setter notifications.
+- **`Computed(getter)`**: Memoized derived signals with dirty-checking and automatic dependency graph recalculation.
+- **`Effect(fn)`**: Reactive side-effect executor with automatic cleanup callbacks (`onCleanup`).
+- **`batch(fn)`**: Synchronous transaction batching that groups multiple signal mutations into a single DOM update pass.
+- **`untrack(fn)`**: Executes code blocks without registering active signal subscriptions.
+- **`reactive(object)`**: Deep reactive Proxy bridge connecting JavaScript objects and arrays to atomic signal atoms.
+
+#### 2. Declarative Directives (Full Alpine.js Parity)
+- **`p-data`**: Declares a new component root element and initializes its fine-grained reactive state object.
+- **`p-init`**: Executes initialization logic when a component mounts.
+- **`p-bind` / `:attr`**: Binds attributes, CSS classes (`:class`), and inline styles (`:style`) reactively.
+- **`p-on` / `@event`**: Event listener directive supporting modifiers:
+  - `.prevent`, `.stop`, `.self`, `.capture`, `.once`, `.passive`, `.window`, `.document`, `.outside`, `.debounce.300ms`, `.throttle.100ms`, `.enter`, `.escape`, `.tab`, `.space`, `.delete`, `.slash`, `.arrow-up`, `.arrow-down`, `.arrow-left`, `.arrow-right`.
+- **`p-text`**: Fine-grained atomic text node binding.
+- **`p-html`**: Reactive inner HTML string binding.
+- **`p-model`**: Two-way data binding for text inputs, numbers, textareas, select dropdowns, checkboxes, and radio buttons with `.number`, `.trim`, `.lazy`, `.boolean`.
+- **`p-modelable`**: Exposes internal component state properties for parent `p-model` binding.
+- **`p-show`**: Toggles visibility with transition presets or `display: none`.
+- **`p-if`**: Conditional DOM mounting/unmounting on `<template>` tags.
+- **`p-for`**: Keyed list rendering over arrays, objects, and numbers on `<template>` tags.
+- **`p-transition`**: CSS transitions with built-in presets (`fade`, `slide`, `scale`).
+- **`p-collapse`**: Smooth height expansion and collapse animation for accordions and drawers.
+- **`p-mask`**: Input formatting mask (e.g. `(999) 999-9999`).
+- **`p-effect`**: Reactive inline side-effect execution.
+- **`p-ref`**: DOM element reference registration.
+- **`p-cloak`**: Anti-FOUC (Flash of Unstyled Content) attribute auto-removed on startup.
+- **`p-teleport`**: Portals `<template>` DOM into target containers (e.g. `body`).
+- **`p-id`**: Scoped unique ID generator for accessible form controls.
+
+#### 3. Magic Properties (`$` Magics)
+- **`$el`**: References the current DOM element.
+- **`$root`**: References the closest component root element.
+- **`$data`**: Accesses the current component's reactive state proxy.
+- **`$refs`**: Accesses registered `p-ref` DOM element references.
+- **`$store(name)`**: Accesses global reactive stores registered with `Pine.store()`.
+- **`$watch(getter, callback, options)`**: Observes reactive property or expression mutations.
+- **`$dispatch(name, detail, options)`**: Dispatches custom bubbling DOM events.
+- **`$nextTick(callback)`**: Resolves a Promise or executes a callback after DOM reconciliation.
+- **`$id(name, key)`**: Generates deterministic scoped element IDs.
+- **`$signal(value)`**: Instantiates raw Signal primitives within templates.
+- **`$persist(initialValue, key)`**: Realtime bidirectional `localStorage` persistence.
+- **`$fetch(url, options)`**: Reactive REST API fetcher with automatic `loading`, `data`, `error`, and `status` properties.
+- **`$intersect(callback, options)`**: IntersectionObserver viewport visibility tracker.
+- **`$focus`**: Accessible focus manager with `.focus(el)` and `.trap(container)`.
+
+#### 4. Global APIs & Built-in Plugins
+- **`Pine.start()`**: Scans and initializes all `p-data` components on the page.
+- **`Pine.data(name, factory)`**: Reusable component state definitions.
+- **`Pine.store(name, data)`**: Global shared reactive stores.
+- **`Pine.bind(name, callback)`**: Reusable directive/event binding objects.
+- **`Pine.directive(name, handler)`**: Custom directive registration.
+- **`Pine.magic(name, factory)`**: Custom magic property registration.
+- **`Pine.plugin(pluginFn)`**: Modular plugin architecture.
+- **`Pine.morph(fromEl, toEl)`**: Built-in DOM morphing algorithm for server-driven UI updates (HTMX / Hotwire compatible).
+
+#### 5. Documentation & Tooling
+- **Alpine.js-Style Documentation Site**: Comprehensive documentation covering all 60+ topics with dedicated interactive live `.demo-card` widgets.
+- **Interactive Playground**: Dual-pane browser sandbox (`docs/playground.html`).
+- **Realtime Benchmarks**: Reactivity and DOM performance stress tests (`docs/benchmarks.html`).
+- **Automated Test Suite**: Browser test suite with automated assertions (`tests/test-suite.html`).
+
+---
+
+## 🔮 Future Roadmap
+
+### `v1.2.0` — "Redwood" (Planned)
+- [ ] TypeScript declaration files (`dist/pine.d.ts`) with full generic type inference.
+- [ ] Built-in Server-Side Rendering (SSR) hydration helper (`p-hydrate`).
+- [ ] `$history` magic for URL query string and pushState synchronization.
+- [ ] Enhanced animations with spring physics.
+
+### `v2.0.0` — "Apex" (Planned)
+- [ ] Compiler-less JSX / Tagged template literals optional add-on.
+- [ ] Web Worker off-thread signal computation bridge.
+- [ ] Micro-frontend component isolation boundaries.
+
+---
+
+## 📝 Version Comparison Summary
+
+| Feature | PineJS `v1.0.0` | PineJS `v1.1.0` | Alpine.js `v3.x` |
+| :--- | :--- | :--- | :--- |
+| **Reactivity Primitive** | Fine-Grained Signals | Fine-Grained Signals | Coarse Proxy Observer |
+| **Scope Inheritance** | Single-level | **Hierarchical Recursive Proxy** | Prototype Chain |
+| **Two-Way Synchronization** | Basic | **Mutex Reentrancy Guard** | Microtask Loop Guard |
+| **Array Mutations** | Explicit length reads | **Auto-syncing Length Signals** | Proxy Interceptors |
+| **Outside Click Handling** | Instant | **Appearance Debounced** | Window Event Tick |
+| **Built-in Morphing** | Yes (`Pine.morph`) | Yes (`Pine.morph`) | Requires Separate Plugin |
+| **Built-in Storage Persistence** | Yes (`$persist`) | Yes (`$persist`) | Requires Separate Plugin |
+| **Built-in Async HTTP Fetch** | Yes (`$fetch`) | Yes (`$fetch`) | None |
+| **Bundle Size (Minified)** | 33.98 KB | 34.66 KB | ~43 KB |
+| **Bundle Size (Gzipped)** | 9.17 KB | **9.30 KB** | ~15 KB |
