@@ -322,36 +322,65 @@
 
   class Scope {
     constructor(data = {}, parent = null, el = null) {
-      this.data = reactive(data);
+      this.localData = reactive(isObject(data) ? data : {});
       this.parent = parent;
       this.el = el;
       this.cleanups = [];
       this.refs = {};
       this.scopedIds = {};
+
+      this.data = new Proxy(this.localData, {
+        get: (target, prop, receiver) => {
+          if (prop === RAW_SYMBOL) return target;
+          if (prop === PROXY_SYMBOL) return this.data;
+          if (prop in target) {
+            return target[prop];
+          }
+          if (this.parent && this.parent.data && prop in this.parent.data) {
+            return this.parent.data[prop];
+          }
+          return target[prop];
+        },
+        set: (target, prop, val, receiver) => {
+          if (prop in target) {
+            target[prop] = val;
+            return true;
+          }
+          if (this.parent && this.parent.data && prop in this.parent.data) {
+            this.parent.data[prop] = val;
+            return true;
+          }
+          target[prop] = val;
+          return true;
+        },
+        has: (target, prop) => {
+          if (prop in target) return true;
+          if (this.parent && this.parent.data && prop in this.parent.data) return true;
+          return false;
+        },
+        deleteProperty: (target, prop) => {
+          if (prop in target) {
+            return delete target[prop];
+          }
+          if (this.parent && this.parent.data && prop in this.parent.data) {
+            return delete this.parent.data[prop];
+          }
+          return true;
+        }
+      });
     }
 
     get(key) {
-      if (key in this.data) return this.data[key];
-      if (this.parent) return this.parent.get(key);
-      return undefined;
+      return this.data[key];
     }
 
     set(key, val) {
-      if (key in this.data) {
-        this.data[key] = val;
-        return true;
-      }
-      if (this.parent && this.parent.has(key)) {
-        return this.parent.set(key, val);
-      }
       this.data[key] = val;
       return true;
     }
 
     has(key) {
-      if (key in this.data) return true;
-      if (this.parent) return this.parent.has(key);
-      return false;
+      return key in this.data;
     }
 
     addCleanup(fn) {

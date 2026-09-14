@@ -64,7 +64,15 @@
     .status { font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
     .status.pass { color: var(--pass); }
     .status.fail { color: var(--fail); }
-    .sandbox { display: none; }
+    .sandbox {
+      position: fixed;
+      left: -9999px;
+      top: -9999px;
+      width: 1000px;
+      height: 1000px;
+      opacity: 0;
+      pointer-events: none;
+    }
   </style>
   <!-- Load PineJS -->
   <script src="../dist/pine.js"></script>
@@ -295,7 +303,7 @@
       sandbox.innerHTML = `
         <div id="t-dd" p-data="{ open: false }">
           <button id="dd-btn" @click="open = !open">Toggle</button>
-          <div id="dd-menu" p-show="open" @click.outside="open = false">
+          <div id="dd-menu" p-show="open" @click.outside="open = false" style="width: 100px; height: 100px;">
             <span>Menu Content</span>
           </div>
         </div>
@@ -312,7 +320,7 @@
 
       // Wait a tick then click outside
       await new Promise(r => setTimeout(r, 120));
-      document.body.click();
+      document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       if (menu.style.display !== 'none') throw new Error(`Dropdown menu should be hidden after clicking outside`);
     });
 
@@ -333,6 +341,42 @@
       if (span.textContent !== '10') throw new Error(`Expected initial parent count 10, got ${span.textContent}`);
       btn.click();
       if (span.textContent !== '11') throw new Error(`Expected updated parent count 11, got ${span.textContent}`);
+    });
+
+    test("Globals: Pine.store()", "Global store reactive state management", () => {
+      Pine.store("cart", {
+        items: 5,
+        add() { this.items++; }
+      });
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t-store" p-data>
+          <span id="store-val" p-text="$store('cart').items"></span>
+          <button id="store-btn" @click="$store('cart').add()">Add</button>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-store"));
+      const span = sandbox.querySelector("#store-val");
+      const btn = sandbox.querySelector("#store-btn");
+      if (span.textContent !== "5") throw new Error(`Expected 5 from store, got ${span.textContent}`);
+      btn.click();
+      if (span.textContent !== "6") throw new Error(`Expected 6 from store, got ${span.textContent}`);
+    });
+
+    test("Magics: $refs & $dispatch", "Accessing element references and custom events", () => {
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t-refs" p-data="{ message: '' }" @notify="message = $event.detail.msg">
+          <input p-ref="customInput" value="InitialRefVal" />
+          <button id="dispatch-btn" @click="$dispatch('notify', { msg: $refs.customInput.value })">Dispatch</button>
+          <span id="msg-span" p-text="message"></span>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-refs"));
+      const btn = sandbox.querySelector("#dispatch-btn");
+      const span = sandbox.querySelector("#msg-span");
+      btn.click();
+      if (span.textContent !== "InitialRefVal") throw new Error(`Expected 'InitialRefVal', got '${span.textContent}'`);
     });
 
     // Run tests & render report
