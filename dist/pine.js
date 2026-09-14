@@ -1019,12 +1019,15 @@
         const stop1 = effect(() => {
           const parentVal = evaluate(el.parentElement || el, expression);
           if (isSyncing) return;
-          if (scope && scope.data && scope.data[modelableProp] !== parentVal) {
-            isSyncing = true;
-            try {
-              scope.data[modelableProp] = parentVal;
-            } finally {
-              isSyncing = false;
+          if (scope && scope.data) {
+            const childVal = untrack(() => scope.data[modelableProp]);
+            if (childVal !== parentVal) {
+              isSyncing = true;
+              try {
+                scope.data[modelableProp] = parentVal;
+              } finally {
+                isSyncing = false;
+              }
             }
           }
         });
@@ -1034,7 +1037,7 @@
           if (scope && scope.data) {
             const childVal = scope.data[modelableProp];
             if (isSyncing) return;
-            const currentParentVal = evaluate(el.parentElement || el, expression);
+            const currentParentVal = untrack(() => evaluate(el.parentElement || el, expression));
             if (childVal !== currentParentVal) {
               isSyncing = true;
               try {
