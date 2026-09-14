@@ -251,8 +251,10 @@
           return function (...args) {
             const lengthSig = getSignalForProp(obj, 'length');
             const result = Array.prototype[prop].apply(obj, args);
+            lengthSig.value = obj.length;
             lengthSig.notify();
             const arrSig = getSignalForProp(obj, '__array_mut__');
+            arrSig.value = (arrSig._value || 0) + 1;
             arrSig.notify();
             return result;
           };
@@ -274,7 +276,7 @@
           return reactive(currentTargetVal);
         }
 
-        return currentSigVal !== undefined ? currentSigVal : currentTargetVal;
+        return currentTargetVal !== undefined ? currentTargetVal : currentSigVal;
       },
 
       set(obj, prop, value, receiver) {
