@@ -39,6 +39,7 @@ const docIndex = [
   { id: 'p-teleport', title: 'p-teleport', category: 'Directives', desc: 'Teleport template content to external DOM targets' },
   { id: 'p-if', title: 'p-if', category: 'Directives', desc: 'Conditionally mount and unmount elements on <template> tags' },
   { id: 'p-id', title: 'p-id', category: 'Directives', desc: 'Declare scoped unique IDs for form accessibility' },
+  { id: 'p-hydrate', title: 'p-hydrate', category: 'Directives', desc: 'Seamless Server-Side Rendering (SSR) hydration activation' },
 
   // Magics
   { id: 'magic-el', title: '$el', category: 'Magics', desc: 'Access current DOM element' },
@@ -52,6 +53,7 @@ const docIndex = [
   { id: 'magic-id', title: '$id', category: 'Magics', desc: 'Generate unique accessible HTML element IDs' },
   { id: 'magic-signal', title: '$signal', category: 'Magics', desc: 'Create and consume raw Signal primitives' },
   { id: 'magic-persist', title: '$persist', category: 'Magics', desc: 'Persist state to localStorage with reactive updates' },
+  { id: 'magic-history', title: '$history', category: 'Magics', desc: 'Bidirectional URL query search parameters and history sync' },
   { id: 'magic-fetch', title: '$fetch', category: 'Magics', desc: 'Reactive HTTP fetch client with loading/data states' },
   { id: 'magic-intersect', title: '$intersect', category: 'Magics', desc: 'IntersectionObserver viewport visibility helper' },
 
@@ -78,6 +80,7 @@ const docIndex = [
   // Advanced
   { id: 'advanced-csp', title: 'Content Security Policy (CSP)', category: 'Advanced', desc: 'Running PineJS in strict CSP environments without unsafe-eval' },
   { id: 'advanced-reactivity', title: 'Reactivity & Signals Deep-Dive', category: 'Advanced', desc: 'Fine-grained signal graph vs virtual DOM vs microtask loops' },
+  { id: 'advanced-typescript', title: 'TypeScript Typings', category: 'Advanced', desc: 'Full TypeScript declarations and generic type support' },
   { id: 'advanced-extending', title: 'Extending PineJS', category: 'Advanced', desc: 'Authoring third-party directives, plugins, and custom magics' },
   { id: 'advanced-async', title: 'Async Handling', category: 'Advanced', desc: 'Managing async functions, promises, and network lifecycles' }
 ];

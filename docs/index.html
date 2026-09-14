@@ -106,6 +106,7 @@
           <li class="sidebar-item"><a href="#p-teleport"><code>p-teleport</code></a></li>
           <li class="sidebar-item"><a href="#p-if"><code>p-if</code></a></li>
           <li class="sidebar-item"><a href="#p-id"><code>p-id</code></a></li>
+          <li class="sidebar-item"><a href="#p-hydrate"><code>p-hydrate</code></a></li>
         </ul>
       </div>
 
@@ -124,6 +125,7 @@
           <li class="sidebar-item"><a href="#magic-id"><code>$id</code></a></li>
           <li class="sidebar-item"><a href="#magic-signal"><code>$signal</code></a></li>
           <li class="sidebar-item"><a href="#magic-persist"><code>$persist</code></a></li>
+          <li class="sidebar-item"><a href="#magic-history"><code>$history</code></a></li>
           <li class="sidebar-item"><a href="#magic-fetch"><code>$fetch</code></a></li>
           <li class="sidebar-item"><a href="#magic-intersect"><code>$intersect</code></a></li>
         </ul>
@@ -165,6 +167,7 @@
         <ul class="sidebar-items">
           <li class="sidebar-item"><a href="#advanced-csp">CSP (Security)</a></li>
           <li class="sidebar-item"><a href="#advanced-reactivity">Reactivity</a></li>
+          <li class="sidebar-item"><a href="#advanced-typescript">TypeScript Typings</a></li>
           <li class="sidebar-item"><a href="#advanced-extending">Extending</a></li>
           <li class="sidebar-item"><a href="#advanced-async">Async Handling</a></li>
         </ul>
@@ -916,6 +919,35 @@
         </div>
       </section>
 
+      <section id="p-hydrate" class="doc-section">
+        <h1 class="doc-h1"><code>p-hydrate</code></h1>
+        <p class="lead-p">Seamless Server-Side Rendering (SSR) hydration marker that activates server-rendered DOM nodes without layout shift or UI tearing.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;!-- Server-rendered HTML payload --&gt;
+&lt;div p-data="{ user: 'Alex', role: 'Admin' }" p-hydrate&gt;
+  &lt;h2 p-text="user"&gt;Alex&lt;/h2&gt;
+  &lt;span p-text="role"&gt;Admin&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live SSR Hydration Demo</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ hydrated: true, count: 42 }" p-hydrate>
+              <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <span style="padding: 0.35rem 0.75rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--alpine-teal); border-radius: 6px; font-weight: 600; color: var(--alpine-teal);">
+                  Hydrated SSR Tree ✓
+                </span>
+                <div>Counter: <strong style="color: var(--alpine-teal);" p-text="count">42</strong></div>
+                <button class="btn-demo" @click="count++">Increment Reactive Count</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ===================================================================
            6. MAGICS (ALL MAGICS WITH LIVE EXAMPLES)
            =================================================================== -->
@@ -1108,6 +1140,35 @@
               <input class="input-demo" p-model="text.value" style="width: 280px;" />
               <div style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
                 Persisted in localStorage: <strong style="color: var(--alpine-teal);" p-text="text.value"></strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="magic-history" class="doc-section">
+        <h1 class="doc-h1"><code>$history</code></h1>
+        <p class="lead-p">Synchronizes reactive signal state bidirectionally with browser URL search parameters and listens to <code>popstate</code> back/forward navigation.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;!-- Syncs with ?filter=... in URL --&gt;
+&lt;div p-data="{ search: $history('', 'filter') }"&gt;
+  &lt;input p-model="search.value" placeholder="Type to update URL query param..." /&gt;
+  &lt;p&gt;Active Filter: &lt;span p-text="search.value"&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $history URL Sync Demo</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ query: $history('PineJS Signals', 'docs_q') }">
+              <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                <input class="input-demo" p-model="query.value" placeholder="Search filter..." style="width: 260px;" />
+                <button class="btn-demo-outline" @click="query.value = ''">Clear Query</button>
+              </div>
+              <div style="margin-top: 0.75rem; font-size: 0.9rem; color: var(--text-muted);">
+                URL Query Parameter: <code style="color: var(--alpine-cyan);" p-text="'?docs_q=' + encodeURIComponent(query.value)"></code>
               </div>
             </div>
           </div>
@@ -1451,6 +1512,46 @@
             }">
               <div>a: <span p-text="a"></span> | b: <span p-text="b"></span> | Total: <strong style="color: var(--alpine-teal);" p-text="a + b"></strong></div>
               <button class="btn-demo" style="margin-top: 0.75rem;" @click="mutateBatched()">Atomic Batch Mutation</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="advanced-typescript" class="doc-section">
+        <h1 class="doc-h1">Advanced: TypeScript Support & Typings</h1>
+        <p class="lead-p">PineJS ships with first-class TypeScript ambient declaration definitions (<code>dist/pine.d.ts</code>) covering reactive primitives, directives, and magics.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>TypeScript</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>import Pine, { signal, computed, effect, Signal, Computed } from 'pinejs-core';
+
+// Strongly-typed Fine-Grained Signals
+const count: Signal&lt;number&gt; = signal(0);
+const doubled: Computed&lt;number&gt; = computed(() => count.value * 2);
+
+// Reusable typed component factory
+Pine.data('userProfile', () => ({
+  name: 'Alex',
+  age: 28,
+  greet(): string {
+    return `Hello, ${this.name}!`;
+  }
+}));</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live TypeScript Ready Component</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{
+              name: 'PineJS TypeScript Core',
+              typedVersion: '1.2.0',
+              status: 'dist/pine.d.ts active'
+            }">
+              <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                <span class="sidebar-tag" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6;" p-text="'TS ' + typedVersion"></span>
+                <span style="color: var(--alpine-teal); font-weight: 600;" p-text="name"></span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);" p-text="'(' + status + ')'"></span>
+              </div>
             </div>
           </div>
         </div>

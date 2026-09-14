@@ -52,6 +52,7 @@ Unlike Alpine.js (which uses proxy-based polling and coarse microtask tree evalu
 - **`p-text`**: Update atomic `textContent`: `<span p-text="username"></span>`
 - **`p-html`**: Update inner `innerHTML`: `<div p-html="rawArticle"></div>`
 - **`p-model`**: Two-way data binding for inputs, textareas, selects, checkboxes, radios with `.number`, `.trim`, `.lazy`
+- **`p-modelable`**: Expose internal component state to parent `p-model`: `<div p-modelable="selected">`
 - **`p-show`**: Toggle element visibility (`display: none` / transitions): `<div p-show="isOpen"></div>`
 - **`p-if`**: Conditionally mount/unmount DOM templates: `<template p-if="isLoggedIn">...</template>`
 - **`p-for`**: Loop over arrays, objects, or numbers: `<template p-for="(item, i) in items">...</template>`
@@ -60,21 +61,28 @@ Unlike Alpine.js (which uses proxy-based polling and coarse microtask tree evalu
 - **`p-ref`**: Register DOM element reference: `<input p-ref="searchField" />`
 - **`p-cloak`**: Hide unrendered DOM until PineJS initializes: `<div p-cloak>`
 - **`p-teleport`**: Teleport templates to external DOM containers: `<template p-teleport="body">`
+- **`p-id`**: Scoped unique element ID generator for accessible form controls: `<div p-id="['user-id']">`
+- **`p-hydrate`**: Server-side rendering (SSR) hydration activation marker: `<div p-data="{ count: 0 }" p-hydrate>`
 
 ---
 
 ## 🔮 Magic Properties Reference
 
 - **`$el`**: The current DOM element
+- **`$root`**: The closest component root element
+- **`$data`**: Access current reactive component state scope
 - **`$refs`**: Access elements marked with `p-ref` (`$refs.searchField.focus()`)
+- **`$id(name)`**: Generate deterministic scoped unique element IDs
 - **`$watch(prop, callback)`**: Reactively watch signals and variables
 - **`$dispatch(event, payload)`**: Dispatch bubbling custom DOM events
 - **`$nextTick(callback)`**: Execute after the next DOM update cycle
 - **`$store(name)`**: Access global reactive store state
 - **`$signal(initialValue)`**: Instantiate a raw fine-grained Signal
 - **`$persist(initialValue, key)`**: Fine-grained reactive `localStorage` binding
+- **`$history(initialValue, paramName)`**: Bidirectional URL query search parameter & `popstate` synchronization
 - **`$fetch(url)`**: Reactive HTTP request state (`loading`, `data`, `error`)
 - **`$intersect(callback)`**: Viewport intersection observer
+- **`$focus`**: Keyboard focus manager and modal focus trap (`$focus.trap(el)`)
 
 ---
 
