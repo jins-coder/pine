@@ -286,8 +286,8 @@
         const oldValue = obj[prop];
 
         if (!Object.is(oldValue, rawVal)) {
-          obj[prop] = rawVal;
           const sig = getSignalForProp(obj, prop);
+          obj[prop] = rawVal;
           sig.value = rawVal;
 
           if (Array.isArray(obj) && prop === 'length') {
