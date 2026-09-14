@@ -8,7 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="docs.css">
   <!-- Load PineJS library via CDN with local fallback -->
-  <script src="https://unpkg.com/pinejs-core@1.4.0/dist/pine.min.js"></script>
+  <script src="https://unpkg.com/pinejs-core@1.5.0/dist/pine.min.js"></script>
   <script>window.Pine || document.write('<script src="../dist/pine.min.js"><\/script>')</script>
   <script src="docs.js" defer></script>
 </head>
@@ -22,7 +22,7 @@
           <img src="logo.svg" alt="PineJS Logo" width="24" height="24" style="display: block;">
         </div>
         <div class="brand-title">PineJS</div>
-        <span class="brand-version" title="Codename: Spruce">v1.4.0 (Spruce)</span>
+        <span class="brand-version" title="Codename: Larch">v1.5.0 (Larch)</span>
       </a>
 
       <button id="search-trigger" class="search-trigger">
@@ -190,7 +190,7 @@
         <h2 class="doc-h2">Quick Example</h2>
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
-          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.4.0/dist/pine.min.js" defer&gt;&lt;/script&gt;
+          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.5.0/dist/pine.min.js" defer&gt;&lt;/script&gt;
 
 &lt;div p-data="{ count: 0 }"&gt;
   &lt;button @click="count++"&gt;Increment&lt;/button&gt;
@@ -221,7 +221,7 @@
         <h1 class="doc-h1">Upgrade From Alpine.js</h1>
         <p class="lead-p">Transition existing Alpine.js applications with <strong>0 migration edits</strong> via Chameleon Mode, or standardize on <code>p-</code> or prefix-free semantic HTML.</p>
 
-        <h2 class="doc-h2">4 Flavor Equivalency (v1.4.0 Spruce)</h2>
+        <h2 class="doc-h2">4 Flavor Equivalency (v1.5.0 Larch)</h2>
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
           <pre><code>&lt;!-- Flavor 1: Standard Pine --&gt;
@@ -286,10 +286,11 @@
         <p class="lead-p">Explore PineJS releases, codenames, and release highlights.</p>
 
         <div class="demo-card" p-data="{
-          selectedVer: '1.4.0',
+          selectedVer: '1.5.0',
           releases: [
-            { ver: '1.4.0', name: 'Spruce', date: '2026-09-15', status: 'Latest Stable', badge: 'stable', desc: 'Configurable multi-prefix engine (Pine.prefix), prefix-free semantic HTML (state, text, show, model, loop), symbol & emoji shorthands (🌲, ⚡, ~, ?, *), WAAPI timeline orchestrator (Pine.timeline), and 100% Alpine Chameleon drop-in mode.' },
-            { ver: '1.3.0', name: 'Cedar', date: '2026-09-15', status: 'Previous Stable', badge: 'prev', desc: 'p-animate spring physics & WAAPI keyframes, Pine.devtools diagnostic bridge, and proxy receiver binding.' },
+            { ver: '1.5.0', name: 'Larch', date: '2026-09-15', status: 'Latest Stable', badge: 'stable', desc: 'Tagged Template Components (Pine.html), Form Validation (p-validate), Cross-Tab Broadcast Sync ($broadcast), Native View Transitions API ($viewTransition), and Off-Thread Web Worker Signal Bridge (Pine.worker).' },
+            { ver: '1.4.0', name: 'Spruce', date: '2026-09-15', status: 'Previous Stable', badge: 'prev', desc: 'Configurable multi-prefix engine (Pine.prefix), prefix-free semantic HTML (state, text, show, model, loop), symbol & emoji shorthands (🌲, ⚡, ~, ?, *), WAAPI timeline orchestrator (Pine.timeline), and 100% Alpine Chameleon drop-in mode.' },
+            { ver: '1.3.0', name: 'Cedar', date: '2026-09-15', status: 'Stable', badge: 'prev', desc: 'p-animate spring physics & WAAPI keyframes, Pine.devtools diagnostic bridge, and proxy receiver binding.' },
             { ver: '1.2.0', name: 'Redwood', date: '2026-09-14', status: 'Stable', badge: 'prev', desc: 'Official TypeScript typings (dist/pine.d.ts), $history URL sync magic, and p-hydrate SSR hydration activation.' },
             { ver: '1.1.0', name: 'Sequoia', date: '2026-09-14', status: 'Stable', badge: 'prev', desc: 'Hierarchical Scope Proxy, p-modelable component binding, reactive array auto-sync, debounced outside clicks, Pine.$data() API.' },
             { ver: '1.0.0', name: 'Evergreen', date: '2026-09-10', status: 'Initial Release', badge: 'prev', desc: 'Initial release with full Alpine.js API parity, Fine-Grained Signals, built-in morphing & plugins, and 60+ interactive docs components.' }

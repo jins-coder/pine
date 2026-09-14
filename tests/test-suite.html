@@ -631,6 +631,119 @@
       await p;
     });
 
+    test("v1.5.0 Larch: Engine Version & Identity", "Verifies Pine.version === '1.5.0' and Pine.versionName === 'Larch'", async () => {
+      if (Pine.version !== "1.5.0") throw new Error(`Expected Pine.version to be '1.5.0', got '${Pine.version}'`);
+      if (Pine.versionName !== "Larch") throw new Error(`Expected Pine.versionName to be 'Larch', got '${Pine.versionName}'`);
+      if (typeof Pine.html !== "function") throw new Error("Pine.html is not a function");
+      if (typeof Pine.worker !== "function") throw new Error("Pine.worker is not a function");
+    });
+
+    test("v1.5.0 Larch: Tagged Template Components (Pine.html)", "Verifies compiler-less template creation, interpolation, and reactivity", async () => {
+      const sandbox = getSandbox();
+      const title = "Reactive Banner";
+      const count = 42;
+      
+      const component = Pine.html`
+        <div id="tpl-root" state="{ active: true }">
+          <h2 id="tpl-title">${title}</h2>
+          <span id="tpl-count">${count}</span>
+          <button id="tpl-btn" @click="active = !active"></button>
+          <div id="tpl-status" show="active">Active State</div>
+        </div>
+      `;
+
+      if (!component || !component.querySelector) throw new Error("Pine.html did not return a valid DOM element");
+      sandbox.appendChild(component);
+      Pine.initTree(component);
+
+      const h2 = sandbox.querySelector("#tpl-title");
+      const span = sandbox.querySelector("#tpl-count");
+      const status = sandbox.querySelector("#tpl-status");
+
+      if (h2.textContent !== "Reactive Banner") throw new Error(`Expected 'Reactive Banner', got '${h2.textContent}'`);
+      if (span.textContent !== "42") throw new Error(`Expected '42', got '${span.textContent}'`);
+      if (status.style.display === "none") throw new Error("Status element should be visible initially");
+    });
+
+    test("v1.5.0 Larch: Declarative Form Validation (p-validate)", "Verifies field constraint validation rules, $errors, and $valid states", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-validate" p-data="{ email: '', username: '' }">
+          <input id="val-email" name="user_email" p-model="email" p-validate.required.email />
+          <span id="val-email-err" p-text="$errors.user_email || ''"></span>
+          <input id="val-user" name="user_name" p-model="username" p-validate.required.min.4 />
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-validate"));
+
+      const emailInput = sandbox.querySelector("#val-email");
+      const errSpan = sandbox.querySelector("#val-email-err");
+      const scope = Pine.$data(sandbox.querySelector("#t-validate"));
+
+      if (!scope || !scope.$errors) throw new Error("Validation state ($errors) not initialized on scope");
+
+      // Trigger invalid email
+      emailInput.value = "invalid-email";
+      emailInput.dispatchEvent(new Event("input"));
+
+      if (scope.$valid.user_email !== false) throw new Error("Expected $valid.user_email to be false");
+      if (scope.$errors.user_email !== "Invalid email address") throw new Error(`Expected email error message, got '${scope.$errors.user_email}'`);
+
+      // Trigger valid email
+      emailInput.value = "team@pinejs.dev";
+      emailInput.dispatchEvent(new Event("input"));
+
+      if (scope.$valid.user_email !== true) throw new Error("Expected $valid.user_email to be true for valid email");
+      if (scope.$errors.user_email !== null) throw new Error("Expected $errors.user_email to be null for valid email");
+    });
+
+    test("v1.5.0 Larch: Cross-Tab Reactive Synchronization ($broadcast)", "Verifies $broadcast magic reactive signal initialization and channel connectivity", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-broadcast" p-data="{ room: $broadcast('Lobby', 'test_channel') }">
+          <span id="bcast-text" p-text="room"></span>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-broadcast"));
+
+      const text = sandbox.querySelector("#bcast-text");
+      const scope = Pine.$data(sandbox.querySelector("#t-broadcast"));
+
+      if (text.textContent !== "Lobby") throw new Error(`Expected 'Lobby', got '${text.textContent}'`);
+      scope.room = "Stage 1";
+      if (text.textContent !== "Stage 1") throw new Error(`Expected 'Stage 1' after update, got '${text.textContent}'`);
+    });
+
+    test("v1.5.0 Larch: Native View Transitions API ($viewTransition)", "Verifies $viewTransition magic execution and Promise lifecycle", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-vt" p-data="{ tab: 'home' }">
+          <button id="vt-btn" @click="$viewTransition(() => tab = 'dashboard')">Switch</button>
+          <span id="vt-tab" p-text="tab"></span>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-vt"));
+
+      const btn = sandbox.querySelector("#vt-btn");
+      const tabSpan = sandbox.querySelector("#vt-tab");
+
+      if (tabSpan.textContent !== "home") throw new Error(`Expected 'home', got '${tabSpan.textContent}'`);
+      btn.click();
+      if (tabSpan.textContent !== "dashboard") throw new Error(`Expected 'dashboard', got '${tabSpan.textContent}'`);
+    });
+
+    test("v1.5.0 Larch: Off-Thread Web Worker Signal Bridge (Pine.worker)", "Verifies background worker signal computation and reactive state synchronization", async () => {
+      const worker = Pine.worker((n) => n * 2);
+      if (typeof worker.compute !== "function" || typeof worker.terminate !== "function") {
+        throw new Error("WorkerSignal missing compute or terminate methods");
+      }
+
+      const res = await worker.compute(21);
+      if (res !== 42) throw new Error(`Expected worker compute result 42, got ${res}`);
+      if (worker.data !== 42) throw new Error(`Expected worker.data signal to be 42, got ${worker.data}`);
+      worker.terminate();
+    });
+
     // Run tests & render report
     async function runAllTests() {
       const list = document.getElementById("results-list");

@@ -1,5 +1,5 @@
 /**
- * PineJS v1.4.2 "Spruce"
+ * PineJS v1.5.0 "Larch"
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * Complete Alpine.js Parity + True Fine-Grained Signals + Built-in Plugins
  * (c) 2026 PineJS Core Team - MIT License
@@ -900,13 +900,72 @@
             sig.value = v !== null ? v : initialValue;
           };
           window.addEventListener('popstate', popHandler);
-          queueMicrotask(() => {
-            const scope = getScope(el);
-            if (scope) scope.addCleanup(() => window.removeEventListener('popstate', popHandler));
-          });
+          const scope = getScope(el);
+          if (scope) scope.addCleanup(() => window.removeEventListener('popstate', popHandler));
         }
 
         return rxVal;
+      };
+    },
+    $broadcast(el) {
+      return (initialValue, channelName) => {
+        const name = channelName || el.getAttribute('name') || el.id || 'pine_broadcast';
+        let channel = null;
+        let isBroadcasting = false;
+
+        const sig = signal(initialValue);
+
+        if (typeof BroadcastChannel !== 'undefined') {
+          try {
+            channel = new BroadcastChannel(name);
+            channel.onmessage = (event) => {
+              if (!isBroadcasting && event.data !== undefined) {
+                isBroadcasting = true;
+                sig.value = event.data;
+                isBroadcasting = false;
+              }
+            };
+          } catch {}
+        }
+
+        const rxVal = reactive({
+          get value() {
+            return sig.value;
+          },
+          set value(v) {
+            sig.value = v;
+            if (channel && !isBroadcasting) {
+              isBroadcasting = true;
+              try {
+                channel.postMessage(v);
+              } catch (e) {
+                console.warn('[PineJS] $broadcast postMessage error:', e);
+              }
+              isBroadcasting = false;
+            }
+          }
+        });
+
+        const scope = getScope(el);
+        if (scope && channel) {
+          scope.addCleanup(() => channel.close());
+        }
+
+        return rxVal;
+      };
+    },
+    $viewTransition() {
+      return (callback) => {
+        if (typeof document !== 'undefined' && typeof document.startViewTransition === 'function') {
+          return document.startViewTransition(() => {
+            return typeof callback === 'function' ? callback() : undefined;
+          });
+        }
+        if (typeof callback === 'function') {
+          const res = callback();
+          return Promise.resolve(res);
+        }
+        return Promise.resolve();
       };
     }
   };
@@ -1677,6 +1736,89 @@
         const scope = getScope(el);
         if (scope) scope.addCleanup(stop);
       }
+    },
+
+    // p-validate: Declarative field & form constraint validation
+    'p-validate': (el, { expression, modifiers }) => {
+      const fieldName = el.getAttribute('name') || el.id || el.getAttribute('p-model') || el.getAttribute('model') || el.getAttribute('~') || 'field';
+      const scope = getScope(el);
+      if (!scope) return;
+
+      if (!scope.data.$errors) scope.data.$errors = reactive({});
+      if (!scope.data.$valid) scope.data.$valid = reactive({});
+      if (!scope.data.$touched) scope.data.$touched = reactive({});
+      if (!scope.data.$dirty) scope.data.$dirty = reactive({});
+
+      scope.data.$valid[fieldName] = true;
+      scope.data.$errors[fieldName] = null;
+      scope.data.$touched[fieldName] = false;
+      scope.data.$dirty[fieldName] = false;
+
+      const validateField = (val) => {
+        const v = val !== undefined ? val : (el.value !== undefined ? el.value : '');
+        let error = null;
+
+        if (modifiers.includes('required') && (!v || String(v).trim() === '')) {
+          error = 'This field is required';
+        } else if (modifiers.includes('email') && v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v))) {
+          error = 'Invalid email address';
+        } else {
+          const minMod = modifiers.find((m) => m.startsWith('min'));
+          if (minMod) {
+            const minVal = Number(minMod.replace('min', '') || 0);
+            if (typeof v === 'number' ? v < minVal : String(v).length < minVal) {
+              error = `Minimum length is ${minVal}`;
+            }
+          }
+          const maxMod = modifiers.find((m) => m.startsWith('max'));
+          if (maxMod) {
+            const maxVal = Number(maxMod.replace('max', '') || 0);
+            if (typeof v === 'number' ? v > maxVal : String(v).length > maxVal) {
+              error = `Maximum length is ${maxVal}`;
+            }
+          }
+        }
+
+        if (!error && expression) {
+          try {
+            const custom = evaluate(el, expression);
+            if (typeof custom === 'function') {
+              const res = custom(v, el);
+              if (res === false) error = 'Validation failed';
+              else if (typeof res === 'string' && res) error = res;
+            } else if (typeof custom === 'string' && custom) {
+              error = custom;
+            } else if (custom === false) {
+              error = 'Validation failed';
+            }
+          } catch {}
+        }
+
+        scope.data.$errors[fieldName] = error;
+        scope.data.$valid[fieldName] = !error;
+        if (error) {
+          el.setAttribute('aria-invalid', 'true');
+        } else {
+          el.removeAttribute('aria-invalid');
+        }
+        return !error;
+      };
+
+      const onInput = (e) => {
+        scope.data.$dirty[fieldName] = true;
+        validateField(e.target.value);
+      };
+      const onBlur = () => {
+        scope.data.$touched[fieldName] = true;
+        validateField(el.value);
+      };
+
+      el.addEventListener('input', onInput);
+      el.addEventListener('blur', onBlur);
+      scope.addCleanup(() => {
+        el.removeEventListener('input', onInput);
+        el.removeEventListener('blur', onBlur);
+      });
     }
   };
 
@@ -1861,7 +2003,9 @@
     'bind': 'p-bind',
     'on': 'p-on',
     'init': 'p-init',
-    'transition': 'p-transition'
+    'transition': 'p-transition',
+    'validate': 'p-validate',
+    'valid': 'p-validate'
   };
 
   const symbolDirectives = {
@@ -2129,11 +2273,148 @@
   }
 
   // =========================================================================
-  // 12. PUBLIC PINE API
+  // 12. TAGGED TEMPLATE LITERALS (Pine.html / Pine.tpl)
+  // =========================================================================
+  function html(strings, ...values) {
+    if (typeof document === 'undefined') return null;
+    let result = '';
+    const domNodes = [];
+
+    strings.forEach((str, i) => {
+      result += str;
+      if (i < values.length) {
+        const val = values[i];
+        if (val instanceof Node || (typeof NodeList !== 'undefined' && val instanceof NodeList) || (Array.isArray(val) && val[0] instanceof Node)) {
+          const markerId = `__pine_node_${Math.random().toString(36).slice(2, 9)}__`;
+          domNodes.push({ markerId, node: val });
+          result += `<span id="${markerId}"></span>`;
+        } else if (Array.isArray(val)) {
+          result += val.join('');
+        } else if (val !== null && val !== undefined) {
+          result += String(val);
+        }
+      }
+    });
+
+    const template = document.createElement('template');
+    template.innerHTML = result.trim();
+    const fragment = template.content;
+
+    domNodes.forEach(({ markerId, node }) => {
+      const placeholder = fragment.querySelector(`#${markerId}`);
+      if (placeholder) {
+        if (Array.isArray(node)) {
+          node.forEach((n) => placeholder.parentNode.insertBefore(n, placeholder));
+        } else if (typeof NodeList !== 'undefined' && node instanceof NodeList) {
+          Array.from(node).forEach((n) => placeholder.parentNode.insertBefore(n, placeholder));
+        } else {
+          placeholder.parentNode.insertBefore(node, placeholder);
+        }
+        placeholder.remove();
+      }
+    });
+
+    const element = fragment.childNodes.length === 1 ? fragment.firstElementChild : fragment;
+    return element;
+  }
+
+  // =========================================================================
+  // 13. OFF-THREAD WEB WORKER SIGNAL BRIDGE (Pine.worker)
+  // =========================================================================
+  function createWorkerSignal(fnOrCode) {
+    let workerCode = '';
+    if (typeof fnOrCode === 'function') {
+      workerCode = `
+        self.onmessage = async (e) => {
+          try {
+            const computeFn = (${fnOrCode.toString()});
+            const result = await computeFn(e.data);
+            self.postMessage({ ok: true, result });
+          } catch (err) {
+            self.postMessage({ ok: false, error: err.message || String(err) });
+          }
+        };
+      `;
+    } else if (typeof fnOrCode === 'string') {
+      workerCode = fnOrCode;
+    }
+
+    let worker = null;
+    let workerUrl = null;
+
+    if (typeof Blob !== 'undefined' && typeof URL !== 'undefined' && typeof Worker !== 'undefined') {
+      try {
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        workerUrl = URL.createObjectURL(blob);
+        worker = new Worker(workerUrl);
+      } catch {}
+    }
+
+    const dataSig = signal(null);
+    const loadingSig = signal(false);
+    const errorSig = signal(null);
+
+    const instance = {
+      get data() { return dataSig.value; },
+      get loading() { return loadingSig.value; },
+      get error() { return errorSig.value; },
+      compute(payload) {
+        if (!worker) {
+          if (typeof fnOrCode === 'function') {
+            loadingSig.value = true;
+            return Promise.resolve()
+              .then(() => fnOrCode(payload))
+              .then((res) => {
+                dataSig.value = res;
+                loadingSig.value = false;
+                return res;
+              })
+              .catch((err) => {
+                errorSig.value = err.message || String(err);
+                loadingSig.value = false;
+                throw err;
+              });
+          }
+          return Promise.reject(new Error('Web Workers not supported in this environment'));
+        }
+
+        loadingSig.value = true;
+        errorSig.value = null;
+
+        return new Promise((resolve, reject) => {
+          const handler = (e) => {
+            worker.removeEventListener('message', handler);
+            loadingSig.value = false;
+            if (e.data.ok) {
+              dataSig.value = e.data.result;
+              resolve(e.data.result);
+            } else {
+              errorSig.value = e.data.error;
+              reject(new Error(e.data.error));
+            }
+          };
+          worker.addEventListener('message', handler);
+          worker.postMessage(payload);
+        });
+      },
+      terminate() {
+        if (worker) {
+          worker.terminate();
+          worker = null;
+          if (workerUrl) URL.revokeObjectURL(workerUrl);
+        }
+      }
+    };
+
+    return instance;
+  }
+
+  // =========================================================================
+  // 14. PUBLIC PINE API
   // =========================================================================
   const Pine = {
-    version: '1.4.2',
-    versionName: 'Spruce',
+    version: '1.5.0',
+    versionName: 'Larch',
 
     // Prefix Configuration
     prefix(newPrefix) {
@@ -2153,6 +2434,9 @@
     raw,
     fetch: createFetchResource,
     timeline,
+    html,
+    tpl: html,
+    worker: createWorkerSignal,
 
     // DevTools & Diagnostic Runtime Bridge
     devtools: {

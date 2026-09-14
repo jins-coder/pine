@@ -123,14 +123,22 @@ export interface TimelineInstance {
   cancel(): void;
 }
 
+export interface WorkerSignal<T = any> {
+  readonly data: T | null;
+  readonly loading: boolean;
+  readonly error: string | null;
+  compute(payload: any): Promise<T>;
+  terminate(): void;
+}
+
 export interface PineAPI {
-  version: '1.4.0';
-  versionName: 'Spruce';
+  version: '1.5.0';
+  versionName: 'Larch';
 
   // Prefix Configuration
   prefix: (newPrefix?: string | string[]) => string[];
 
-  // Signals & Fetch
+  // Signals, Fetch, Timeline & Templates
   signal: typeof signal;
   computed: typeof computed;
   effect: typeof effect;
@@ -140,6 +148,9 @@ export interface PineAPI {
   raw: typeof raw;
   fetch: FetchClient;
   timeline: (steps: TimelineStep[], globalOptions?: KeyframeAnimationOptions) => TimelineInstance;
+  html: (strings: TemplateStringsArray, ...values: any[]) => HTMLElement | DocumentFragment;
+  tpl: (strings: TemplateStringsArray, ...values: any[]) => HTMLElement | DocumentFragment;
+  worker: <T = any>(fnOrCode: ((payload: any) => T | Promise<T>) | string) => WorkerSignal<T>;
 
   // Diagnostics & DevTools
   devtools: DevToolsAPI;

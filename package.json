@@ -1,7 +1,7 @@
 {
   "name": "pinejs-core",
-  "version": "1.4.2",
-  "versionName": "Spruce",
+  "version": "1.5.0",
+  "versionName": "Larch",
   "description": "Next-generation fine-grained reactive declarative micro-framework for the modern web with CDN support, signals, and ultra-fast DOM updates.",
   "main": "dist/pine.js",
   "module": "dist/pine.esm.js",

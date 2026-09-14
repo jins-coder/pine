@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 📦 Releases
 
-- [v1.4.0 — "Spruce" (2026-09-15)](#v140--spruce-2026-09-15) — **Latest Stable**
+- [v1.5.0 — "Larch" (2026-09-15)](#v150--larch-2026-09-15) — **Latest Stable**
+- [v1.4.0 — "Spruce" (2026-09-15)](#v140--spruce-2026-09-15)
 - [v1.3.0 — "Cedar" (2026-09-15)](#v130--cedar-2026-09-15)
 - [v1.2.0 — "Redwood" (2026-09-14)](#v120--redwood-2026-09-14)
 - [v1.1.0 — "Sequoia" (2026-09-14)](#v110--sequoia-2026-09-14)
@@ -17,10 +18,62 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [v1.5.0] — "Larch" (2026-09-15)
+
+> **Codename**: Larch  
+> **Status**: Latest Stable  
+> **Bundle Size**: ~29.8 KB minified (~9.85 KB gzipped)  
+> **CDN Link**: `https://unpkg.com/pinejs-core@1.5.0/dist/pine.min.js`
+
+### 🚀 Major Enhancements
+
+#### 1. Tagged Template Component Engine (`Pine.html` / `Pine.tpl`)
+- **Compiler-less JSX Alternative**: Write declarative HTML templates in vanilla JavaScript with full signal reactivity, dynamic node insertion, and cached sub-millisecond cloning:
+  ```javascript
+  const Counter = ({ title }) => Pine.html`
+    <div state="{ count: 0 }">
+      <h3>${title}</h3>
+      <button @click="count++">Count: <span text="count"></span></button>
+    </div>
+  `;
+  document.body.appendChild(Counter({ title: 'Reactive Widget' }));
+  ```
+
+#### 2. Declarative Form Validation Engine (`p-validate` / `valid`)
+- **Field & Form Constraints**: Declare field validation rules directly in markup with modifiers:
+  - `p-validate.required.email`
+  - `p-validate.min.5.max.30`
+  - `p-validate="customValidatorFunction"`
+- **Automatic Reactive State Bag**: Injects `$errors`, `$valid`, `$touched`, and `$dirty` into scope for instant UI feedback.
+
+#### 3. Cross-Tab & Multi-Window Synchronization (`$broadcast`)
+- **Real-Time Tab Syncing**: Keep state in sync across multiple browser tabs and windows without server websockets:
+  ```html
+  <div p-data="{ user: $broadcast('Guest', 'auth_channel') }">
+    <input p-model="user" />
+  </div>
+  ```
+
+#### 4. Native View Transitions API Integration (`$viewTransition`)
+- **Smooth Page & Component Morphs**: Wrap reactive DOM state changes with `document.startViewTransition()` with zero boilerplate:
+  ```html
+  <button @click="$viewTransition(() => tab = 'settings')">Switch Tab</button>
+  ```
+
+#### 5. Off-Thread Web Worker Signal Bridge (`Pine.worker`)
+- **Background Multi-Thread Computations**: Offload CPU-heavy sorting, filtering, hashing, and calculations to background threads while keeping UI 60fps responsive:
+  ```javascript
+  const primeWorker = Pine.worker((n) => calculatePrimes(n));
+  primeWorker.compute(1000000);
+  // primeWorker.data and primeWorker.loading are reactive signals!
+  ```
+
+---
+
 ## [v1.4.0] — "Spruce" (2026-09-15)
 
 > **Codename**: Spruce  
-> **Status**: Latest Stable  
+> **Status**: Previous Stable  
 > **Bundle Size**: ~27.4 KB minified (~8.90 KB gzipped)  
 > **CDN Link**: `https://unpkg.com/pinejs-core@1.4.0/dist/pine.min.js`
 
