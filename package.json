@@ -18,10 +18,26 @@
     "cdn",
     "lightweight"
   ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/pine.d.ts",
+      "import": "./dist/pine.esm.js",
+      "require": "./dist/pine.js",
+      "default": "./dist/pine.js"
+    },
+    "./esm": "./dist/pine.esm.js",
+    "./min": "./dist/pine.min.js"
+  },
   "scripts": {
     "build": "node build.js",
     "build:esbuild": "node build.js --esbuild",
     "build:terser": "node build.js --terser",
+    "prepublishOnly": "node build.js",
     "test": "echo \"Open tests/test-suite.html in your browser\""
   },
   "author": "PineJS Core Team",
