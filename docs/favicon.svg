@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="pineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="50%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <filter id="pineShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#047857" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- Base Circle Background -->
+  <rect width="64" height="64" rx="16" fill="#f0fdf4" stroke="#dcfce7" stroke-width="1.5" />
+
+  <!-- Layer 3: Bottom Pine Tier -->
+  <path d="M14 44 C14 42 16 41 18 41 L46 41 C48 41 50 42 50 44 C50 46 48 47 45 47 L19 47 C16 47 14 46 14 44 Z" fill="url(#pineGrad)" opacity="0.9" />
+  <path d="M16 42 L32 28 L48 42 L39 42 L45 47 L19 47 L25 42 Z" fill="url(#pineGrad)" filter="url(#pineShadow)" />
+
+  <!-- Layer 2: Middle Pine Tier -->
+  <path d="M20 32 L32 20 L44 32 L37 32 L41 36 L23 36 L27 32 Z" fill="url(#pineGrad)" />
+
+  <!-- Layer 1: Top Crown Tier -->
+  <path d="M25 22 L32 12 L39 22 L34 22 L36 25 L28 25 L30 22 Z" fill="url(#accentGrad)" />
+
+  <!-- Trunk -->
+  <rect x="30" y="47" width="4" height="7" rx="2" fill="#047857" />
+
+  <!-- Reactive Signal Spark / Core Dot -->
+  <circle cx="32" cy="27" r="2" fill="#ffffff" />
+</svg>

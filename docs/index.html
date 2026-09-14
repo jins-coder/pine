@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PineJS — Next-Gen Fine-Grained Declarative Micro-Framework</title>
   <meta name="description" content="Next-generation CDN-based fine-grained reactive declarative micro-framework. Complete Alpine.js parity with signals, faster DOM updates, and built-in plugins.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="docs.css">
   <!-- Load PineJS library -->
   <script src="../dist/pine.js"></script>
@@ -17,10 +18,7 @@
     <div style="display: flex; align-items: center; gap: 2rem;">
       <a href="#start-here" class="brand-wrapper">
         <div class="brand-logo">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m12 2 4 6h-3l4 6h-3l4 6H6l4-6H7l4-6H8z"/>
-            <path d="M12 20v2"/>
-          </svg>
+          <img src="logo.svg" alt="PineJS Logo" width="24" height="24" style="display: block;">
         </div>
         <div class="brand-title">PineJS</div>
         <span class="brand-version" title="Codename: Cedar">v1.3.0 (Cedar)</span>
@@ -41,7 +39,6 @@
         <li><a href="../tests/test-suite.html" class="nav-link" target="_blank">Test Suite 🧪</a></li>
       </ul>
 
-      <button id="theme-toggle" class="theme-toggle-btn" title="Toggle color theme">🌙</button>
       <a href="https://github.com" target="_blank" class="icon-btn" title="GitHub Repository">
         <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
       </a>
@@ -1420,8 +1417,8 @@
         <div class="demo-card">
           <div class="demo-preview-header"><span>⚡ Live Persist Storage</span></div>
           <div class="demo-preview-body">
-            <div p-data="{ theme: $persist('Dark Slate', 'pine_pref_theme') }">
-              Saved Theme Preference: <strong style="color: var(--alpine-teal);" p-text="theme.value"></strong>
+            <div p-data="{ accent: $persist('Emerald Pine', 'pine_pref_accent') }">
+              Saved Color Accent: <strong style="color: var(--alpine-teal);" p-text="accent.value"></strong>
             </div>
           </div>
         </div>

@@ -127,20 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const initialHash = window.location.hash.slice(1) || 'start-here';
   navigateTo(initialHash);
 
-  // Theme switcher (defaults to light)
-  const themeToggleBtn = document.getElementById('theme-toggle');
-  const storedTheme = localStorage.getItem('pine_doc_theme') || 'light';
-  document.documentElement.setAttribute('data-theme', storedTheme);
-
-  if (themeToggleBtn) {
-    themeToggleBtn.innerHTML = storedTheme === 'light' ? '🌙' : '☀️';
-    themeToggleBtn.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('pine_doc_theme', next);
-      themeToggleBtn.innerHTML = next === 'light' ? '🌙' : '☀️';
-    });
+  // Enforce Light Theme
+  document.documentElement.setAttribute('data-theme', 'light');
+  if (localStorage.getItem('pine_doc_theme')) {
+    localStorage.removeItem('pine_doc_theme');
   }
 
   // Copy Code Buttons

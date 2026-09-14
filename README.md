@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.svg" width="90" height="90" alt="PineJS Logo" />
+</p>
+
 # 🌲 PineJS (`pine.js`)
 
 > **Next-Generation Fine-Grained Reactive Declarative Micro-Framework for Modern Web Apps**  

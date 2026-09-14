@@ -1,6 +1,6 @@
 /* =========================================================================
    PineJS Documentation Site Stylesheet
-   Modern Light Theme (Alpine.js / VitePress / Tailwind Inspired)
+   Modern Clean Light Theme (Alpine.js / VitePress / Tailwind Inspired)
    ========================================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -9,7 +9,7 @@
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', Menlo, Monaco, Consolas, monospace;
 
-  /* Crisp Light Theme (Default) */
+  /* Clean Light Theme */
   --bg-body: #f8fafc;
   --bg-sidebar: #ffffff;
   --bg-surface: #ffffff;
@@ -23,7 +23,7 @@
   --text-secondary: #475569;
   --text-muted: #94a3b8;
 
-  /* Alpine Signature Teal */
+  /* Alpine / Pine Signature Teal */
   --alpine-teal: #0d9488;
   --alpine-teal-hover: #0f766e;
   --alpine-teal-light: #f0fdfa;
@@ -32,27 +32,6 @@
 
   --sidebar-width: 275px;
   --header-height: 64px;
-}
-
-[data-theme="dark"] {
-  --bg-body: #0b1120;
-  --bg-sidebar: #0f172a;
-  --bg-surface: #1e293b;
-  --bg-surface-elevated: #334155;
-  --bg-code: #070d19;
-  
-  --border-color: #1e293b;
-  --border-subtle: #172033;
-
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-
-  --alpine-teal: #2dd4bf;
-  --alpine-teal-hover: #5eead4;
-  --alpine-teal-light: rgba(45, 212, 191, 0.1);
-  --alpine-teal-border: rgba(45, 212, 191, 0.3);
-  --alpine-cyan: #38bdf8;
 }
 
 * {
@@ -89,10 +68,6 @@ body {
   border-radius: 999px;
 }
 
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: #334155;
-}
-
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
@@ -106,7 +81,7 @@ body {
   left: 0;
   right: 0;
   height: var(--header-height);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color);
@@ -115,10 +90,6 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 2rem;
-}
-
-[data-theme="dark"] .site-header {
-  background: rgba(15, 23, 42, 0.9);
 }
 
 .brand-wrapper {
@@ -130,17 +101,20 @@ body {
 }
 
 .brand-logo {
-  width: 34px;
-  height: 34px;
-  background: linear-gradient(135deg, #0d9488, #0284c7);
-  border-radius: 9px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  color: #ffffff;
-  font-size: 1.15rem;
-  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.2);
+}
+
+.brand-logo img {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .brand-title {
@@ -177,10 +151,6 @@ body {
   min-width: 250px;
 }
 
-[data-theme="dark"] .search-trigger {
-  background: #1e293b;
-}
-
 .search-trigger:hover {
   border-color: var(--alpine-teal);
   color: var(--text-primary);
@@ -195,10 +165,6 @@ body {
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
   margin-left: auto;
-}
-
-[data-theme="dark"] .search-kbd {
-  background: #0f172a;
 }
 
 .nav-links {
@@ -241,7 +207,7 @@ body {
   gap: 1rem;
 }
 
-.theme-toggle-btn, .icon-btn {
+.icon-btn {
   background: #f8fafc;
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
@@ -263,11 +229,7 @@ body {
   display: block;
 }
 
-[data-theme="dark"] .theme-toggle-btn, [data-theme="dark"] .icon-btn {
-  background: #1e293b;
-}
-
-.theme-toggle-btn:hover, .icon-btn:hover {
+.icon-btn:hover {
   color: var(--alpine-teal);
   border-color: var(--alpine-teal);
 }
@@ -329,10 +291,6 @@ body {
   background: #f1f5f9;
 }
 
-[data-theme="dark"] .sidebar-item a:hover {
-  background: #1e293b;
-}
-
 .sidebar-item a.active {
   background: var(--alpine-teal-light);
   color: var(--alpine-teal);
@@ -348,10 +306,6 @@ body {
   border-radius: 4px;
   border: 1px solid var(--border-color);
   font-weight: 600;
-}
-
-[data-theme="dark"] .sidebar-tag {
-  background: #1e293b;
 }
 
 /* =========================================================================
@@ -449,11 +403,6 @@ code:not(pre code) {
   font-weight: 600;
 }
 
-[data-theme="dark"] code:not(pre code) {
-  background: #1e293b;
-  color: #2dd4bf;
-}
-
 /* Code Blocks with Dark Slate Syntax Container */
 .code-box {
   position: relative;
@@ -515,10 +464,6 @@ pre {
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
-[data-theme="dark"] .demo-card {
-  background: #1e293b;
-}
-
 .demo-preview-header {
   padding: 0.65rem 1.25rem;
   background: #f8fafc;
@@ -533,17 +478,9 @@ pre {
   justify-content: space-between;
 }
 
-[data-theme="dark"] .demo-preview-header {
-  background: #0f172a;
-}
-
 .demo-preview-body {
   padding: 1.5rem;
   background: #ffffff;
-}
-
-[data-theme="dark"] .demo-preview-body {
-  background: #1e293b;
 }
 
 /* Alert Boxes */
@@ -562,10 +499,6 @@ pre {
   background: #f0f9ff;
 }
 
-[data-theme="dark"] .doc-alert.info {
-  background: rgba(2, 132, 199, 0.1);
-}
-
 /* Tables */
 .doc-table-wrapper {
   overflow-x: auto;
@@ -573,10 +506,6 @@ pre {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background: #ffffff;
-}
-
-[data-theme="dark"] .doc-table-wrapper {
-  background: #1e293b;
 }
 
 .doc-table {
@@ -592,10 +521,6 @@ pre {
   font-weight: 700;
   color: var(--text-primary);
   border-bottom: 1px solid var(--border-color);
-}
-
-[data-theme="dark"] .doc-table th {
-  background: #0f172a;
 }
 
 .doc-table td {
@@ -640,10 +565,6 @@ pre {
   transition: all 0.15s ease;
 }
 
-[data-theme="dark"] .btn-demo-outline {
-  background: #1e293b;
-}
-
 .btn-demo-outline:hover {
   border-color: var(--alpine-teal);
   color: var(--alpine-teal);
@@ -659,10 +580,6 @@ pre {
   font-size: 0.88rem;
   outline: none;
   transition: border-color 0.15s ease;
-}
-
-[data-theme="dark"] .input-demo {
-  background: #0f172a;
 }
 
 .input-demo:focus {
@@ -698,10 +615,6 @@ pre {
   max-width: 580px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   overflow: hidden;
-}
-
-[data-theme="dark"] .search-modal {
-  background: #0f172a;
 }
 
 .search-input-wrapper {
@@ -740,10 +653,6 @@ pre {
 
 .search-result-item:hover {
   background: #f1f5f9;
-}
-
-[data-theme="dark"] .search-result-item:hover {
-  background: #1e293b;
 }
 
 .search-result-title {
