@@ -968,21 +968,39 @@
 
       const modelableProp = el.getAttribute('p-modelable') || (scope && scope.modelableProp);
       if (modelableProp && tag !== 'input' && tag !== 'select' && tag !== 'textarea') {
+        let isSyncing = false;
+
+        // Sync parent -> child
         const stop1 = effect(() => {
           const parentVal = evaluate(el.parentElement || el, expression);
+          if (isSyncing) return;
           if (scope && scope.data && scope.data[modelableProp] !== parentVal) {
-            scope.data[modelableProp] = parentVal;
-          }
-        });
-        const stop2 = effect(() => {
-          if (scope && scope.data) {
-            const childVal = scope.data[modelableProp];
-            const currentParentVal = evaluate(el.parentElement || el, expression);
-            if (childVal !== currentParentVal) {
-              evaluateSetter(el.parentElement || el, expression, childVal);
+            isSyncing = true;
+            try {
+              scope.data[modelableProp] = parentVal;
+            } finally {
+              isSyncing = false;
             }
           }
         });
+
+        // Sync child -> parent
+        const stop2 = effect(() => {
+          if (scope && scope.data) {
+            const childVal = scope.data[modelableProp];
+            if (isSyncing) return;
+            const currentParentVal = evaluate(el.parentElement || el, expression);
+            if (childVal !== currentParentVal) {
+              isSyncing = true;
+              try {
+                evaluateSetter(el.parentElement || el, expression, childVal);
+              } finally {
+                isSyncing = false;
+              }
+            }
+          }
+        });
+
         if (scope) {
           scope.addCleanup(stop1);
           scope.addCleanup(stop2);
