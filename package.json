@@ -1,6 +1,6 @@
 {
   "name": "pinejs-core",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "versionName": "Spruce",
   "description": "Next-generation fine-grained reactive declarative micro-framework for the modern web with CDN support, signals, and ultra-fast DOM updates.",
   "main": "dist/pine.js",
