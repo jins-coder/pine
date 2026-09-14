@@ -168,7 +168,8 @@
         </div>
       `;
       Pine.initTree(sandbox.querySelector("#t2"));
-      const btn = sandbox.querySelector("#t2-btn");
+      const btn = sandbox.querySelector("#t2 button");
+      if (!btn) throw new Error("Button element not found");
       if (btn.id !== "btn-101") throw new Error(`Expected id 'btn-101', got '${btn.id}'`);
       if (!btn.classList.contains("is-active")) throw new Error(`Expected class 'is-active'`);
 

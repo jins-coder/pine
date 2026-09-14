@@ -1215,14 +1215,18 @@
       let renderedNodes = [];
 
       const stop = effect(() => {
-        const items = evaluate(templateEl, itemsExpr) || [];
-        const itemsArray = Array.isArray(items)
-          ? items
-          : typeof items === 'number'
-          ? Array.from({ length: items }, (_, i) => i + 1)
-          : isObject(items)
-          ? Object.entries(items).map(([k, v]) => ({ key: k, value: v }))
-          : [];
+        const items = evaluate(templateEl, itemsExpr);
+        let itemsArray = [];
+        if (Array.isArray(items)) {
+          const len = items.length;
+          for (let i = 0; i < len; i++) {
+            itemsArray.push(items[i]);
+          }
+        } else if (typeof items === 'number') {
+          itemsArray = Array.from({ length: items }, (_, i) => i + 1);
+        } else if (isObject(items)) {
+          itemsArray = Object.entries(items).map(([k, v]) => ({ key: k, value: v }));
+        }
 
         const newRenderedNodes = [];
         const parent = marker.parentElement;
