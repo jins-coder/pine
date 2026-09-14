@@ -23,7 +23,7 @@
           </svg>
         </div>
         <div class="brand-title">PineJS</div>
-        <span class="brand-version" title="Codename: Sequoia">v1.1.0 (Sequoia)</span>
+        <span class="brand-version" title="Codename: Redwood">v1.2.0 (Redwood)</span>
       </a>
 
       <button id="search-trigger" class="search-trigger">
@@ -188,7 +188,7 @@
         <h2 class="doc-h2">Quick Example</h2>
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
-          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.1.0/dist/pine.min.js" defer&gt;&lt;/script&gt;
+          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.2.0/dist/pine.min.js" defer&gt;&lt;/script&gt;
 
 &lt;div p-data="{ count: 0 }"&gt;
   &lt;button @click="count++"&gt;Increment&lt;/button&gt;
@@ -1506,12 +1506,25 @@
           <div class="demo-preview-header"><span>📦 Version Selector & Changelog Explorer</span></div>
           <div class="demo-preview-body">
             <div p-data="{
-              selectedVer: '1.1.0',
+              selectedVer: '1.2.0',
               versions: [
+                {
+                  ver: '1.2.0',
+                  name: 'Redwood',
+                  tag: 'Latest Stable',
+                  date: '2026-09-14',
+                  highlights: [
+                    'Official TypeScript typings (dist/pine.d.ts) for signals, directives & magics',
+                    '$history magic for bidirectional URL query search param synchronization & popstate',
+                    'p-hydrate SSR directive for seamless server-side rendering activation',
+                    'Fine-Grained Signals reactivity with near-zero latency DOM updates',
+                    '100% test suite pass rate across all automated unit & integration tests'
+                  ]
+                },
                 {
                   ver: '1.1.0',
                   name: 'Sequoia',
-                  tag: 'Latest Stable',
+                  tag: 'Previous Stable',
                   date: '2026-09-14',
                   highlights: [
                     'Hierarchical Scope Proxy inheritance across nested components & templates',

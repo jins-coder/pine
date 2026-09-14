@@ -1,5 +1,5 @@
 /**
- * PineJS v1.1.0 "Sequoia"
+ * PineJS v1.2.0 "Redwood"
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * Complete Alpine.js Parity + True Fine-Grained Signals + Built-in Plugins
  * (c) 2026 PineJS Core Team - MIT License
@@ -704,6 +704,51 @@
           scope.addCleanup(() => observer.disconnect());
         }
       };
+    },
+    $history(el) {
+      return (initialValue, paramName) => {
+        const key = paramName || el.getAttribute('name') || el.id || 'q';
+        let currentVal = initialValue;
+        if (typeof window !== 'undefined') {
+          const url = new URL(window.location.href);
+          const urlVal = url.searchParams.get(key);
+          if (urlVal !== null) {
+            try { currentVal = JSON.parse(urlVal); } catch { currentVal = urlVal; }
+          }
+        }
+
+        const sig = signal(currentVal);
+        const rxVal = reactive({
+          get value() {
+            return sig.value;
+          },
+          set value(v) {
+            sig.value = v;
+            if (typeof window !== 'undefined') {
+              const currentUrl = new URL(window.location.href);
+              if (v === '' || v === null || v === undefined) {
+                currentUrl.searchParams.delete(key);
+              } else {
+                currentUrl.searchParams.set(key, typeof v === 'object' ? JSON.stringify(v) : String(v));
+              }
+              window.history.replaceState({}, '', currentUrl.toString());
+            }
+          }
+        });
+
+        if (typeof window !== 'undefined') {
+          const popHandler = () => {
+            const u = new URL(window.location.href);
+            const v = u.searchParams.get(key);
+            sig.value = v !== null ? v : initialValue;
+          };
+          window.addEventListener('popstate', popHandler);
+          const scope = getScope(el);
+          if (scope) scope.addCleanup(() => window.removeEventListener('popstate', popHandler));
+        }
+
+        return rxVal;
+      };
     }
   };
 
@@ -1403,6 +1448,11 @@
       if (!el.hasAttribute('p-data')) {
         evaluate(el, expression);
       }
+    },
+
+    // p-hydrate: Server-Side Rendering (SSR) hydration marker
+    'p-hydrate': (el) => {
+      el.removeAttribute('p-hydrate');
     }
   };
 
@@ -1677,8 +1727,8 @@
   // 10. PUBLIC PINE API
   // =========================================================================
   const Pine = {
-    version: '1.1.0',
-    versionName: 'Sequoia',
+    version: '1.2.0',
+    versionName: 'Redwood',
 
     // Signals Engine
     signal,

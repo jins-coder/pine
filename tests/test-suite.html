@@ -380,6 +380,42 @@
       if (span.textContent !== "InitialRefVal") throw new Error(`Expected 'InitialRefVal', got '${span.textContent}'`);
     });
 
+    test("PineJS v1.2.0: Version & SSR p-hydrate", "Verifying runtime version tags and SSR hydration directive", () => {
+      if (Pine.version !== "1.2.0") throw new Error(`Expected Pine.version '1.2.0', got '${Pine.version}'`);
+      if (Pine.versionName !== "Redwood") throw new Error(`Expected Pine.versionName 'Redwood', got '${Pine.versionName}'`);
+
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t-hydrate" p-data="{ active: true }" p-hydrate>
+          <span id="hydrate-span" p-text="active ? 'Hydrated' : 'Inactive'">Hydrated</span>
+        </div>
+      `;
+      const root = sandbox.querySelector("#t-hydrate");
+      if (!root.hasAttribute("p-hydrate")) throw new Error("Expected p-hydrate attribute initially");
+      Pine.initTree(root);
+      if (root.hasAttribute("p-hydrate")) throw new Error("Expected p-hydrate attribute to be removed upon tree activation");
+      const span = sandbox.querySelector("#hydrate-span");
+      if (span.textContent !== "Hydrated") throw new Error(`Expected 'Hydrated', got '${span.textContent}'`);
+    });
+
+    test("Magics: $history Reactive URL Sync", "Bidirectional URL query sync with reactive signal", () => {
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t-hist" p-data="{ query: $history('initialQuery', 'test_search_key') }">
+          <input id="hist-input" p-model="query.value" />
+          <span id="hist-span" p-text="query.value"></span>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-hist"));
+      const input = sandbox.querySelector("#hist-input");
+      const span = sandbox.querySelector("#hist-span");
+      if (span.textContent !== "initialQuery") throw new Error(`Expected 'initialQuery', got '${span.textContent}'`);
+      
+      input.value = "updatedFilter";
+      input.dispatchEvent(new Event("input"));
+      if (span.textContent !== "updatedFilter") throw new Error(`Expected 'updatedFilter', got '${span.textContent}'`);
+    });
+
     // Run tests & render report
     async function runAllTests() {
       const list = document.getElementById("results-list");

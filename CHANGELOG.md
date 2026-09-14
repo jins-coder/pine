@@ -8,16 +8,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 📦 Releases
 
-- [v1.1.0 — "Sequoia" (2026-09-14)](#v110--sequoia-2026-09-14) — **Latest Stable**
+- [v1.2.0 — "Redwood" (2026-09-14)](#v120--redwood-2026-09-14) — **Latest Stable**
+- [v1.1.0 — "Sequoia" (2026-09-14)](#v110--sequoia-2026-09-14)
 - [v1.0.0 — "Evergreen" (2026-09-10)](#v100--evergreen-2026-09-10) — Initial Release
 - [Roadmap & Upcoming Versions](#-future-roadmap)
+
+---
+
+## [v1.2.0] — "Redwood" (2026-09-14)
+
+> **Codename**: Redwood  
+> **Status**: Latest Stable  
+> **Bundle Size**: ~35.4 KB minified (~9.5 KB gzipped)  
+> **CDN Link**: `https://unpkg.com/pinejs-core@1.2.0/dist/pine.min.js`
+
+### 🚀 Major Enhancements
+
+#### 1. Official TypeScript Typings (`dist/pine.d.ts`)
+- **Full Ambient Declarations**: First-class TypeScript definitions for all signals primitives (`Signal`, `Computed`, `EffectFn`, `batch`, `untrack`, `reactive`, `raw`), `PineAPI`, directives, and `$magics`.
+- **Package Manifest Integration**: Bound directly to `"types": "dist/pine.d.ts"` in `package.json` for seamless autocomplete and type-checking in VS Code and IDEs.
+
+#### 2. Built-in Server-Side Rendering (SSR) Hydration (`p-hydrate`)
+- **Flicker-Free SSR Hydration**: Added the `p-hydrate` directive which seamlessly activates server-rendered DOM elements without DOM tearing or flash of uninitialized state, automatically stripping the hydration marker once client-side tree activation finishes.
+
+#### 3. `$history` Magic Property (URL Query & History Sync)
+- **Bidirectional Query Parameter Sync**: Bind reactive state directly to browser URL search parameters with `window.history.replaceState`.
+- **`popstate` Listener**: Automatically synchronizes signal state on browser Back/Forward navigation with automatic cleanup on scope destruction.
 
 ---
 
 ## [v1.1.0] — "Sequoia" (2026-09-14)
 
 > **Codename**: Sequoia  
-> **Status**: Latest Stable  
+> **Status**: Previous Stable  
 > **Bundle Size**: 34.66 KB minified (9.30 KB gzipped)  
 > **CDN Link**: `https://unpkg.com/pinejs-core@1.1.0/dist/pine.min.js`
 
@@ -124,11 +147,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 🔮 Future Roadmap
 
-### `v1.2.0` — "Redwood" (Planned)
-- [ ] TypeScript declaration files (`dist/pine.d.ts`) with full generic type inference.
-- [ ] Built-in Server-Side Rendering (SSR) hydration helper (`p-hydrate`).
-- [ ] `$history` magic for URL query string and pushState synchronization.
-- [ ] Enhanced animations with spring physics.
+### `v1.3.0` — "Cedar" (Planned)
+- [ ] Enhanced spring physics animations for transitions.
+- [ ] Built-in Web Animations API (WAAPI) integration (`p-animate`).
+- [ ] DevTools browser extension runtime hooks.
 
 ### `v2.0.0` — "Apex" (Planned)
 - [ ] Compiler-less JSX / Tagged template literals optional add-on.
@@ -139,15 +161,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 📝 Version Comparison Summary
 
-| Feature | PineJS `v1.0.0` | PineJS `v1.1.0` | Alpine.js `v3.x` |
-| :--- | :--- | :--- | :--- |
-| **Reactivity Primitive** | Fine-Grained Signals | Fine-Grained Signals | Coarse Proxy Observer |
-| **Scope Inheritance** | Single-level | **Hierarchical Recursive Proxy** | Prototype Chain |
-| **Two-Way Synchronization** | Basic | **Mutex Reentrancy Guard** | Microtask Loop Guard |
-| **Array Mutations** | Explicit length reads | **Auto-syncing Length Signals** | Proxy Interceptors |
-| **Outside Click Handling** | Instant | **Appearance Debounced** | Window Event Tick |
-| **Built-in Morphing** | Yes (`Pine.morph`) | Yes (`Pine.morph`) | Requires Separate Plugin |
-| **Built-in Storage Persistence** | Yes (`$persist`) | Yes (`$persist`) | Requires Separate Plugin |
-| **Built-in Async HTTP Fetch** | Yes (`$fetch`) | Yes (`$fetch`) | None |
-| **Bundle Size (Minified)** | 33.98 KB | 34.66 KB | ~43 KB |
-| **Bundle Size (Gzipped)** | 9.17 KB | **9.30 KB** | ~15 KB |
+| Feature | PineJS `v1.0.0` | PineJS `v1.1.0` | PineJS `v1.2.0` | Alpine.js `v3.x` |
+| :--- | :--- | :--- | :--- | :--- |
+| **Reactivity Primitive** | Fine-Grained Signals | Fine-Grained Signals | **Fine-Grained Signals** | Coarse Proxy Observer |
+| **Scope Inheritance** | Single-level | **Hierarchical Scope Proxy** | **Hierarchical Scope Proxy** | Prototype Chain |
+| **Two-Way Synchronization** | Basic | **Mutex Reentrancy Guard** | **Mutex Reentrancy Guard** | Microtask Loop Guard |
+| **Array Mutations** | Explicit length reads | **Auto-syncing Length Signals** | **Auto-syncing Length Signals** | Proxy Interceptors |
+| **TypeScript Typings** | Partial | Partial | **Full Ambient (`dist/pine.d.ts`)** | Community / Defs |
+| **URL Query Sync** | Custom code | Custom code | **Built-in `$history` Magic** | None |
+| **SSR Hydration** | Manual | Manual | **Built-in `p-hydrate`** | None |
+| **Built-in Morphing** | Yes (`Pine.morph`) | Yes (`Pine.morph`) | **Yes (`Pine.morph`)** | Requires Separate Plugin |
+| **Built-in Storage Persistence** | Yes (`$persist`) | Yes (`$persist`) | **Yes (`$persist`)** | Requires Separate Plugin |
+| **Built-in Async HTTP Fetch** | Yes (`$fetch`) | Yes (`$fetch`) | **Yes (`$fetch`)** | None |
+| **Bundle Size (Minified)** | 33.98 KB | 34.66 KB | **~35.4 KB** | ~43 KB |
+| **Bundle Size (Gzipped)** | 9.17 KB | 9.30 KB | **~9.5 KB** | ~15 KB |
