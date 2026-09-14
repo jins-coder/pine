@@ -239,14 +239,15 @@
 
     function updatePreview() {
       const userCode = codeInput.value;
+      const scriptUrl = new URL('../dist/pine.js', window.location.href).href;
       const htmlDoc = `
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8" />
-          <script src="${window.location.origin}/dist/pine.js"><\/script>
+          <script src="${scriptUrl}"><\/script>
         </head>
-        <body>
+        <body style="margin: 0; padding: 1rem; font-family: system-ui, -apple-system, sans-serif;">
           ${userCode}
         </body>
         </html>

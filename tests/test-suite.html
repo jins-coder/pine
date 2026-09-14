@@ -442,6 +442,31 @@
       }
     });
 
+    test("Reactivity: Computed Getters on Nested Arrays (Shopping Cart)", "Reactive getter evaluation with proxy receiver binding", () => {
+      const sandbox = document.getElementById("sandbox-root");
+      sandbox.innerHTML = `
+        <div id="t-cart" p-data="{
+          items: [
+            { id: 1, name: 'Earbuds', price: 50, qty: 1 },
+            { id: 2, name: 'Stand', price: 20, qty: 2 }
+          ],
+          get total() {
+            return this.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+          }
+        }">
+          <button id="cart-inc-btn" @click="items[0].qty++">+</button>
+          <span id="cart-total-span" p-text="'$' + total"></span>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-cart"));
+      const btn = sandbox.querySelector("#cart-inc-btn");
+      const span = sandbox.querySelector("#cart-total-span");
+
+      if (span.textContent !== "$90") throw new Error(`Expected initial total '$90', got '${span.textContent}'`);
+      btn.click();
+      if (span.textContent !== "$140") throw new Error(`Expected updated total '$140', got '${span.textContent}'`);
+    });
+
     // Run tests & render report
     async function runAllTests() {
       const list = document.getElementById("results-list");

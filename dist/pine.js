@@ -264,6 +264,12 @@
           return Reflect.get(obj, prop, receiver);
         }
 
+        const desc = Object.getOwnPropertyDescriptor(obj, prop) || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(obj) || {}, prop);
+        if (desc && desc.get) {
+          const getterResult = desc.get.call(proxy);
+          return isObject(getterResult) ? reactive(getterResult) : getterResult;
+        }
+
         const sig = getSignalForProp(obj, prop);
         const currentSigVal = sig.value;
         const currentTargetVal = obj[prop];
