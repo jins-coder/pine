@@ -169,13 +169,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 🔮 Future Roadmap
 
-### `v1.4.0` — "Spruce" (Planned)
-- [ ] Built-in Web Animations API timeline orchestration (`Pine.timeline`).
-- [ ] Signals state machine directive (`p-state`).
-- [ ] Streaming HTML fragment patching.
+### `v1.4.0` — "Spruce" (Next Planned Release)
+- [ ] **Configurable Multi-Prefix Engine (`Pine.prefix`)**:
+  - Customize the directive prefix globally: `Pine.prefix('pine')` or `Pine.prefix('app')`.
+  - Multi-prefix array support (`Pine.prefix(['p-', 'pine-', 'x-', ''])`) for progressive adoption.
+- [ ] **Prefix-Free Semantic HTML Syntax (Industry First)**:
+  - Clean HTML5 attribute bindings with zero framework prefixes:
+    - `<div state="{ count: 0 }">` (Component root)
+    - `<span text="count"></span>` (Reactive text)
+    - `<input model="query" />` (Two-way model binding)
+    - `<div show="isOpen"></div>` (Conditional display)
+    - `<template loop="item in items">` (Keyed list iteration)
+- [ ] **Expressive Symbol & Emoji Directives**:
+  - Ultra-compact syntax for minimalists:
+    - `🌲="{ ... }"` (Component state root)
+    - `⚡="count"` (Atomic fine-grained signal text)
+    - `~="query"` (Two-way model binding)
+    - `?="isOpen"` (Conditional display)
+    - `*="item in items"` (Loop iteration)
+- [ ] **Universal "Chameleon" Drop-in Mode**:
+  - Native runtime interception of Alpine `x-` attributes, upgrading legacy code to Signals with zero migration effort.
+- [ ] **Unified `$`-Attribute Shorthands**:
+  - Unify JS magics with HTML attributes: `<div $data="...">`, `<span $text="...">`, `<div $show="...">`.
+- [ ] **Web Animations API Timeline Orchestrator (`Pine.timeline`)**:
+  - Choreograph multi-element sequenced spring animations.
 
-### `v2.0.0` — "Apex" (Planned)
-- [ ] Compiler-less JSX / Tagged template literals optional add-on.
+### `v2.0.0` — "Apex" (Major Evolution)
+- [ ] Compiler-less JSX / Tagged template literals optional runtime.
 - [ ] Web Worker off-thread signal computation bridge.
 - [ ] Micro-frontend component isolation boundaries.
 

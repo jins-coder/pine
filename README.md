@@ -164,16 +164,17 @@ pinejs/
 
 ---
 
-## 🏷️ Version History & Releases
+## 🏷️ Version History & Roadmap
 
 | Version | Codename | Release Date | Status | Key Features |
 | :--- | :--- | :--- | :--- | :--- |
+| **`v1.4.0`** | **Spruce** | *Planned* | 🔮 In Progress | Configurable multi-prefix engine (`Pine.prefix`), prefix-free semantic HTML (`state`, `text`, `show`, `model`, `loop`), symbol shorthands (`🌲`, `⚡`, `~`, `?`, `*`), chameleon drop-in mode. |
 | **`v1.3.0`** | **Cedar** | 2026-09-15 | **Latest Stable** | `p-animate` spring physics & keyframe animations, `Pine.devtools` runtime diagnostics bridge, getter receiver proxy binding. |
 | **`v1.2.0`** | **Redwood** | 2026-09-14 | Previous Stable | Official TypeScript typings (`dist/pine.d.ts`), `$history` URL query sync magic, `p-hydrate` SSR directive, fine-grained reactivity. |
 | **`v1.1.0`** | **Sequoia** | 2026-09-14 | Stable | Hierarchical Scope Proxy inheritance, `p-modelable` mutex, reactive array auto-sync, debounced outside clicks, `Pine.$data()` API, minification pipeline. |
 | **`v1.0.0`** | **Evergreen** | 2026-09-10 | Stable | Initial release with full Alpine.js API parity, Fine-Grained Signals, built-in morphing & plugins, and 60+ interactive docs components. |
 
-👉 For full detailed release notes, breaking changes, and roadmap, see [CHANGELOG.md](file:///e:/afterquery/shopify/utility/pinejs/CHANGELOG.md).
+👉 For full detailed release notes, architecture plans, and roadmap, see [CHANGELOG.md](file:///e:/afterquery/shopify/utility/pinejs/CHANGELOG.md).
 
 ---
 
