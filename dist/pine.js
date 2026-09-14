@@ -405,6 +405,8 @@
     let curr = el;
     while (curr) {
       if (curr[SCOPE_SYMBOL]) return curr[SCOPE_SYMBOL];
+      if (curr.__pine_scope__) return curr.__pine_scope__;
+      if (curr._pineScope) return curr._pineScope;
       curr = curr.parentElement;
     }
     return null;
@@ -753,6 +755,8 @@
       const parentScope = getScope(el.parentElement);
       const scope = new Scope(initialData, parentScope, el);
       el[SCOPE_SYMBOL] = scope;
+      el.__pine_scope__ = scope;
+      el._pineScope = scope;
 
       if (el.hasAttribute('p-init')) {
         const initExpr = el.getAttribute('p-init');
@@ -1161,6 +1165,8 @@
             const parentScope = getScope(templateEl);
             childScope = new Scope({}, parentScope, clone);
             clone[SCOPE_SYMBOL] = childScope;
+            clone.__pine_scope__ = childScope;
+            clone._pineScope = childScope;
 
             marker.parentElement.insertBefore(clone, marker);
             initTree(clone);
@@ -1239,6 +1245,8 @@
 
             const childScope = new Scope(loopData, parentScope, clone);
             clone[SCOPE_SYMBOL] = childScope;
+            clone.__pine_scope__ = childScope;
+            clone._pineScope = childScope;
 
             parent.insertBefore(clone, marker);
             initTree(clone);
@@ -1351,6 +1359,8 @@
       const parentScope = getScope(templateEl);
       const childScope = new Scope({}, parentScope, clone);
       clone[SCOPE_SYMBOL] = childScope;
+      clone.__pine_scope__ = childScope;
+      clone._pineScope = childScope;
 
       targetContainer.appendChild(clone);
       initTree(clone);
@@ -1717,6 +1727,11 @@
 
     initTree(element) {
       initTree(element);
+    },
+
+    $data(element) {
+      const scope = getScope(element);
+      return scope ? scope.data : null;
     }
   };
 
