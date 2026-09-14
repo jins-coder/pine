@@ -8,18 +8,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 📦 Releases
 
-- [v1.2.0 — "Redwood" (2026-09-14)](#v120--redwood-2026-09-14) — **Latest Stable**
+- [v1.3.0 — "Cedar" (2026-09-15)](#v130--cedar-2026-09-15) — **Latest Stable**
+- [v1.2.0 — "Redwood" (2026-09-14)](#v120--redwood-2026-09-14)
 - [v1.1.0 — "Sequoia" (2026-09-14)](#v110--sequoia-2026-09-14)
 - [v1.0.0 — "Evergreen" (2026-09-10)](#v100--evergreen-2026-09-10) — Initial Release
 - [Roadmap & Upcoming Versions](#-future-roadmap)
 
 ---
 
+## [v1.3.0] — "Cedar" (2026-09-15)
+
+> **Codename**: Cedar  
+> **Status**: Latest Stable  
+> **Bundle Size**: ~36.1 KB minified (~9.68 KB gzipped)  
+> **CDN Link**: `https://unpkg.com/pinejs-core@1.3.0/dist/pine.min.js`
+
+### 🚀 Major Enhancements
+
+#### 1. `p-animate` Spring Physics & Keyframe Animations
+- **High-Performance Animations**: Declarative CSS / Web Animations API (WAAPI) keyframe animations with built-in physics presets: `.spring`, `.bounce`, `.shake`, `.pulse`, `.loop`.
+- **Reactive Triggering**: Re-triggers physics animations whenever bound signal expressions change.
+
+#### 2. PineJS DevTools & Diagnostics Runtime Bridge (`Pine.devtools`)
+- **Inspection Tools**: Inspect component roots, reactive scope trees, active signals graph, and cleanup counts programmatically or via DevTools (`Pine.devtools.inspect(el)`).
+
+#### 3. Computed Receiver Proxy Binding for Nested Getters
+- **Deep Computed Subscriptions**: Computed getters (like `.total` in shopping cart models) now bind `this` to the reactive proxy receiver, establishing automatic fine-grained subscriptions to nested arrays and sub-properties.
+
+---
+
 ## [v1.2.0] — "Redwood" (2026-09-14)
 
 > **Codename**: Redwood  
-> **Status**: Latest Stable  
-> **Bundle Size**: ~35.4 KB minified (~9.5 KB gzipped)  
+> **Status**: Previous Stable  
+> **Bundle Size**: 35.87 KB minified (9.60 KB gzipped)  
 > **CDN Link**: `https://unpkg.com/pinejs-core@1.2.0/dist/pine.min.js`
 
 ### 🚀 Major Enhancements
@@ -147,10 +169,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 🔮 Future Roadmap
 
-### `v1.3.0` — "Cedar" (Planned)
-- [ ] Enhanced spring physics animations for transitions.
-- [ ] Built-in Web Animations API (WAAPI) integration (`p-animate`).
-- [ ] DevTools browser extension runtime hooks.
+### `v1.4.0` — "Spruce" (Planned)
+- [ ] Built-in Web Animations API timeline orchestration (`Pine.timeline`).
+- [ ] Signals state machine directive (`p-state`).
+- [ ] Streaming HTML fragment patching.
 
 ### `v2.0.0` — "Apex" (Planned)
 - [ ] Compiler-less JSX / Tagged template literals optional add-on.
@@ -161,17 +183,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 📝 Version Comparison Summary
 
-| Feature | PineJS `v1.0.0` | PineJS `v1.1.0` | PineJS `v1.2.0` | Alpine.js `v3.x` |
-| :--- | :--- | :--- | :--- | :--- |
-| **Reactivity Primitive** | Fine-Grained Signals | Fine-Grained Signals | **Fine-Grained Signals** | Coarse Proxy Observer |
-| **Scope Inheritance** | Single-level | **Hierarchical Scope Proxy** | **Hierarchical Scope Proxy** | Prototype Chain |
-| **Two-Way Synchronization** | Basic | **Mutex Reentrancy Guard** | **Mutex Reentrancy Guard** | Microtask Loop Guard |
-| **Array Mutations** | Explicit length reads | **Auto-syncing Length Signals** | **Auto-syncing Length Signals** | Proxy Interceptors |
-| **TypeScript Typings** | Partial | Partial | **Full Ambient (`dist/pine.d.ts`)** | Community / Defs |
-| **URL Query Sync** | Custom code | Custom code | **Built-in `$history` Magic** | None |
-| **SSR Hydration** | Manual | Manual | **Built-in `p-hydrate`** | None |
-| **Built-in Morphing** | Yes (`Pine.morph`) | Yes (`Pine.morph`) | **Yes (`Pine.morph`)** | Requires Separate Plugin |
-| **Built-in Storage Persistence** | Yes (`$persist`) | Yes (`$persist`) | **Yes (`$persist`)** | Requires Separate Plugin |
-| **Built-in Async HTTP Fetch** | Yes (`$fetch`) | Yes (`$fetch`) | **Yes (`$fetch`)** | None |
-| **Bundle Size (Minified)** | 33.98 KB | 34.66 KB | **~35.4 KB** | ~43 KB |
-| **Bundle Size (Gzipped)** | 9.17 KB | 9.30 KB | **~9.5 KB** | ~15 KB |
+| Feature | PineJS `v1.0.0` | PineJS `v1.1.0` | PineJS `v1.2.0` | PineJS `v1.3.0` | Alpine.js `v3.x` |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Reactivity Primitive** | Fine-Grained Signals | Fine-Grained Signals | Fine-Grained Signals | **Fine-Grained Signals** | Coarse Proxy Observer |
+| **Scope Inheritance** | Single-level | **Hierarchical Scope Proxy** | **Hierarchical Scope Proxy** | **Hierarchical Scope Proxy** | Prototype Chain |
+| **Two-Way Synchronization** | Basic | **Mutex Reentrancy Guard** | **Mutex Reentrancy Guard** | **Mutex Reentrancy Guard** | Microtask Loop Guard |
+| **Array Mutations** | Explicit length reads | **Auto-syncing Length Signals** | **Auto-syncing Length Signals** | **Auto-syncing Length Signals** | Proxy Interceptors |
+| **Spring Physics & WAAPI** | None | None | None | **Built-in `p-animate`** | None |
+| **DevTools Bridge** | None | None | None | **Built-in `Pine.devtools`** | Requires Extension |
+| **TypeScript Typings** | Partial | Partial | **Full Ambient (`dist/pine.d.ts`)** | **Full Ambient (`dist/pine.d.ts`)** | Community / Defs |
+| **URL Query Sync** | Custom code | Custom code | **Built-in `$history` Magic** | **Built-in `$history` Magic** | None |
+| **SSR Hydration** | Manual | Manual | **Built-in `p-hydrate`** | **Built-in `p-hydrate`** | None |
+| **Built-in Morphing** | Yes (`Pine.morph`) | Yes (`Pine.morph`) | **Yes (`Pine.morph`)** | **Yes (`Pine.morph`)** | Requires Separate Plugin |
+| **Built-in Storage Persistence** | Yes (`$persist`) | Yes (`$persist`) | **Yes (`$persist`)** | **Yes (`$persist`)** | Requires Separate Plugin |
+| **Built-in Async HTTP Fetch** | Yes (`$fetch`) | Yes (`$fetch`) | **Yes (`$fetch`)** | **Yes (`$fetch`)** | None |
+| **Bundle Size (Minified)** | 33.98 KB | 34.66 KB | 35.87 KB | **~36.1 KB** | ~43 KB |
+| **Bundle Size (Gzipped)** | 9.17 KB | 9.30 KB | 9.60 KB | **~9.68 KB** | ~15 KB |

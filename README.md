@@ -3,7 +3,7 @@
 > **Next-Generation Fine-Grained Reactive Declarative Micro-Framework for Modern Web Apps**  
 > *As simple and ergonomic as Alpine.js, fast as Solid signals, ultra-lightweight (&lt; 8 KB minified).*
 
-[![Version](https://img.shields.io/badge/version-1.2.0%20%22Redwood%22-10b981.svg)](https://github.com)
+[![Version](https://img.shields.io/badge/version-1.3.0%20%22Cedar%22-10b981.svg)](https://github.com)
 [![Reactivity](https://img.shields.io/badge/reactivity-fine--grained%20signals-06b6d4.svg)](https://github.com)
 [![Size](https://img.shields.io/badge/bundle%20size-%3C%2010%20KB%20min-8b5cf6.svg)](https://github.com)
 [![License](https://img.shields.io/badge/license-MIT-emerald.svg)](LICENSE)
@@ -18,7 +18,7 @@ Unlike Alpine.js (which uses proxy-based polling and coarse microtask tree evalu
 
 ```html
 <!-- Include via CDN -->
-<script src="https://unpkg.com/pinejs-core@1.2.0/dist/pine.min.js" defer></script>
+<script src="https://unpkg.com/pinejs-core@1.3.0/dist/pine.min.js" defer></script>
 
 <!-- Declare fine-grained reactive components -->
 <div p-data="{ count: 0 }">
@@ -57,6 +57,7 @@ Unlike Alpine.js (which uses proxy-based polling and coarse microtask tree evalu
 - **`p-if`**: Conditionally mount/unmount DOM templates: `<template p-if="isLoggedIn">...</template>`
 - **`p-for`**: Loop over arrays, objects, or numbers: `<template p-for="(item, i) in items">...</template>`
 - **`p-transition`**: Smooth CSS enter/leave animations: `<div p-show="open" p-transition.fade>`
+- **`p-animate`**: Spring physics and WAAPI keyframe animations: `<button p-animate.spring @click="liked = !liked">`
 - **`p-effect`**: Execute side-effects reactively: `<div p-effect="console.log(count)">`
 - **`p-ref`**: Register DOM element reference: `<input p-ref="searchField" />`
 - **`p-cloak`**: Hide unrendered DOM until PineJS initializes: `<div p-cloak>`
@@ -98,6 +99,10 @@ Pine.effect(() => console.log(doubled.value));
 Pine.batch(() => {
   count.value = 10;
 });
+
+// DevTools & Diagnostics
+const inspection = Pine.devtools.inspect(document.querySelector('#my-app'));
+console.log(inspection.data);
 
 // Global state stores
 Pine.store('auth', {
@@ -159,8 +164,9 @@ pinejs/
 
 | Version | Codename | Release Date | Status | Key Features |
 | :--- | :--- | :--- | :--- | :--- |
-| **`v1.2.0`** | **Redwood** | 2026-09-14 | **Latest Stable** | Official TypeScript typings (`dist/pine.d.ts`), `$history` URL query sync magic, `p-hydrate` SSR directive, fine-grained reactivity. |
-| **`v1.1.0`** | **Sequoia** | 2026-09-14 | Previous Stable | Hierarchical Scope Proxy inheritance, `p-modelable` mutex, reactive array auto-sync, debounced outside clicks, `Pine.$data()` API, minification pipeline. |
+| **`v1.3.0`** | **Cedar** | 2026-09-15 | **Latest Stable** | `p-animate` spring physics & keyframe animations, `Pine.devtools` runtime diagnostics bridge, getter receiver proxy binding. |
+| **`v1.2.0`** | **Redwood** | 2026-09-14 | Previous Stable | Official TypeScript typings (`dist/pine.d.ts`), `$history` URL query sync magic, `p-hydrate` SSR directive, fine-grained reactivity. |
+| **`v1.1.0`** | **Sequoia** | 2026-09-14 | Stable | Hierarchical Scope Proxy inheritance, `p-modelable` mutex, reactive array auto-sync, debounced outside clicks, `Pine.$data()` API, minification pipeline. |
 | **`v1.0.0`** | **Evergreen** | 2026-09-10 | Stable | Initial release with full Alpine.js API parity, Fine-Grained Signals, built-in morphing & plugins, and 60+ interactive docs components. |
 
 👉 For full detailed release notes, breaking changes, and roadmap, see [CHANGELOG.md](file:///e:/afterquery/shopify/utility/pinejs/CHANGELOG.md).

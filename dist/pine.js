@@ -1,5 +1,5 @@
 /**
- * PineJS v1.2.0 "Redwood"
+ * PineJS v1.3.0 "Cedar"
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * Complete Alpine.js Parity + True Fine-Grained Signals + Built-in Plugins
  * (c) 2026 PineJS Core Team - MIT License
@@ -1464,6 +1464,68 @@
     // p-hydrate: Server-Side Rendering (SSR) hydration marker
     'p-hydrate': (el) => {
       el.removeAttribute('p-hydrate');
+    },
+
+    // p-animate: High-performance spring physics and keyframe animations
+    'p-animate': (el, { expression, modifiers }) => {
+      const presets = {
+        spring: [
+          { transform: 'scale(1)', offset: 0 },
+          { transform: 'scale(1.18)', offset: 0.35 },
+          { transform: 'scale(0.95)', offset: 0.65 },
+          { transform: 'scale(1)', offset: 1 }
+        ],
+        bounce: [
+          { transform: 'translateY(0)', offset: 0 },
+          { transform: 'translateY(-14px)', offset: 0.3 },
+          { transform: 'translateY(0)', offset: 0.6 },
+          { transform: 'translateY(-6px)', offset: 0.8 },
+          { transform: 'translateY(0)', offset: 1 }
+        ],
+        shake: [
+          { transform: 'translateX(0)', offset: 0 },
+          { transform: 'translateX(-8px)', offset: 0.2 },
+          { transform: 'translateX(8px)', offset: 0.4 },
+          { transform: 'translateX(-6px)', offset: 0.6 },
+          { transform: 'translateX(6px)', offset: 0.8 },
+          { transform: 'translateX(0)', offset: 1 }
+        ],
+        pulse: [
+          { transform: 'scale(1)', opacity: 1, offset: 0 },
+          { transform: 'scale(1.08)', opacity: 0.85, offset: 0.5 },
+          { transform: 'scale(1)', opacity: 1, offset: 1 }
+        ]
+      };
+
+      const matchedPreset = modifiers.find((m) => m in presets);
+      const isLoop = modifiers.includes('loop') || modifiers.includes('infinite');
+
+      const triggerAnimation = () => {
+        if (typeof el.animate !== 'function') return;
+        let keyframes = matchedPreset ? presets[matchedPreset] : null;
+        let options = { duration: 400, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)', iterations: isLoop ? Infinity : 1 };
+
+        if (!keyframes && expression) {
+          const evalRes = evaluate(el, expression);
+          if (Array.isArray(evalRes)) keyframes = evalRes;
+          else if (isObject(evalRes)) keyframes = [evalRes];
+        }
+
+        if (keyframes) {
+          el.animate(keyframes, options);
+        }
+      };
+
+      if (!expression || expression.trim() === '') {
+        triggerAnimation();
+      } else {
+        const stop = effect(() => {
+          const val = evaluate(el, expression);
+          if (val) triggerAnimation();
+        });
+        const scope = getScope(el);
+        if (scope) scope.addCleanup(stop);
+      }
     }
   };
 
@@ -1620,43 +1682,59 @@
   }
 
   // =========================================================================
-  // 9. DOM SCANNER & PARSER
+  // 9. DIRECTIVE PARSER
   // =========================================================================
-  function parseAttributeName(attrName) {
-    if (attrName.startsWith('@')) {
-      const rest = attrName.slice(1);
-      const [eventAndArg, ...modifiers] = rest.split('.');
-      return { directive: 'p-on', arg: eventAndArg, modifiers };
-    }
-    if (attrName.startsWith(':')) {
-      const rest = attrName.slice(1);
-      const [propAndArg, ...modifiers] = rest.split('.');
-      return { directive: 'p-bind', arg: propAndArg, modifiers };
+  function parseDirective(attrName) {
+    if (attrName.startsWith('p-')) {
+      const parts = attrName.split('.');
+      const mainPart = parts[0];
+      const modifiers = parts.slice(1);
+
+      let directive = mainPart;
+      let arg = null;
+
+      if (mainPart.includes(':')) {
+        const colonIdx = mainPart.indexOf(':');
+        directive = mainPart.slice(0, colonIdx);
+        arg = mainPart.slice(colonIdx + 1);
+      }
+
+      return { directive, arg, modifiers };
     }
 
-    if (attrName.startsWith('p-')) {
-      const [fullDirective, ...modifiers] = attrName.split('.');
-      const colonIndex = fullDirective.indexOf(':');
-      if (colonIndex > -1) {
-        const directive = fullDirective.slice(0, colonIndex);
-        const arg = fullDirective.slice(colonIndex + 1);
-        return { directive, arg, modifiers };
-      }
-      return { directive: fullDirective, arg: null, modifiers };
+    if (attrName.startsWith(':')) {
+      const parts = attrName.slice(1).split('.');
+      return {
+        directive: 'p-bind',
+        arg: parts[0],
+        modifiers: parts.slice(1)
+      };
+    }
+
+    if (attrName.startsWith('@')) {
+      const parts = attrName.slice(1).split('.');
+      return {
+        directive: 'p-on',
+        arg: parts[0],
+        modifiers: parts.slice(1)
+      };
     }
 
     return null;
   }
 
+  // =========================================================================
+  // 9. DOM COMPILER & TREE WALKER
+  // =========================================================================
   function initElement(el) {
-    if (el.nodeType !== Node.ELEMENT_NODE) return;
-    if (el.hasAttribute('p-ignore')) return;
+    if (!el || el.nodeType !== Node.ELEMENT_NODE) return;
+    if (el.hasAttribute && el.hasAttribute('p-ignore')) return;
 
     const attrs = Array.from(el.attributes || []);
     const parsedDirectives = [];
 
     attrs.forEach((attr) => {
-      const parsed = parseAttributeName(attr.name);
+      const parsed = parseDirective(attr.name);
       if (parsed) {
         parsedDirectives.push({
           name: attr.name,
@@ -1680,7 +1758,7 @@
 
     const directiveOrder = [
       'p-bind', 'p-modelable', 'p-model', 'p-text', 'p-html',
-      'p-show', 'p-collapse', 'p-mask', 'p-transition', 'p-effect',
+      'p-show', 'p-collapse', 'p-mask', 'p-animate', 'p-transition', 'p-effect',
       'p-ref', 'p-on', 'p-init'
     ];
 
@@ -1738,8 +1816,8 @@
   // 10. PUBLIC PINE API
   // =========================================================================
   const Pine = {
-    version: '1.2.0',
-    versionName: 'Redwood',
+    version: '1.3.0',
+    versionName: 'Cedar',
 
     // Signals Engine
     signal,
@@ -1749,6 +1827,28 @@
     untrack,
     reactive,
     raw,
+
+    // DevTools & Diagnostic Runtime Bridge
+    devtools: {
+      getRoots() {
+        return typeof document !== 'undefined' ? Array.from(document.querySelectorAll('[p-data]')) : [];
+      },
+      getScope(element) {
+        return getScope(element);
+      },
+      getSignalMap() {
+        return signalMap;
+      },
+      inspect(element) {
+        const scope = getScope(element);
+        return {
+          element,
+          data: scope ? scope.data : null,
+          parent: scope && scope.parent ? scope.parent.el : null,
+          cleanupsCount: scope ? scope.cleanups.length : 0
+        };
+      }
+    },
 
     // Component Registration & Binding
     data(name, factory) {

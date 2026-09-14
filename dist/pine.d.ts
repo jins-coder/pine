@@ -1,5 +1,5 @@
 /**
- * PineJS v1.2.0 "Redwood"
+ * PineJS v1.3.0 "Cedar"
  * TypeScript Declaration File
  * (c) 2026 PineJS Core Team - MIT License
  */
@@ -58,9 +58,23 @@ export type DirectiveHandler = (el: HTMLElement, context: DirectiveContext) => v
 export type MagicFactory = (el: HTMLElement, additionalContext?: Record<string, any>) => any;
 export type PluginFn = (pine: typeof Pine) => void;
 
+export interface DevToolsInspection {
+  element: HTMLElement;
+  data: Record<string, any> | null;
+  parent: HTMLElement | null;
+  cleanupsCount: number;
+}
+
+export interface DevToolsAPI {
+  getRoots: () => HTMLElement[];
+  getScope: (element: HTMLElement) => any;
+  getSignalMap: () => WeakMap<any, any>;
+  inspect: (element: HTMLElement) => DevToolsInspection;
+}
+
 export interface PineAPI {
-  version: '1.2.0';
-  versionName: 'Redwood';
+  version: '1.3.0';
+  versionName: 'Cedar';
 
   // Signals
   signal: typeof signal;
@@ -70,6 +84,9 @@ export interface PineAPI {
   untrack: typeof untrack;
   reactive: typeof reactive;
   raw: typeof raw;
+
+  // Diagnostics & DevTools
+  devtools: DevToolsAPI;
 
   // Component Registration
   data: (name: string, factory: () => Record<string, any>) => void;

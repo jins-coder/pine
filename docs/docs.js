@@ -39,6 +39,7 @@ const docIndex = [
   { id: 'p-teleport', title: 'p-teleport', category: 'Directives', desc: 'Teleport template content to external DOM targets' },
   { id: 'p-if', title: 'p-if', category: 'Directives', desc: 'Conditionally mount and unmount elements on <template> tags' },
   { id: 'p-id', title: 'p-id', category: 'Directives', desc: 'Declare scoped unique IDs for form accessibility' },
+  { id: 'p-animate', title: 'p-animate', category: 'Directives', desc: 'Spring physics and WAAPI keyframe animation presets' },
   { id: 'p-hydrate', title: 'p-hydrate', category: 'Directives', desc: 'Seamless Server-Side Rendering (SSR) hydration activation' },
 
   // Magics

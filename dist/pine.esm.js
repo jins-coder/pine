@@ -1,5 +1,5 @@
 /**
- * PineJS v1.2.0 "Redwood" (ES Module)
+ * PineJS v1.3.0 "Cedar" (ES Module)
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * (c) 2026 PineJS Core Team - MIT License
  */
@@ -13,6 +13,7 @@ export const {
   untrack,
   reactive,
   raw,
+  devtools,
   data,
   bind,
   store,

@@ -467,6 +467,37 @@
       if (span.textContent !== "$140") throw new Error(`Expected updated total '$140', got '${span.textContent}'`);
     });
 
+    test("Release v1.3.0: Cedar Version & DevTools Bridge", "Verifies Pine.version, versionName, and runtime diagnostics bridge", async () => {
+      if (Pine.version !== "1.3.0") throw new Error(`Expected version '1.3.0', got '${Pine.version}'`);
+      if (Pine.versionName !== "Cedar") throw new Error(`Expected versionName 'Cedar', got '${Pine.versionName}'`);
+      if (typeof Pine.devtools !== "object" || typeof Pine.devtools.inspect !== "function") {
+        throw new Error("Pine.devtools inspection bridge not found");
+      }
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `<div id="t-dt" p-data="{ score: 42 }"><span p-text="score"></span></div>`;
+      Pine.initTree(sandbox.querySelector("#t-dt"));
+      const dtInfo = Pine.devtools.inspect(sandbox.querySelector("#t-dt"));
+      if (!dtInfo.hasScope || dtInfo.scope.score !== 42) {
+        throw new Error("Pine.devtools.inspect() failed to inspect active component scope");
+      }
+    });
+
+    test("Directive: p-animate WAAPI Keyframes", "Declarative micro-animation trigger via spring physics preset", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-anim" p-data="{ count: 0 }">
+          <button id="anim-btn" @click="count++">Animate</button>
+          <div id="anim-target" p-animate.spring="count" p-text="count"></div>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#t-anim"));
+      const btn = sandbox.querySelector("#anim-btn");
+      const target = sandbox.querySelector("#anim-target");
+      if (target.textContent !== "0") throw new Error(`Expected target text '0', got '${target.textContent}'`);
+      btn.click();
+      if (target.textContent !== "1") throw new Error(`Expected target text '1', got '${target.textContent}'`);
+    });
+
     // Run tests & render report
     async function runAllTests() {
       const list = document.getElementById("results-list");

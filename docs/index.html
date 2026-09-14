@@ -23,7 +23,7 @@
           </svg>
         </div>
         <div class="brand-title">PineJS</div>
-        <span class="brand-version" title="Codename: Redwood">v1.2.0 (Redwood)</span>
+        <span class="brand-version" title="Codename: Cedar">v1.3.0 (Cedar)</span>
       </a>
 
       <button id="search-trigger" class="search-trigger">
@@ -106,6 +106,7 @@
           <li class="sidebar-item"><a href="#p-teleport"><code>p-teleport</code></a></li>
           <li class="sidebar-item"><a href="#p-if"><code>p-if</code></a></li>
           <li class="sidebar-item"><a href="#p-id"><code>p-id</code></a></li>
+          <li class="sidebar-item"><a href="#p-animate"><code>p-animate</code> <span class="sidebar-tag">⚡</span></a></li>
           <li class="sidebar-item"><a href="#p-hydrate"><code>p-hydrate</code></a></li>
         </ul>
       </div>
@@ -919,6 +920,53 @@
         </div>
       </section>
 
+      <section id="p-animate" class="doc-section">
+        <h1 class="doc-h1"><code>p-animate</code></h1>
+        <p class="lead-p">Declarative hardware-accelerated Web Animations API (WAAPI) micro-animations with built-in spring physics (<code>.spring</code>, <code>.bounce</code>, <code>.shake</code>, <code>.pulse</code>, <code>.loop</code>).</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;!-- Spring physics animation trigger --&gt;
+&lt;button @click="score++"&gt;Score +1&lt;/button&gt;
+&lt;div p-animate.spring="score" class="score-badge" p-text="score"&gt;&lt;/div&gt;
+
+&lt;!-- Preset shake on error, pulse loop --&gt;
+&lt;div p-animate.shake="hasError"&gt;Invalid submission!&lt;/div&gt;
+&lt;span p-animate.pulse.loop&gt;Live Status&lt;/span&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Spring Physics & Presets Demo</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ clicks: 0, bounceTrigger: 0, shakeTrigger: 0 }">
+              <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                <button class="btn-demo" @click="clicks++">Trigger Spring Pop 🚀</button>
+                <button class="btn-demo-outline" @click="bounceTrigger++">Trigger Bounce 🏀</button>
+                <button class="btn-demo-outline" @click="shakeTrigger++">Trigger Shake ⚠️</button>
+              </div>
+
+              <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
+                <div p-animate.spring="clicks" style="padding: 1rem 1.5rem; background: linear-gradient(135deg, #10b981, #06b6d4); color: white; font-weight: 700; border-radius: 12px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); display: inline-block;">
+                  Spring Hits: <span p-text="clicks">0</span>
+                </div>
+
+                <div p-animate.bounce="bounceTrigger" style="padding: 1rem 1.5rem; background: var(--bg-surface-elevated); border: 1px solid var(--alpine-cyan); color: var(--alpine-cyan); font-weight: 600; border-radius: 12px;">
+                  Bounce Target
+                </div>
+
+                <div p-animate.shake="shakeTrigger" style="padding: 1rem 1.5rem; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; font-weight: 600; border-radius: 12px;">
+                  Shake Warning
+                </div>
+
+                <div p-animate.pulse.loop style="padding: 0.5rem 1rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--alpine-teal); color: var(--alpine-teal); border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
+                  ● Pulse Looping
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="p-hydrate" class="doc-section">
         <h1 class="doc-h1"><code>p-hydrate</code></h1>
         <p class="lead-p">Seamless Server-Side Rendering (SSR) hydration marker that activates server-rendered DOM nodes without layout shift or UI tearing.</p>
@@ -1607,12 +1655,25 @@ Pine.data('userProfile', () => ({
           <div class="demo-preview-header"><span>📦 Version Selector & Changelog Explorer</span></div>
           <div class="demo-preview-body">
             <div p-data="{
-              selectedVer: '1.2.0',
+              selectedVer: '1.3.0',
               versions: [
+                {
+                  ver: '1.3.0',
+                  name: 'Cedar',
+                  tag: 'Latest Stable',
+                  date: '2026-09-15',
+                  highlights: [
+                    'p-animate directive with WAAPI spring physics & presets (.spring, .bounce, .shake, .pulse, .loop)',
+                    'Pine.devtools runtime diagnostics API (getRoots, getScope, getSignalMap, inspect)',
+                    'Computed getter proxy receiver binding for reliable nested array/object signal tracking',
+                    'Updated TypeScript typings (dist/pine.d.ts) for devtools and p-animate',
+                    'Interactive playground shopping cart and live demo suite optimizations'
+                  ]
+                },
                 {
                   ver: '1.2.0',
                   name: 'Redwood',
-                  tag: 'Latest Stable',
+                  tag: 'Previous Stable',
                   date: '2026-09-14',
                   highlights: [
                     'Official TypeScript typings (dist/pine.d.ts) for signals, directives & magics',
