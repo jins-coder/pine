@@ -269,13 +269,15 @@
 
     function updatePreview() {
       const userCode = codeInput.value;
-      const scriptUrl = new URL('../dist/pine.js', window.location.href).href;
+      const cdnUrl = 'https://unpkg.com/pinejs-core@1.3.0/dist/pine.min.js';
+      const localUrl = new URL('../dist/pine.min.js', window.location.href).href;
       const htmlDoc = `
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8" />
-          <script src="${scriptUrl}"><\/script>
+          <script src="${cdnUrl}"><\/script>
+          <script>window.Pine || document.write('<script src="${localUrl}"><\\/script>')<\/script>
         </head>
         <body style="margin: 0; padding: 1rem; font-family: system-ui, -apple-system, sans-serif;">
           ${userCode}

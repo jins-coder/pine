@@ -7,8 +7,9 @@
   <meta name="description" content="Next-generation CDN-based fine-grained reactive declarative micro-framework. Complete Alpine.js parity with signals, faster DOM updates, and built-in plugins.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="docs.css">
-  <!-- Load PineJS library -->
-  <script src="../dist/pine.js"></script>
+  <!-- Load PineJS library via CDN with local fallback -->
+  <script src="https://unpkg.com/pinejs-core@1.3.0/dist/pine.min.js"></script>
+  <script>window.Pine || document.write('<script src="../dist/pine.min.js"><\/script>')</script>
   <script src="docs.js" defer></script>
 </head>
 <body>
@@ -189,7 +190,7 @@
         <h2 class="doc-h2">Quick Example</h2>
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
-          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.2.0/dist/pine.min.js" defer&gt;&lt;/script&gt;
+          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.3.0/dist/pine.min.js" defer&gt;&lt;/script&gt;
 
 &lt;div p-data="{ count: 0 }"&gt;
   &lt;button @click="count++"&gt;Increment&lt;/button&gt;
@@ -256,7 +257,7 @@
 
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
-          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.0.0/dist/pine.min.js" defer&gt;&lt;/script&gt;</code></pre>
+          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.3.0/dist/pine.min.js" defer&gt;&lt;/script&gt;</code></pre>
         </div>
 
         <div class="demo-card">
