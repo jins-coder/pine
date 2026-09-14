@@ -20,8 +20,14 @@
   ],
   "scripts": {
     "build": "node build.js",
+    "build:esbuild": "node build.js --esbuild",
+    "build:terser": "node build.js --terser",
     "test": "echo \"Open tests/test-suite.html in your browser\""
   },
   "author": "PineJS Core Team",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "terser": "^5.51.2"
+  }
 }
