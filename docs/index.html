@@ -105,6 +105,7 @@
           <li class="sidebar-item"><a href="#p-if"><code>p-if</code></a></li>
           <li class="sidebar-item"><a href="#p-id"><code>p-id</code></a></li>
           <li class="sidebar-item"><a href="#p-animate"><code>p-animate</code> <span class="sidebar-tag">⚡</span></a></li>
+          <li class="sidebar-item"><a href="#p-validate"><code>p-validate</code> <span class="sidebar-tag">✓</span></a></li>
           <li class="sidebar-item"><a href="#p-hydrate"><code>p-hydrate</code></a></li>
         </ul>
       </div>
@@ -126,6 +127,8 @@
           <li class="sidebar-item"><a href="#magic-persist"><code>$persist</code></a></li>
           <li class="sidebar-item"><a href="#magic-history"><code>$history</code></a></li>
           <li class="sidebar-item"><a href="#magic-fetch"><code>$fetch</code></a></li>
+          <li class="sidebar-item"><a href="#magic-broadcast"><code>$broadcast</code> <span class="sidebar-tag">📡</span></a></li>
+          <li class="sidebar-item"><a href="#magic-viewtransition"><code>$viewTransition</code> <span class="sidebar-tag">🎬</span></a></li>
           <li class="sidebar-item"><a href="#magic-intersect"><code>$intersect</code></a></li>
         </ul>
       </div>
@@ -139,6 +142,8 @@
           <li class="sidebar-item"><a href="#global-bind"><code>Pine.bind()</code></a></li>
           <li class="sidebar-item"><a href="#global-directive"><code>Pine.directive()</code></a></li>
           <li class="sidebar-item"><a href="#global-magic"><code>Pine.magic()</code></a></li>
+          <li class="sidebar-item"><a href="#global-html"><code>Pine.html()</code> <span class="sidebar-tag">🏷️</span></a></li>
+          <li class="sidebar-item"><a href="#global-worker"><code>Pine.worker()</code> <span class="sidebar-tag">⚡</span></a></li>
           <li class="sidebar-item"><a href="#global-plugin"><code>Pine.plugin()</code></a></li>
           <li class="sidebar-item"><a href="#global-start"><code>Pine.start()</code></a></li>
         </ul>
@@ -1040,6 +1045,58 @@
         </div>
       </section>
 
+      <!-- ===================================================================
+           p-validate (Form Validation)
+           =================================================================== -->
+      <section id="p-validate" class="doc-section">
+        <h1 class="doc-h1"><code>p-validate</code></h1>
+        <p class="lead-p">Declarative field and form constraint validation. Automatically injects <code>$errors</code>, <code>$valid</code>, <code>$touched</code>, and <code>$dirty</code> into component scopes with zero boilerplate.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ email: '', username: '', age: '' }"&gt;
+  &lt;!-- Required & Email Format --&gt;
+  &lt;input name="user_email" p-model="email" p-validate.required.email /&gt;
+  &lt;span class="error" p-text="$errors.user_email"&gt;&lt;/span&gt;
+
+  &lt;!-- Length Constraints --&gt;
+  &lt;input name="user_name" p-model="username" p-validate.required.min.4.max.16 /&gt;
+  &lt;span class="error" p-text="$errors.user_name"&gt;&lt;/span&gt;
+
+  &lt;button :disabled="!$valid.user_email || !$valid.user_name"&gt;Submit Form&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Form Validation Demo</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ email: '', username: '', submitted: false }">
+              <div style="display: grid; gap: 1.25rem; max-width: 420px;">
+                <div>
+                  <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem;">Email Address *</label>
+                  <input class="input-demo" name="val_email" p-model="email" p-validate.required.email placeholder="name@domain.com" style="width: 100%;" />
+                  <div p-show="$errors?.val_email" style="color: #ef4444; font-size: 0.8rem; margin-top: 0.35rem;" p-text="$errors?.val_email"></div>
+                </div>
+
+                <div>
+                  <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.35rem;">Username (Min 4 chars) *</label>
+                  <input class="input-demo" name="val_user" p-model="username" p-validate.required.min.4 placeholder="Choose username" style="width: 100%;" />
+                  <div p-show="$errors?.val_user" style="color: #ef4444; font-size: 0.8rem; margin-top: 0.35rem;" p-text="$errors?.val_user"></div>
+                </div>
+
+                <button class="btn-demo" :disabled="!$valid?.val_email || !$valid?.val_user" @click="submitted = true">
+                  Submit Registration
+                </button>
+
+                <div p-show="submitted" style="padding: 0.85rem; background: rgba(16, 185, 129, 0.15); border: 1px solid var(--alpine-teal); border-radius: 6px; color: var(--alpine-teal); font-weight: 600;">
+                  ✓ Form successfully validated and submitted!
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="p-hydrate" class="doc-section">
         <h1 class="doc-h1"><code>p-hydrate</code></h1>
         <p class="lead-p">Seamless Server-Side Rendering (SSR) hydration marker that activates server-rendered DOM nodes without layout shift or UI tearing.</p>
@@ -1350,6 +1407,83 @@
         </div>
       </section>
 
+      <!-- ===================================================================
+           $broadcast (Multi-Tab Sync)
+           =================================================================== -->
+      <section id="magic-broadcast" class="doc-section">
+        <h1 class="doc-h1"><code>$broadcast</code></h1>
+        <p class="lead-p">Seamless real-time state synchronization across multiple browser tabs and windows using the browser's native <code>BroadcastChannel</code> API.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ room: $broadcast('General', 'chat_sync') }"&gt;
+  &lt;label&gt;Synced Across All Open Tabs:&lt;/label&gt;
+  &lt;input p-model="room" /&gt;
+  &lt;span p-text="'Active Channel: ' + room"&gt;&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $broadcast Simulated Demo</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ room: $broadcast('Main Lounge', 'docs_demo_channel') }">
+              <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                Broadcast Value (Open another tab of this site to see live sync!):
+              </label>
+              <input class="input-demo" p-model="room" style="width: 100%; max-width: 320px;" />
+              <div style="margin-top: 0.75rem;">
+                Current Synced Value: <strong style="color: var(--alpine-teal);" p-text="room"></strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           $viewTransition (Native View Transitions API)
+           =================================================================== -->
+      <section id="magic-viewtransition" class="doc-section">
+        <h1 class="doc-h1"><code>$viewTransition</code></h1>
+        <p class="lead-p">Wraps reactive DOM modifications with <code>document.startViewTransition()</code> for app-like fluid screen animations.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>&lt;div p-data="{ tab: 'overview' }"&gt;
+  &lt;button @click="$viewTransition(() => tab = 'overview')"&gt;Overview&lt;/button&gt;
+  &lt;button @click="$viewTransition(() => tab = 'analytics')"&gt;Analytics&lt;/button&gt;
+
+  &lt;div p-show="tab === 'overview'"&gt;Overview Panel&lt;/div&gt;
+  &lt;div p-show="tab === 'analytics'"&gt;Analytics Panel&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live $viewTransition Tab Morph</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{ currentTab: 'overview' }">
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                <button class="btn-demo" :class="{ 'btn-demo-outline': currentTab !== 'overview' }" @click="$viewTransition(() => currentTab = 'overview')">
+                  Overview Panel
+                </button>
+                <button class="btn-demo" :class="{ 'btn-demo-outline': currentTab !== 'metrics' }" @click="$viewTransition(() => currentTab = 'metrics')">
+                  Metrics & Charts
+                </button>
+              </div>
+
+              <div p-show="currentTab === 'overview'" style="padding: 1.25rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px;">
+                <h4>📊 System Overview</h4>
+                <p style="margin-top: 0.5rem; color: var(--text-secondary);">PineJS v1.5.0 fine-grained engine running with 0ms transition latency.</p>
+              </div>
+
+              <div p-show="currentTab === 'metrics'" style="padding: 1.25rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px;">
+                <h4>📈 Live Performance Metrics</h4>
+                <p style="margin-top: 0.5rem; color: var(--text-secondary);">100% signal execution efficiency, sub-millisecond atomic DOM updates.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="magic-intersect" class="doc-section">
         <h1 class="doc-h1"><code>$intersect</code></h1>
         <p class="lead-p">Observes when an element scrolls into the browser viewport using <code>IntersectionObserver</code>.</p>
@@ -1436,6 +1570,96 @@
           <div class="demo-preview-body">
             <div p-data p-init="Pine.magic('currentYear', () => new Date().getFullYear())">
               Current Year Magic: <strong style="color: var(--alpine-teal);" p-text="$currentYear"></strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           Pine.html() (Tagged Template Components)
+           =================================================================== -->
+      <section id="global-html" class="doc-section">
+        <h1 class="doc-h1"><code>Pine.html()</code></h1>
+        <p class="lead-p">Compiler-less declarative component template engine. Creates reactive DOM fragments directly from JavaScript template literals with full signal interpolation.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>JavaScript</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>const Card = ({ title, count }) => Pine.html`
+  &lt;div state="{ active: true }" class="card"&gt;
+    &lt;h3&gt;${title}&lt;/h3&gt;
+    &lt;button @click="active = !active"&gt;Toggle (${count})&lt;/button&gt;
+    &lt;div show="active"&gt;Active Content&lt;/div&gt;
+  &lt;/div&gt;
+`;
+
+document.getElementById('app').appendChild(Card({ title: 'Dynamic Widget', count: 10 }));</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Tagged Template Component Demo</span></div>
+          <div class="demo-preview-body">
+            <div id="html-tpl-mount" p-data p-init="
+              const Card = (name) => Pine.html`
+                <div style='padding: 1rem; border: 1px solid var(--alpine-teal); border-radius: 8px; background: var(--bg-surface-elevated);' state='{ count: 1 }'>
+                  <strong>\${name}</strong>
+                  <div style='margin-top: 0.5rem;'>
+                    <button class='btn-demo' @click='count++'>Increment</button>
+                    <span style='margin-left: 0.75rem;'>Count: <strong text='count'></strong></span>
+                  </div>
+                </div>
+              `;
+              const el = Card('🌲 Pine.html Generated Card');
+              $el.appendChild(el);
+              Pine.initTree(el);
+            "></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           Pine.worker() (Web Worker Signal Bridge)
+           =================================================================== -->
+      <section id="global-worker" class="doc-section">
+        <h1 class="doc-h1"><code>Pine.worker()</code></h1>
+        <p class="lead-p">Executes heavy calculations, cryptographic hashing, and data processing in background Web Workers with automatic fine-grained reactive signals.</p>
+
+        <div class="code-box">
+          <div class="code-header"><span>JavaScript</span><button class="code-copy-btn">Copy</button></div>
+          <pre><code>const worker = Pine.worker((n) => {
+  // Runs entirely on background worker thread
+  let total = 0;
+  for (let i = 0; i < n; i++) total += i;
+  return total;
+});
+
+// worker.data, worker.loading, and worker.error are reactive signals!
+worker.compute(1000000);</code></pre>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-preview-header"><span>⚡ Live Background Worker Computation</span></div>
+          <div class="demo-preview-body">
+            <div p-data="{
+              w: Pine.worker((n) => {
+                let sum = 0;
+                for (let i = 0; i <= n; i++) sum += i;
+                return sum;
+              }),
+              n: 1000000
+            }">
+              <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem;">
+                <button class="btn-demo" :disabled="w.loading" @click="w.compute(Number(n))">
+                  <span p-text="w.loading ? 'Crunching in Background...' : 'Run Worker Compute ⚡'"></span>
+                </button>
+              </div>
+
+              <div p-show="w.loading" style="color: var(--text-muted);">
+                ⚙️ Executing on background worker thread (main UI thread remains 60fps)...
+              </div>
+
+              <div p-show="w.data !== null && !w.loading" style="padding: 1rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px;">
+                Result from Background Thread: <strong style="color: var(--alpine-teal);" p-text="w.data"></strong>
+              </div>
             </div>
           </div>
         </div>

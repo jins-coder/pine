@@ -40,6 +40,7 @@ const docIndex = [
   { id: 'p-if', title: 'p-if', category: 'Directives', desc: 'Conditionally mount and unmount elements on <template> tags' },
   { id: 'p-id', title: 'p-id', category: 'Directives', desc: 'Declare scoped unique IDs for form accessibility' },
   { id: 'p-animate', title: 'p-animate', category: 'Directives', desc: 'Spring physics and WAAPI keyframe animation presets' },
+  { id: 'p-validate', title: 'p-validate', category: 'Directives', desc: 'Declarative form constraint validation with $errors and $valid' },
   { id: 'p-hydrate', title: 'p-hydrate', category: 'Directives', desc: 'Seamless Server-Side Rendering (SSR) hydration activation' },
 
   // Magics
@@ -56,6 +57,8 @@ const docIndex = [
   { id: 'magic-persist', title: '$persist', category: 'Magics', desc: 'Persist state to localStorage with reactive updates' },
   { id: 'magic-history', title: '$history', category: 'Magics', desc: 'Bidirectional URL query search parameters and history sync' },
   { id: 'magic-fetch', title: '$fetch', category: 'Magics', desc: 'Reactive HTTP fetch client with loading/data states' },
+  { id: 'magic-broadcast', title: '$broadcast', category: 'Magics', desc: 'Cross-tab and multi-window reactive state synchronization via BroadcastChannel' },
+  { id: 'magic-viewtransition', title: '$viewTransition', category: 'Magics', desc: 'Native View Transitions API animation wrapper' },
   { id: 'magic-intersect', title: '$intersect', category: 'Magics', desc: 'IntersectionObserver viewport visibility helper' },
 
   // Globals
@@ -64,6 +67,8 @@ const docIndex = [
   { id: 'global-bind', title: 'Pine.bind()', category: 'Globals', desc: 'Bundle reusable attributes and event listeners' },
   { id: 'global-directive', title: 'Pine.directive()', category: 'Globals', desc: 'Register custom directives' },
   { id: 'global-magic', title: 'Pine.magic()', category: 'Globals', desc: 'Register custom magic properties' },
+  { id: 'global-html', title: 'Pine.html()', category: 'Globals', desc: 'Tagged template literal component engine for compiler-less reactive templates' },
+  { id: 'global-worker', title: 'Pine.worker()', category: 'Globals', desc: 'Off-thread Web Worker background signal computation bridge' },
   { id: 'global-plugin', title: 'Pine.plugin()', category: 'Globals', desc: 'Register framework extensions and plugins' },
   { id: 'global-start', title: 'Pine.start()', category: 'Globals', desc: 'Boot and initialize PineJS on document' },
 
