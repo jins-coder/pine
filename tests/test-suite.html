@@ -123,7 +123,7 @@
     <div class="header">
       <div>
         <h1>🌲 PineJS Test Suite <span id="summary-badge" class="badge">Running...</span></h1>
-        <p style="color: var(--text-muted); margin: 0.5rem 0 0 0;">Comprehensive verification of all Alpine.js parity
+        <p style="color: var(--text-muted); margin: 0.5rem 0 0 0;">Comprehensive verification of all PineJS reactive
           features, directives, magics, morphing, and plugins</p>
       </div>
       <button onclick="runAllTests()"
@@ -602,55 +602,29 @@
       if (textSpan.textContent !== "Spruce") throw new Error(`Expected 'Spruce' after click, got '${textSpan.textContent}'`);
     });
 
-    test("v1.4.0 Spruce: Symbol & Emoji Directives", "Tests 🌲 (state), ⚡ (text), ~ (model), ? (show), * (loop)", async () => {
+    test("Multi-Prefix: pine- and p- Directives", "Verifies both p- and pine- prefixes operate seamlessly", async () => {
       const sandbox = getSandbox();
       sandbox.innerHTML = `
-        <div id="t-symbol" 🌲="{ title: 'Emoji Power', show: true, tags: ['signal', 'speed'] }">
-          <span id="sym-text" ⚡="title"></span>
-          <div id="sym-show" ?="show">Active</div>
-          <button id="sym-btn" @click="title = 'Fast'"></button>
-          <ul id="sym-tags">
-            <template *="tag in tags">
-              <li class="sym-item" ⚡="tag"></li>
+        <div id="t-prefix" pine-data="{ count: 10, list: ['alpha', 'beta'] }">
+          <span id="pfx-text" pine-text="'Total: ' + count"></span>
+          <button id="pfx-btn" @click="count++">Increment</button>
+          <ul id="pfx-list">
+            <template pine-for="item in list">
+              <li class="pfx-item" pine-text="item"></li>
             </template>
           </ul>
         </div>
       `;
-      Pine.initTree(sandbox.querySelector("#t-symbol"));
-      const symText = sandbox.querySelector("#sym-text");
-      const symBtn = sandbox.querySelector("#sym-btn");
-      const symItems = sandbox.querySelectorAll(".sym-item");
+      Pine.initTree(sandbox.querySelector("#t-prefix"));
+      const pfxText = sandbox.querySelector("#pfx-text");
+      const pfxBtn = sandbox.querySelector("#pfx-btn");
+      const pfxItems = sandbox.querySelectorAll(".pfx-item");
 
-      if (symText.textContent !== "Emoji Power") throw new Error(`Expected 'Emoji Power', got '${symText.textContent}'`);
-      if (symItems.length !== 2 || symItems[1].textContent !== "speed") throw new Error(`Symbol * loop failed to render items`);
+      if (pfxText.textContent !== "Total: 10") throw new Error(`Expected 'Total: 10', got '${pfxText.textContent}'`);
+      if (pfxItems.length !== 2 || pfxItems[1].textContent !== "beta") throw new Error(`pine-for failed to render items`);
 
-      symBtn.click();
-      if (symText.textContent !== "Fast") throw new Error(`Expected 'Fast' after click, got '${symText.textContent}'`);
-    });
-
-    test("v1.4.0 Spruce: Alpine.js Chameleon Drop-in Mode", "Verifies x-data, x-text, x-show, x-for, and @click run natively without migration edits", async () => {
-      const sandbox = getSandbox();
-      sandbox.innerHTML = `
-        <div id="t-alpine" x-data="{ count: 10, list: ['one', 'two'] }">
-          <span id="alp-text" x-text="'Value: ' + count"></span>
-          <button id="alp-btn" @click="count++">Increment</button>
-          <ul id="alp-list">
-            <template x-for="item in list">
-              <li class="alp-item" x-text="item"></li>
-            </template>
-          </ul>
-        </div>
-      `;
-      Pine.initTree(sandbox.querySelector("#t-alpine"));
-      const alpText = sandbox.querySelector("#alp-text");
-      const alpBtn = sandbox.querySelector("#alp-btn");
-      const alpItems = sandbox.querySelectorAll(".alp-item");
-
-      if (alpText.textContent !== "Value: 10") throw new Error(`Expected 'Value: 10', got '${alpText.textContent}'`);
-      if (alpItems.length !== 2) throw new Error(`x-for failed to render items`);
-
-      alpBtn.click();
-      if (alpText.textContent !== "Value: 11") throw new Error(`Expected 'Value: 11', got '${alpText.textContent}'`);
+      pfxBtn.click();
+      if (pfxText.textContent !== "Total: 11") throw new Error(`Expected 'Total: 11', got '${pfxText.textContent}'`);
     });
 
     test("v1.4.0 Spruce: Web Animations API Timeline Orchestration", "Verifies Pine.timeline() step creation, execution, and chaining", async () => {

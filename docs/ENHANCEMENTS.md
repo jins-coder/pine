@@ -10,7 +10,7 @@ This document provides a comprehensive technical overview of the architectural e
 | :--- | :--- | :--- |
 | **DOM Lifecycle** | `MutationObserver` Integration | Auto-initializes injected DOM nodes and auto-cleans unmounted trees. |
 | **Lifecycle API** | `Pine.destroyTree(root)` | Public API to teardown scopes, remove listeners, and clean up effects. |
-| **FOUC Prevention**| `p-cloak` Style Injection | Automatically injects CSS hiding `[p-cloak]`, `[x-cloak]`, and `[cloak]`. |
+| **FOUC Prevention**| `p-cloak` Style Injection | Automatically injects CSS hiding `[p-cloak]`, `[pine-cloak]`, and `[cloak]`. |
 | **Conditionals** | `p-else-if` & `p-else` | Sequential condition chains on sibling `<template>` tags. |
 | **Template Engine**| Multi-Child Templates | `<template p-if>` and `<template p-for>` support multi-node fragments. |
 | **List Rendering** | Custom `:key` in `p-for` | Custom identity keys for optimal DOM reuse and minimal layout thrashing. |
@@ -48,7 +48,7 @@ Pine.destroyTree(document.getElementById('widget'));
 
 PineJS automatically injects the following CSS into `<head>` upon execution:
 ```css
-[p-cloak], [x-cloak], [cloak] {
+[p-cloak], [pine-cloak], [cloak] {
   display: none !important;
 }
 ```
@@ -76,9 +76,9 @@ Full support for sequential condition chains using sibling `<template>` elements
 </div>
 ```
 
-Also supports prefix-free and Alpine aliases:
-- `x-else-if`, `else-if`, `elseif`
-- `x-else`, `else`
+Also supports prefix-free and explicit aliases:
+- `pine-else-if`, `else-if`, `elseif`
+- `pine-else`, `else`
 
 ---
 
@@ -245,11 +245,11 @@ Wraps `document.startViewTransition()` with guaranteed asynchronous fallback:
 
 ## 12. Verification & Test Suite
 
-The comprehensive test suite in `tests/test-suite.html` verifies all 42 feature units across:
+The comprehensive test suite in `tests/test-suite.html` verifies all 41 feature units across:
 1. **Signals Primitive & Computed Reactivity** (peek, memoization, batching)
 2. **Core Directives** (`p-data`, `p-bind`, `p-on`, `p-model`, `p-if`, `p-else`, `p-for`, `p-mask`, `p-trap`, `p-cloak`)
 3. **Advanced Magics** (`$refs`, `$dispatch`, `$store`, `$history`, `$broadcast`, `$viewTransition`, `$worker`, `$errors`)
 4. **Plugins & Integrations** (`Pine.morph`, `Pine.timeline`, `Pine.html`, `Pine.devtools`)
-5. **Alpine.js Chameleon Compatibility** (`x-data`, `x-show`, `x-text`, `x-for`, `@click.outside`)
+5. **Multi-Prefix Support** (`pine-data`, `pine-text`, `pine-show`, `pine-for`, `@click.outside`)
 
-**Result:** `42/42 Passed (100%)` in Headless Chromium.
+**Result:** `41/41 Passed (100%)` in Headless Chromium.

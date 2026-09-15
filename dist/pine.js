@@ -1,7 +1,7 @@
 /**
  * PineJS v1.5.1 "Larch"
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
- * Complete Alpine.js Parity + True Fine-Grained Signals + Built-in Plugins
+ * True Fine-Grained Signals + Multi-Prefix (p-, pine-) + Built-in Plugins
  * (c) 2026 PineJS Core Team - MIT License
  * https://pinejs.dev
  */
@@ -17,7 +17,7 @@
       if (document.head && !document.getElementById('pine-cloak-styles')) {
         const style = document.createElement('style');
         style.id = 'pine-cloak-styles';
-        style.textContent = '[p-cloak], [x-cloak], [cloak] { display: none !important; }';
+        style.textContent = '[p-cloak], [pine-cloak], [cloak] { display: none !important; }';
         document.head.appendChild(style);
       }
       if (document.readyState === 'loading') {
@@ -462,7 +462,7 @@
       if (!document.getElementById('pine-cloak-styles')) {
         const style = document.createElement('style');
         style.id = 'pine-cloak-styles';
-        style.textContent = '[p-cloak], [x-cloak], [cloak] { display: none !important; }';
+        style.textContent = '[p-cloak], [pine-cloak], [cloak] { display: none !important; }';
         document.head.appendChild(style);
       }
     }
@@ -474,7 +474,7 @@
     for (const mutation of mutations) {
       mutation.addedNodes.forEach((node) => {
         if (node.nodeType === Node.ELEMENT_NODE) {
-          if (node.hasAttribute && (node.hasAttribute('p-ignore') || node.hasAttribute('x-ignore') || node.hasAttribute('ignore'))) return;
+          if (node.hasAttribute && (node.hasAttribute('p-ignore') || node.hasAttribute('pine-ignore') || node.hasAttribute('ignore'))) return;
           initTree(node);
         }
       });
@@ -1681,7 +1681,7 @@
 
       const keyAttr = templateEl.getAttribute(':key') ||
                       templateEl.getAttribute('p-bind:key') ||
-                      templateEl.getAttribute('x-bind:key') ||
+                      templateEl.getAttribute('pine-bind:key') ||
                       templateEl.getAttribute('key');
 
       const marker = document.createComment(`pine-for: ${expression}`);
@@ -2324,7 +2324,7 @@
   // =========================================================================
   // 9. MULTI-PREFIX & DIRECTIVE PARSER
   // =========================================================================
-  let configuredPrefixes = ['p-', 'x-', 'pine-'];
+  let configuredPrefixes = ['p-', 'pine-'];
 
   const semanticKeywords = {
     'state': 'p-data',
@@ -2357,14 +2357,6 @@
     'valid': 'p-validate'
   };
 
-  const symbolDirectives = {
-    '🌲': 'p-data',
-    '⚡': 'p-text',
-    '~': 'p-model',
-    '?': 'p-show',
-    '*': 'p-for'
-  };
-
   function setPrefix(pfx) {
     if (Array.isArray(pfx)) {
       configuredPrefixes = pfx.map((p) => {
@@ -2381,17 +2373,7 @@
   }
 
   function parseDirective(attrName) {
-    // 1. Symbol shorthands (🌲, ⚡, ~, ?, *)
-    if (symbolDirectives[attrName]) {
-      return { directive: symbolDirectives[attrName], arg: null, modifiers: [] };
-    }
-    for (const [sym, dir] of Object.entries(symbolDirectives)) {
-      if (attrName.startsWith(`${sym}.`)) {
-        return { directive: dir, arg: null, modifiers: attrName.slice(sym.length + 1).split('.') };
-      }
-    }
-
-    // 2. Shorthands: :bind and @event
+    // 1. Shorthands: :bind and @event
     if (attrName.startsWith(':')) {
       const parts = attrName.slice(1).split('.');
       return {
@@ -2476,7 +2458,7 @@
   function initElement(el) {
     if (!el || el.nodeType !== Node.ELEMENT_NODE) return;
     if (el._pineInitialized) return;
-    if (el.hasAttribute && (el.hasAttribute('p-ignore') || el.hasAttribute('x-ignore') || el.hasAttribute('ignore'))) return;
+    if (el.hasAttribute && (el.hasAttribute('p-ignore') || el.hasAttribute('pine-ignore') || el.hasAttribute('ignore'))) return;
     el._pineInitialized = true;
 
     const attrs = Array.from(el.attributes || []);
@@ -2530,7 +2512,7 @@
   function initTree(root) {
     if (!root || root.nodeType !== Node.ELEMENT_NODE) return;
     if (root._pineHandled) return;
-    if (root.hasAttribute && (root.hasAttribute('p-ignore') || root.hasAttribute('x-ignore') || root.hasAttribute('ignore'))) return;
+    if (root.hasAttribute && (root.hasAttribute('p-ignore') || root.hasAttribute('pine-ignore') || root.hasAttribute('ignore'))) return;
 
     if (root.tagName && root.tagName.toLowerCase() === 'template') {
       const attrs = Array.from(root.attributes || []);
@@ -2922,9 +2904,9 @@
       }
 
       if (typeof document !== 'undefined') {
-        document.querySelectorAll('[p-cloak], [x-cloak], [cloak]').forEach((el) => {
+        document.querySelectorAll('[p-cloak], [pine-cloak], [cloak]').forEach((el) => {
           el.removeAttribute('p-cloak');
-          el.removeAttribute('x-cloak');
+          el.removeAttribute('pine-cloak');
           el.removeAttribute('cloak');
         });
       }

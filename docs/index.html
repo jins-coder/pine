@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PineJS — Next-Gen Fine-Grained Declarative Micro-Framework</title>
   <meta name="description"
-    content="Next-generation CDN-based fine-grained reactive declarative micro-framework. Complete Alpine.js parity with signals, faster DOM updates, and built-in plugins.">
+    content="Next-generation CDN-based fine-grained reactive declarative micro-framework with signals, faster DOM updates, and built-in plugins.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="docs.css">
   <!-- Load PineJS library via CDN with local fallback -->
@@ -65,7 +65,7 @@
         <div class="sidebar-title">Getting Started</div>
         <ul class="sidebar-items">
           <li class="sidebar-item"><a href="#start-here" class="active">Start Here</a></li>
-          <li class="sidebar-item"><a href="#upgrade-guide">Upgrade From Alpine.js</a></li>
+          <li class="sidebar-item"><a href="#syntax-styles">Syntax & Prefixes</a></li>
           <li class="sidebar-item"><a href="#releases">Releases & Versions</a></li>
         </ul>
       </div>
@@ -208,7 +208,7 @@
           web applications directly in your HTML markup.</p>
 
         <div class="doc-alert">
-          <strong>🌲 Signals + Alpine Ergonomics:</strong> Powered by true Fine-Grained Signals with atomic DOM
+          <strong>🌲 Fine-Grained Signals:</strong> Powered by true Fine-Grained Signals with atomic DOM
           bindings, sub-millisecond execution latency, and &lt; 8 kB footprint.
         </div>
 
@@ -241,43 +241,36 @@
       </section>
 
       <!-- ===================================================================
-           2. UPGRADE FROM ALPINE.JS
+           2. SYNTAX & DIRECTIVE STYLES
            =================================================================== -->
-      <section id="upgrade-guide" class="doc-section">
-        <h1 class="doc-h1">Upgrade From Alpine.js</h1>
-        <p class="lead-p">Transition existing Alpine.js applications with <strong>0 migration edits</strong> via
-          Chameleon Mode, or standardize on <code>p-</code> or prefix-free semantic HTML.</p>
+      <section id="syntax-styles" class="doc-section">
+        <h1 class="doc-h1">Syntax & Directive Styles</h1>
+        <p class="lead-p">PineJS offers clean, flexible syntax styles. Standardize on the canonical <code>p-</code> prefix, the explicit <code>pine-</code> prefix, or prefix-free semantic HTML attributes.</p>
 
-        <h2 class="doc-h2">4 Flavor Equivalency (v1.5.1 Larch)</h2>
+        <h2 class="doc-h2">Syntax Styles (v1.5.1 Larch)</h2>
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
-          <pre><code>&lt;!-- Flavor 1: Standard Pine --&gt;
+          <pre><code>&lt;!-- Style 1: Standard Pine (p-) --&gt;
 &lt;div p-data="{ count: 0 }"&gt;
   &lt;button @click="count++"&gt;+1&lt;/button&gt;
   &lt;span p-text="count"&gt;&lt;/span&gt;
 &lt;/div&gt;
 
-&lt;!-- Flavor 2: Prefix-Free Semantic HTML --&gt;
+&lt;!-- Style 2: Explicit Pine (pine-) --&gt;
+&lt;div pine-data="{ count: 0 }"&gt;
+  &lt;button @click="count++"&gt;+1&lt;/button&gt;
+  &lt;span pine-text="count"&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;!-- Style 3: Prefix-Free Semantic HTML --&gt;
 &lt;div state="{ count: 0 }"&gt;
   &lt;button @click="count++"&gt;+1&lt;/button&gt;
   &lt;span text="count"&gt;&lt;/span&gt;
-&lt;/div&gt;
-
-&lt;!-- Flavor 3: Ultra-Concise Symbols / Emojis --&gt;
-&lt;div 🌲="{ count: 0 }"&gt;
-  &lt;button @click="count++"&gt;+1&lt;/button&gt;
-  &lt;span ⚡="count"&gt;&lt;/span&gt;
-&lt;/div&gt;
-
-&lt;!-- Flavor 4: 100% Alpine.js Chameleon Drop-in (Zero edits!) --&gt;
-&lt;div x-data="{ count: 0 }"&gt;
-  &lt;button @click="count++"&gt;+1&lt;/button&gt;
-  &lt;span x-text="count"&gt;&lt;/span&gt;
 &lt;/div&gt;</code></pre>
         </div>
 
         <div class="demo-card">
-          <div class="demo-preview-header"><span>⚡ Live 4-Flavor Demo</span></div>
+          <div class="demo-preview-header"><span>⚡ Live Multi-Style Demo</span></div>
           <div class="demo-preview-body">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
               <div p-data="{ count: 0 }"
@@ -287,6 +280,14 @@
                 <button class="btn-demo" @click="count++">Increment</button>
                 <div style="margin-top: 0.5rem;">Count: <strong p-text="count">0</strong></div>
               </div>
+              <div pine-data="{ count: 0 }"
+                style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: #06b6d4; margin-bottom: 0.5rem;">Explicit
+                  <code>pine-</code>
+                </div>
+                <button class="btn-demo" @click="count++">Increment</button>
+                <div style="margin-top: 0.5rem;">Count: <strong pine-text="count">0</strong></div>
+              </div>
               <div state="{ count: 0 }"
                 style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
                 <div style="font-weight: 700; font-size: 0.85rem; color: #8b5cf6; margin-bottom: 0.5rem;">Semantic
@@ -294,21 +295,6 @@
                 </div>
                 <button class="btn-demo" @click="count++">Increment</button>
                 <div style="margin-top: 0.5rem;">Count: <strong text="count">0</strong></div>
-              </div>
-              <div 🌲="{ count: 0 }" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
-                <div style="font-weight: 700; font-size: 0.85rem; color: #ec4899; margin-bottom: 0.5rem;">Emoji
-                  <code>🌲/⚡</code>
-                </div>
-                <button class="btn-demo" @click="count++">Increment</button>
-                <div style="margin-top: 0.5rem;">Count: <strong ⚡="count">0</strong></div>
-              </div>
-              <div x-data="{ count: 0 }"
-                style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
-                <div style="font-weight: 700; font-size: 0.85rem; color: #06b6d4; margin-bottom: 0.5rem;">Alpine
-                  <code>x-</code> Chameleon
-                </div>
-                <button class="btn-demo" @click="count++">Increment</button>
-                <div style="margin-top: 0.5rem;">Count: <strong x-text="count">0</strong></div>
               </div>
             </div>
           </div>
@@ -326,11 +312,11 @@
           selectedVer: '1.5.1',
           releases: [
             { ver: '1.5.1', name: 'Larch', date: '2026-09-15', status: 'Latest Stable', badge: 'stable', desc: 'Tagged Template Components (Pine.html), Form Validation (p-validate), Cross-Tab Broadcast Sync ($broadcast), Native View Transitions API ($viewTransition), and Off-Thread Web Worker Signal Bridge (Pine.worker).' },
-            { ver: '1.4.0', name: 'Spruce', date: '2026-09-15', status: 'Previous Stable', badge: 'prev', desc: 'Configurable multi-prefix engine (Pine.prefix), prefix-free semantic HTML (state, text, show, model, loop), symbol & emoji shorthands (🌲, ⚡, ~, ?, *), WAAPI timeline orchestrator (Pine.timeline), and 100% Alpine Chameleon drop-in mode.' },
+            { ver: '1.4.0', name: 'Spruce', date: '2026-09-15', status: 'Previous Stable', badge: 'prev', desc: 'Configurable multi-prefix engine (Pine.prefix), prefix-free semantic HTML (state, text, show, model, loop), and WAAPI timeline orchestrator (Pine.timeline).' },
             { ver: '1.3.0', name: 'Cedar', date: '2026-09-15', status: 'Stable', badge: 'prev', desc: 'p-animate spring physics & WAAPI keyframes, Pine.devtools diagnostic bridge, and proxy receiver binding.' },
             { ver: '1.2.0', name: 'Redwood', date: '2026-09-14', status: 'Stable', badge: 'prev', desc: 'Official TypeScript typings (dist/pine.d.ts), $history URL sync magic, and p-hydrate SSR hydration activation.' },
             { ver: '1.1.0', name: 'Sequoia', date: '2026-09-14', status: 'Stable', badge: 'prev', desc: 'Hierarchical Scope Proxy, p-modelable component binding, reactive array auto-sync, debounced outside clicks, Pine.$data() API.' },
-            { ver: '1.0.0', name: 'Evergreen', date: '2026-09-10', status: 'Initial Release', badge: 'prev', desc: 'Initial release with full Alpine.js API parity, Fine-Grained Signals, built-in morphing & plugins, and 60+ interactive docs components.' }
+            { ver: '1.0.0', name: 'Evergreen', date: '2026-09-10', status: 'Initial Release', badge: 'prev', desc: 'Initial release with Fine-Grained Signals, built-in morphing & plugins, and 60+ interactive docs components.' }
           ]
         }">
           <div class="demo-preview-header"><span>🌲 Version Explorer</span></div>
@@ -2152,35 +2138,35 @@ Pine.data('userProfile', () => ({
                   tag: '🔮 Next Planned Release',
                   date: 'Upcoming',
                   highlights: [
-                    'Configurable multi-prefix engine: Pine.prefix(" pine") or Pine.prefix(["p-", "x-" , ""
-              ])', 'Pure prefix-free semantic HTML syntax (state, text, show, model, loop)'
-              , 'Expressive symbol & emoji shorthands (🌲 for root, ⚡ for text, ~ for model, ? for show, * for loop)'
-              , 'Universal Chameleon Drop-in Mode: Run existing Alpine.js x- code on Signals with 0 migration edits'
-              , 'Unified $-attribute shorthands ($data, $text, $show, $model) and Pine.timeline WAAPI orchestrator' ] },
-              { ver: '1.3.0' , name: 'Cedar' , tag: 'Latest Stable' , date: '2026-09-15' , highlights:
-              [ 'p-animate directive with WAAPI spring physics & presets (.spring, .bounce, .shake, .pulse, .loop)'
-              , 'Pine.devtools runtime diagnostics API (getRoots, getScope, getSignalMap, inspect)'
-              , 'Computed getter proxy receiver binding for reliable nested array/object signal tracking'
-              , 'Updated TypeScript typings (dist/pine.d.ts) for devtools and p-animate'
-              , 'Interactive playground shopping cart and live demo suite optimizations' ] }, { ver: '1.2.0' ,
-              name: 'Redwood' , tag: 'Previous Stable' , date: '2026-09-14' , highlights:
-              [ 'Official TypeScript typings (dist/pine.d.ts) for signals, directives & magics'
-              , '$history magic for bidirectional URL query search param synchronization & popstate'
-              , 'p-hydrate SSR directive for seamless server-side rendering activation'
-              , 'Fine-Grained Signals reactivity with near-zero latency DOM updates'
-              , '100% test suite pass rate across all automated unit & integration tests' ] }, { ver: '1.1.0' ,
-              name: 'Sequoia' , tag: 'Previous Stable' , date: '2026-09-14' , highlights:
-              [ 'Hierarchical Scope Proxy inheritance across nested components & templates'
-              , 'Two-way p-modelable reentrancy mutex to prevent loop feedback'
-              , 'Array mutation auto-sync on .push(), .pop(), .splice(), .sort(), etc.'
-              , 'Debounced click.outside appearance threshold for instant floating menus'
-              , 'Added Pine.$data(element) and element.__pine_scope__ runtime access'
-              , '16/16 Test Suites fully passing (100%)' , 'Automated build & minification pipeline (npm run build)' ]
-              }, { ver: '1.0.0' , name: 'Evergreen' , tag: 'Initial Release' , date: '2026-09-10' , highlights:
-              [ 'Initial release with 100% Alpine.js syntax & API parity'
-              , 'Fine-Grained Signals reactivity engine (Signal, Computed, Effect, Batch)'
-              , 'Built-in Morphing, Masks, Collapse, and CSS Presets'
-              , 'Full documentation with 60+ interactive live demo components' ] } ] }">
+                    'Configurable multi-prefix engine: Pine.prefix("pine") or Pine.prefix(["p-", "pine-"])',
+                    'Pure prefix-free semantic HTML syntax (state, text, show, model, loop)',
+                    'Unified $-attribute shorthands ($data, $text, $show, $model) and Pine.timeline WAAPI orchestrator'
+                  ]
+                },
+                { ver: '1.3.0' , name: 'Cedar' , tag: 'Latest Stable' , date: '2026-09-15' , highlights:
+                [ 'p-animate directive with WAAPI spring physics & presets (.spring, .bounce, .shake, .pulse, .loop)'
+                , 'Pine.devtools runtime diagnostics API (getRoots, getScope, getSignalMap, inspect)'
+                , 'Computed getter proxy receiver binding for reliable nested array/object signal tracking'
+                , 'Updated TypeScript typings (dist/pine.d.ts) for devtools and p-animate'
+                , 'Interactive playground shopping cart and live demo suite optimizations' ] }, { ver: '1.2.0' ,
+                name: 'Redwood' , tag: 'Previous Stable' , date: '2026-09-14' , highlights:
+                [ 'Official TypeScript typings (dist/pine.d.ts) for signals, directives & magics'
+                , '$history magic for bidirectional URL query search param synchronization & popstate'
+                , 'p-hydrate SSR directive for seamless server-side rendering activation'
+                , 'Fine-Grained Signals reactivity with near-zero latency DOM updates'
+                , '100% test suite pass rate across all automated unit & integration tests' ] }, { ver: '1.1.0' ,
+                name: 'Sequoia' , tag: 'Previous Stable' , date: '2026-09-14' , highlights:
+                [ 'Hierarchical Scope Proxy inheritance across nested components & templates'
+                , 'Two-way p-modelable reentrancy mutex to prevent loop feedback'
+                , 'Array mutation auto-sync on .push(), .pop(), .splice(), .sort(), etc.'
+                , 'Debounced click.outside appearance threshold for instant floating menus'
+                , 'Added Pine.$data(element) and element.__pine_scope__ runtime access'
+                , '16/16 Test Suites fully passing (100%)' , 'Automated build & minification pipeline (npm run build)' ]
+                }, { ver: '1.0.0' , name: 'Evergreen' , tag: 'Initial Release' , date: '2026-09-10' , highlights:
+                [ 'Initial release with fine-grained reactive declarative directives'
+                , 'Fine-Grained Signals reactivity engine (Signal, Computed, Effect, Batch)'
+                , 'Built-in Morphing, Masks, Collapse, and CSS Presets'
+                , 'Full documentation with 60+ interactive live demo components' ] } ] }">
               <div style="display: flex; gap: 0.75rem; margin-bottom: 1.25rem;">
                 <template p-for="item in versions">
                   <button class="btn-demo" :class="{ 'btn-demo-outline': selectedVer !== item.ver }"

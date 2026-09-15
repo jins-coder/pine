@@ -5,7 +5,7 @@
 # 🌲 PineJS (`pine.js`)
 
 > **Next-Generation Fine-Grained Reactive Declarative Micro-Framework for Modern Web Apps**  
-> *As simple and ergonomic as Alpine.js, fast as Solid signals, ultra-lightweight (&lt; 8 KB minified).*
+> *Modern, minimal, reactive micro-framework powered by fine-grained signals (&lt; 10 KB minified).*
 
 [![Version](https://img.shields.io/badge/version-1.5.1%20%22Larch%22-10b981.svg)](https://github.com)
 [![Reactivity](https://img.shields.io/badge/reactivity-fine--grained%20signals-06b6d4.svg)](https://github.com)
@@ -18,73 +18,70 @@
 
 **PineJS** allows you to declare interactive frontend behavior right in your HTML without a build step or virtual DOM diffing overhead. 
 
-Unlike Alpine.js (which uses proxy-based polling and coarse microtask tree evaluations), **PineJS is powered by true Fine-Grained Signals**. Every reactive binding (`p-text`, `:class`, `p-model`, `p-show`, `p-validate`) directly subscribes to atomic signal changes, updating DOM nodes with near-zero latency.
+**PineJS is powered by true Fine-Grained Signals**. Every reactive binding (`p-text`, `:class`, `p-model`, `p-show`, `p-validate`) directly subscribes to atomic signal changes, updating DOM nodes with near-zero latency.
 
-### 🌲 4 Expressive Syntax Flavors in v1.5.1 ("Larch"):
+### 🌲 Expressive Syntax in v1.5.1 ("Larch"):
 
 ```html
 <!-- Include via CDN -->
 <script src="https://unpkg.com/pinejs-core@1.5.1/dist/pine.min.js" defer></script>
 
-<!-- Flavor 1: Standard Pine Directives -->
+<!-- Flavor 1: Standard Pine Directives (p-) -->
 <div p-data="{ count: 0 }">
   <button @click="count++">Increment</button>
   <span p-text="count"></span>
 </div>
 
-<!-- Flavor 2: Prefix-Free Semantic HTML -->
+<!-- Flavor 2: Explicit Pine Directives (pine-) -->
+<div pine-data="{ count: 0 }">
+  <button @click="count++">Increment</button>
+  <span pine-text="count"></span>
+</div>
+
+<!-- Flavor 3: Prefix-Free Semantic HTML -->
 <div state="{ count: 0 }">
   <button @click="count++">Increment</button>
   <span text="count"></span>
-</div>
-
-<!-- Flavor 3: Ultra-Concise Symbol & Emoji Directives -->
-<div 🌲="{ count: 0 }">
-  <button @click="count++">Increment</button>
-  <span ⚡="count"></span>
-</div>
-
-<!-- Flavor 4: 100% Alpine.js Drop-in Chameleon Mode (Zero edits needed!) -->
-<div x-data="{ count: 0 }">
-  <button @click="count++">Increment</button>
-  <span x-text="count"></span>
 </div>
 ```
 
 ---
 
-## ⚡ Key Improvements Over Alpine.js
+## ⚡ Key Highlights & Architecture
 
-| Feature | Alpine.js (v3) | PineJS (v1.5 "Larch") |
-| :--- | :--- | :--- |
-| **Reactivity Architecture** | Coarse Proxy tree effects | **True Fine-Grained Signals (`Signal`, `Computed`, `Effect`, `Batch`)** |
-| **DOM Update Granularity** | Re-evaluates entire directive expressions | **Direct atomic text node & attribute subscriptions** |
-| **Bundle Size** | ~14 KB minified | **&lt; 10 KB minified**, zero dependencies |
-| **Directive Flavors** | `x-` prefix only | **Multi-Prefix (`p-`, `x-`, `pine-`), Prefix-Free Semantic HTML, & Symbol/Emoji (`🌲`, `⚡`, `~`, `?`, `*`)** |
-| **Tagged Template Components** | Not available | **`Pine.html` compiler-less reactive templates** |
-| **Form Validation** | Manual custom code | **Built-in `p-validate` with real-time `$errors`, `$valid`, `$touched`** |
-| **Multi-Tab Sync** | Manual `storage` listeners | **Built-in `$broadcast` (native `BroadcastChannel` synchronization)** |
-| **View Transitions** | CSS transitions only | **Built-in `$viewTransition` (native `document.startViewTransition`)** |
-| **Off-Thread Web Workers** | Manual Web Worker code | **Built-in `Pine.worker` off-thread reactive signal computation** |
-| **Animation Engine** | CSS class transitions only | **CSS transitions, `p-animate` Spring physics, & `Pine.timeline` WAAPI Orchestrator** |
-| **Built-in Magics** | `$el`, `$refs`, `$watch`, `$dispatch`, `$nextTick`, `$root`, `$data`, `$id`, `$store` | All Alpine magics PLUS **`$signal`**, **`$persist`**, **`$history`**, **`$fetch`**, **`$broadcast`**, **`$viewTransition`**, **`$intersect`**, **`$focus`** |
+| Feature | PineJS (v1.5 "Larch") |
+| :--- | :--- |
+| **Reactivity Architecture** | **True Fine-Grained Signals (`Signal`, `Computed`, `Effect`, `Batch`)** |
+| **DOM Update Granularity** | **Direct atomic text node & attribute subscriptions** |
+| **Bundle Size** | **&lt; 10 KB minified**, zero dependencies |
+| **Directive Prefixes** | **Configurable Multi-Prefix (`p-`, `pine-`) & Prefix-Free Semantic HTML (`state`, `text`, etc.)** |
+| **Tagged Template Components** | **`Pine.html` compiler-less reactive templates** |
+| **Form Validation** | **Built-in `p-validate` with real-time `$errors`, `$valid`, `$touched`, `$dirty`** |
+| **Multi-Tab Sync** | **Built-in `$broadcast` (native `BroadcastChannel` synchronization)** |
+| **View Transitions** | **Built-in `$viewTransition` (native `document.startViewTransition`)** |
+| **Off-Thread Web Workers** | **Built-in `Pine.worker` off-thread reactive signal computation** |
+| **Animation Engine** | **CSS transitions, `p-animate` Spring physics, & `Pine.timeline` WAAPI Orchestrator** |
+| **DOM Morphing** | **Virtual-DOM-style live element morphing with `Pine.morph()`** |
+| **Lifecycle & Observer** | **Automatic node initialization & teardown via native `MutationObserver`** |
 
 ---
 
 ## 📦 Directives Reference
 
-- **`p-data` / `state` / `🌲` / `x-data`**: Initialize component scope: `<div p-data="{ count: 0 }">` or `<div state="{ count: 0 }">`
+- **`p-data` / `pine-data` / `state`**: Initialize component scope: `<div p-data="{ count: 0 }">` or `<div state="{ count: 0 }">`
 - **`p-validate` / `valid`**: Declarative form validation: `<input p-model="email" p-validate.required.email />`
 - **`p-bind` / `:attr`**: Bind attributes dynamically: `<button :disabled="isLoading" :class="{ active: isOpen }">`
 - **`p-on` / `@event`**: Listen for events with modifiers: `<button @click.prevent="submit()" @click.outside="close()">`
-  - Modifiers: `.prevent`, `.stop`, `.debounce.300ms`, `.throttle.100ms`, `.outside`, `.window`, `.document`, `.once`, `.passive`, `.enter`, `.escape`
-- **`p-text` / `text` / `⚡`**: Update atomic `textContent`: `<span p-text="username"></span>` or `<span text="username"></span>`
-- **`p-html` / `html`**: Update inner `innerHTML`: `<div p-html="rawArticle"></div>`
-- **`p-model` / `model` / `~`**: Two-way data binding for inputs, textareas, selects, checkboxes, radios with `.number`, `.trim`, `.lazy`
+  - Modifiers: `.prevent`, `.stop`, `.debounce.300ms`, `.throttle.100ms`, `.outside`, `.window`, `.document`, `.once`, `.passive`, `.enter`, `.escape`, `.ctrl`, `.meta`, `.cmd`, `.shift`, `.alt`, `.left`, `.middle`, `.right`
+- **`p-text` / `pine-text` / `text`**: Update atomic `textContent`: `<span p-text="username"></span>` or `<span text="username"></span>`
+- **`p-html` / `pine-html` / `html`**: Update inner `innerHTML`: `<div p-html="rawArticle"></div>`
+- **`p-model` / `pine-model` / `model`**: Two-way data binding for inputs, textareas, selects, checkboxes, radios with `.number`, `.trim`, `.lazy`
 - **`p-modelable`**: Expose internal component state to parent `p-model`: `<div p-modelable="selected">`
-- **`p-show` / `show` / `?`**: Toggle element visibility (`display: none` / transitions): `<div p-show="isOpen"></div>`
-- **`p-if` / `when`**: Conditionally mount/unmount DOM templates: `<template p-if="isLoggedIn">...</template>` or `<template when="isLoggedIn">...</template>`
-- **`p-for` / `loop` / `*`**: Loop over arrays, objects, or numbers: `<template p-for="(item, i) in items">...</template>` or `<template loop="item in items">...</template>`
+- **`p-show` / `pine-show` / `show`**: Toggle element visibility (`display: none` / transitions): `<div p-show="isOpen"></div>`
+- **`p-if` / `p-else-if` / `p-else` / `when`: Conditionally mount/unmount DOM templates: `<template p-if="isLoggedIn">...</template>`
+- **`p-for` / `pine-for` / `loop`**: Loop over arrays, objects, or numbers: `<template p-for="item in items" :key="item.id">...</template>`
+- **`p-trap`**: Confinements keyboard focus within modal dialogs for WAI-ARIA compliance: `<div p-trap="isOpen">`
+- **`p-mask`**: Input formatting mask (`9` for numbers, `a` for letters, `*` for alphanumeric): `<input p-mask="9999 9999 9999 9999" />`
 - **`p-transition`**: Smooth CSS enter/leave animations: `<div p-show="open" p-transition.fade>`
 - **`p-animate`**: Spring physics and WAAPI keyframe animations: `<button p-animate.spring @click="liked = !liked">`
 - **`p-effect`**: Execute side-effects reactively: `<div p-effect="console.log(count)">`
@@ -131,7 +128,6 @@ const Card = ({ title }) => Pine.html`
 
 // Off-Thread Web Worker Signal Bridge
 const heavyWorker = Pine.worker((num) => {
-  // Heavy computation running in background thread
   return num * 42;
 });
 heavyWorker.compute(100);
@@ -143,7 +139,7 @@ Pine.effect(() => console.log(doubled.value));
 
 // Configure directive prefix
 Pine.prefix('pine'); // Support pine-data, pine-text, etc.
-Pine.prefix(['p-', 'x-', 'pine-']); // Support multiple prefixes simultaneously
+Pine.prefix(['p-', 'pine-']); // Support multiple prefixes simultaneously
 
 // Web Animations API (WAAPI) Timeline Orchestration
 const tl = Pine.timeline()
@@ -163,12 +159,12 @@ Pine.batch(() => {
 
 | Version | Codename | Release Date | Status | Key Features |
 | :--- | :--- | :--- | :--- | :--- |
-| **`v1.5.1`** | **Larch** | 2026-09-15 | **Latest Stable** | Tagged Template Components (`Pine.html`), Form Validation (`p-validate`), Cross-Tab Broadcast Sync (`$broadcast`), Native View Transitions (`$viewTransition`), Web Worker Signal Bridge (`Pine.worker`). |
-| **`v1.4.0`** | **Spruce** | 2026-09-15 | Previous Stable | Configurable multi-prefix engine (`Pine.prefix`), prefix-free semantic HTML (`state`, `text`, `show`, `model`, `loop`), symbol shorthands (`🌲`, `⚡`, `~`, `?`, `*`), WAAPI timeline orchestrator (`Pine.timeline`), chameleon drop-in mode. |
+| **`v1.5.1`** | **Larch** | 2026-09-15 | **Latest Stable** | Tagged Template Components (`Pine.html`), Form Validation (`p-validate`), Cross-Tab Broadcast Sync (`$broadcast`), Native View Transitions (`$viewTransition`), Web Worker Signal Bridge (`Pine.worker`), DOM Lifecycle Observer (`MutationObserver`). |
+| **`v1.4.0`** | **Spruce** | 2026-09-15 | Previous Stable | Configurable multi-prefix engine (`Pine.prefix`), prefix-free semantic HTML (`state`, `text`, `show`, `model`, `loop`), WAAPI timeline orchestrator (`Pine.timeline`). |
 | **`v1.3.0`** | **Cedar** | 2026-09-15 | Stable | `p-animate` spring physics & keyframe animations, `Pine.devtools` runtime diagnostics bridge, getter receiver proxy binding. |
 | **`v1.2.0`** | **Redwood** | 2026-09-14 | Stable | Official TypeScript typings (`dist/pine.d.ts`), `$history` URL query sync magic, `p-hydrate` SSR directive, fine-grained reactivity. |
 | **`v1.1.0`** | **Sequoia** | 2026-09-14 | Stable | Hierarchical Scope Proxy inheritance, `p-modelable` mutex, reactive array auto-sync, debounced outside clicks, `Pine.$data()` API, minification pipeline. |
-| **`v1.0.0`** | **Evergreen** | 2026-09-10 | Stable | Initial release with full Alpine.js API parity, Fine-Grained Signals, built-in morphing & plugins, and 60+ interactive docs components. |
+| **`v1.0.0`** | **Evergreen** | 2026-09-10 | Stable | Initial release with Fine-Grained Signals, reactive directives, built-in morphing & plugins, and comprehensive documentation. |
 
 👉 For full detailed release notes, architecture plans, and roadmap, see [CHANGELOG.md](file:///e:/afterquery/shopify/utility/pinejs/CHANGELOG.md).
 

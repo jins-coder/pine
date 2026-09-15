@@ -81,28 +81,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 #### 1. Configurable Multi-Prefix Engine (`Pine.prefix`)
 - **Custom Prefixes**: Dynamically configure framework prefixes globally via `Pine.prefix('pine')` or `Pine.prefix('app')`.
-- **Multi-Prefix Array Support**: Supports multiple prefixes simultaneously (e.g. `Pine.prefix(['p-', 'x-', 'pine-', ''])`) for frictionless gradual adoption.
+- **Multi-Prefix Array Support**: Supports multiple prefixes simultaneously (e.g. `Pine.prefix(['p-', 'pine-'])`) for flexible naming conventions.
 
 #### 2. Pure Prefix-Free Semantic HTML Attributes
-- **Zero-Prefix Syntax**: First micro-framework to support clean HTML5 attribute bindings with zero framework prefixes:
+- **Zero-Prefix Syntax**: Clean HTML5 attribute bindings with zero framework prefixes:
   - `<div state="{ count: 0 }">` (Component state root)
   - `<span text="count"></span>` (Reactive text)
   - `<input model="query" />` (Two-way model binding)
   - `<div show="isOpen"></div>` (Conditional display)
   - `<template loop="item in items">` (Keyed list iteration)
 
-#### 3. Expressive Symbol & Emoji Directives
-- **Ultra-Compact Shorthands**:
-  - `🌲="{ count: 0 }"` (Pine state root)
-  - `⚡="count"` (Signal-speed text)
-  - `~="query"` (Two-way model binding)
-  - `?="isOpen"` (Conditional display)
-  - `*="item in items"` (Loop iteration)
-
-#### 4. Universal "Chameleon" Drop-in Compatibility
-- **Zero-Migration Upgrade**: Natively detects and runs legacy Alpine.js `x-` attributes (`x-data`, `x-show`, `x-text`, `x-model`, `x-for`, `x-if`, etc.) on Fine-Grained Signals with 0 code changes.
-
-#### 5. Web Animations API Timeline Orchestration (`Pine.timeline`)
+#### 3. Web Animations API Timeline Orchestration (`Pine.timeline`)
 - **Choreographed Animations**: Multi-element sequenced animations with `.play()`, `.pause()`, `.reverse()`, `.finish()`, and `.cancel()` controls.
 
 ---
@@ -202,7 +191,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **`untrack(fn)`**: Executes code blocks without registering active signal subscriptions.
 - **`reactive(object)`**: Deep reactive Proxy bridge connecting JavaScript objects and arrays to atomic signal atoms.
 
-#### 2. Declarative Directives (Full Alpine.js Parity)
+#### 2. Declarative Directives
 - **`p-data`**: Declares a new component root element and initializes its fine-grained reactive state object.
 - **`p-init`**: Executes initialization logic when a component mounts.
 - **`p-bind` / `:attr`**: Binds attributes, CSS classes (`:class`), and inline styles (`:style`) reactively.
@@ -251,7 +240,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **`Pine.morph(fromEl, toEl)`**: Built-in DOM morphing algorithm for server-driven UI updates (HTMX / Hotwire compatible).
 
 #### 5. Documentation & Tooling
-- **Alpine.js-Style Documentation Site**: Comprehensive documentation covering all 60+ topics with dedicated interactive live `.demo-card` widgets.
+- **Interactive Documentation Site**: Comprehensive documentation covering all 60+ topics with dedicated interactive live `.demo-card` widgets.
 - **Interactive Playground**: Dual-pane browser sandbox (`docs/playground.html`).
 - **Realtime Benchmarks**: Reactivity and DOM performance stress tests (`docs/benchmarks.html`).
 - **Automated Test Suite**: Browser test suite with automated assertions (`tests/test-suite.html`).
@@ -260,30 +249,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 🔮 Future Roadmap
 
-### `v1.4.0` — "Spruce" (Next Planned Release)
-- [ ] **Configurable Multi-Prefix Engine (`Pine.prefix`)**:
-  - Customize the directive prefix globally: `Pine.prefix('pine')` or `Pine.prefix('app')`.
-  - Multi-prefix array support (`Pine.prefix(['p-', 'pine-', 'x-', ''])`) for progressive adoption.
-- [ ] **Prefix-Free Semantic HTML Syntax (Industry First)**:
-  - Clean HTML5 attribute bindings with zero framework prefixes:
-    - `<div state="{ count: 0 }">` (Component root)
-    - `<span text="count"></span>` (Reactive text)
-    - `<input model="query" />` (Two-way model binding)
-    - `<div show="isOpen"></div>` (Conditional display)
-    - `<template loop="item in items">` (Keyed list iteration)
-- [ ] **Expressive Symbol & Emoji Directives**:
-  - Ultra-compact syntax for minimalists:
-    - `🌲="{ ... }"` (Component state root)
-    - `⚡="count"` (Atomic fine-grained signal text)
-    - `~="query"` (Two-way model binding)
-    - `?="isOpen"` (Conditional display)
-    - `*="item in items"` (Loop iteration)
-- [ ] **Universal "Chameleon" Drop-in Mode**:
-  - Native runtime interception of Alpine `x-` attributes, upgrading legacy code to Signals with zero migration effort.
-- [ ] **Unified `$`-Attribute Shorthands**:
-  - Unify JS magics with HTML attributes: `<div $data="...">`, `<span $text="...">`, `<div $show="...">`.
-- [ ] **Web Animations API Timeline Orchestrator (`Pine.timeline`)**:
-  - Choreograph multi-element sequenced spring animations.
+### `v1.4.0` — "Spruce" (Multi-Prefix & Timelines)
+- [x] **Configurable Multi-Prefix Engine**:
+  - `Pine.prefix('pine')` or `Pine.prefix(['p-', 'pine-'])`.
+- [x] **Prefix-Free Semantic HTML Attributes**:
+  - `<div state="{ count: 0 }">` (Component state root)
+  - `<span text="count"></span>` (Reactive text)
+  - `<input model="query" />` (Two-way model binding)
+  - `<div show="isOpen"></div>` (Conditional display)
+  - `<template loop="item in items">` (Keyed list iteration)
+- [x] **Unified `$`-Attribute Shorthands**:
+  - `<div $data="...">`, `<span $text="...">`, `<div $show="...">`.
+- [x] **Web Animations API Timeline Orchestrator (`Pine.timeline`)**:
+  - Choreograph multi-element sequenced animations.
 
 ### `v2.0.0` — "Apex" (Major Evolution)
 - [ ] Compiler-less JSX / Tagged template literals optional runtime.
@@ -292,21 +270,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
-## 📝 Version Comparison Summary
+## 📝 Version Evolution Summary
 
-| Feature | PineJS `v1.0.0` | PineJS `v1.1.0` | PineJS `v1.2.0` | PineJS `v1.3.0` | Alpine.js `v3.x` |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Reactivity Primitive** | Fine-Grained Signals | Fine-Grained Signals | Fine-Grained Signals | **Fine-Grained Signals** | Coarse Proxy Observer |
-| **Scope Inheritance** | Single-level | **Hierarchical Scope Proxy** | **Hierarchical Scope Proxy** | **Hierarchical Scope Proxy** | Prototype Chain |
-| **Two-Way Synchronization** | Basic | **Mutex Reentrancy Guard** | **Mutex Reentrancy Guard** | **Mutex Reentrancy Guard** | Microtask Loop Guard |
-| **Array Mutations** | Explicit length reads | **Auto-syncing Length Signals** | **Auto-syncing Length Signals** | **Auto-syncing Length Signals** | Proxy Interceptors |
-| **Spring Physics & WAAPI** | None | None | None | **Built-in `p-animate`** | None |
-| **DevTools Bridge** | None | None | None | **Built-in `Pine.devtools`** | Requires Extension |
-| **TypeScript Typings** | Partial | Partial | **Full Ambient (`dist/pine.d.ts`)** | **Full Ambient (`dist/pine.d.ts`)** | Community / Defs |
-| **URL Query Sync** | Custom code | Custom code | **Built-in `$history` Magic** | **Built-in `$history` Magic** | None |
-| **SSR Hydration** | Manual | Manual | **Built-in `p-hydrate`** | **Built-in `p-hydrate`** | None |
-| **Built-in Morphing** | Yes (`Pine.morph`) | Yes (`Pine.morph`) | **Yes (`Pine.morph`)** | **Yes (`Pine.morph`)** | Requires Separate Plugin |
-| **Built-in Storage Persistence** | Yes (`$persist`) | Yes (`$persist`) | **Yes (`$persist`)** | **Yes (`$persist`)** | Requires Separate Plugin |
-| **Built-in Async HTTP Fetch** | Yes (`$fetch`) | Yes (`$fetch`) | **Yes (`$fetch`)** | **Yes (`$fetch`)** | None |
-| **Bundle Size (Minified)** | 33.98 KB | 34.66 KB | 35.87 KB | **~36.1 KB** | ~43 KB |
-| **Bundle Size (Gzipped)** | 9.17 KB | 9.30 KB | 9.60 KB | **~9.68 KB** | ~15 KB |
+| Feature | PineJS `v1.0.0` | PineJS `v1.1.0` | PineJS `v1.2.0` | PineJS `v1.3.0` |
+| :--- | :--- | :--- | :--- | :--- |
+| **Reactivity Primitive** | Fine-Grained Signals | Fine-Grained Signals | Fine-Grained Signals | **Fine-Grained Signals** |
+| **Scope Inheritance** | Single-level | **Hierarchical Scope Proxy** | **Hierarchical Scope Proxy** | **Hierarchical Scope Proxy** |
+| **Two-Way Synchronization** | Basic | **Mutex Reentrancy Guard** | **Mutex Reentrancy Guard** | **Mutex Reentrancy Guard** |
+| **Array Mutations** | Explicit length reads | **Auto-syncing Length Signals** | **Auto-syncing Length Signals** | **Auto-syncing Length Signals** |
+| **Spring Physics & WAAPI** | None | None | None | **Built-in `p-animate`** |
+| **DevTools Bridge** | None | None | None | **Built-in `Pine.devtools`** |
+| **TypeScript Typings** | Partial | Partial | **Full Ambient (`dist/pine.d.ts`)** | **Full Ambient (`dist/pine.d.ts`)** |
+| **URL Query Sync** | Custom code | Custom code | **Built-in `$history` Magic** | **Built-in `$history` Magic** |
+| **SSR Hydration** | Manual | Manual | **Built-in `p-hydrate`** | **Built-in `p-hydrate`** |
+| **Built-in Morphing** | Yes (`Pine.morph`) | Yes (`Pine.morph`) | **Yes (`Pine.morph`)** | **Yes (`Pine.morph`)** |
+| **Built-in Storage Persistence** | Yes (`$persist`) | Yes (`$persist`) | **Yes (`$persist`)** | **Yes (`$persist`)** |
+| **Built-in Async HTTP Fetch** | Yes (`$fetch`) | Yes (`$fetch`) | **Yes (`$fetch`)** | **Yes (`$fetch`)** |
+| **Bundle Size (Minified)** | 33.98 KB | 34.66 KB | 35.87 KB | **~36.1 KB** |
+| **Bundle Size (Gzipped)** | 9.17 KB | 9.30 KB | 9.60 KB | **~9.68 KB** |
