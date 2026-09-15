@@ -20,9 +20,80 @@ export type CleanupFn = () => void;
 export type EffectFn = (onCleanup: (fn: CleanupFn) => void) => void;
 export type StopFn = () => void;
 
+export interface ScopeInstance {
+  readonly active: boolean;
+  run<T>(fn: () => T): T;
+  effect(fn: EffectFn, options?: { scheduler?: string | ((job: () => void) => void) }): StopFn;
+  listen(target: EventTarget, event: string, handler: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): () => void;
+  timeout(fn: () => void, delay: number): any;
+  interval(fn: () => void, delay: number): any;
+  cleanup(fn: () => void): void;
+  child(): ScopeInstance;
+  dispose(): void;
+}
+
+export interface SchedulerAPI {
+  schedule(job: () => void, mode?: 'sync' | 'microtask' | 'raf' | 'idle'): void;
+  flush(): void;
+  sync(job: () => void): void;
+  microtask(job: () => void): void;
+  raf(job: () => void): void;
+  idle(job: () => void): void;
+}
+
+export interface Resource<T = any> {
+  data: T;
+  readonly loading: boolean;
+  readonly error: any;
+  readonly status: 'idle' | 'loading' | 'refreshing' | 'success' | 'error';
+  refresh(): Promise<T>;
+  cancel(): void;
+  reset(): void;
+  dispose(): void;
+}
+
+export interface MountWrapper {
+  el: HTMLElement;
+  container: HTMLElement;
+  find(selector: string): HTMLElement | null;
+  findAll(selector: string): HTMLElement[];
+  text(selector?: string): string;
+  html(selector?: string): string;
+  attribute(selector: string, name: string): string | null;
+  click(selector: string | HTMLElement): Promise<void>;
+  input(selector: string | HTMLElement, value: string): Promise<void>;
+  type(selector: string | HTMLElement, text: string): Promise<void>;
+  dispatch(selector: string | HTMLElement, eventName: string, detail?: any): void;
+  flush(): Promise<void>;
+  waitFor(predicate: () => boolean, timeout?: number): Promise<boolean>;
+  unmount(): void;
+}
+
+export interface CacheAPI {
+  readonly size: number;
+  readonly stats: { hits: number; misses: number; size: number };
+  clear(): void;
+}
+
+export function scope(fn?: () => void): ScopeInstance;
+export const scheduler: SchedulerAPI;
+export function batchAsync<T>(fn: () => Promise<T>): Promise<T>;
+export function transaction<T>(fn: () => T, options?: { rollbackOnError?: boolean }): T;
+export function errorBoundary<T>(fn: () => T, options?: { onError?: (err: any) => void }): T;
+export function resource<T = any>(source: string | ((signal?: AbortSignal) => any), options?: { initialValue?: T; cache?: boolean; ttl?: number; onError?: (err: any) => void }): Resource<T>;
+export function component(definition: any): (...args: any[]) => any;
+export function onBeforeMount(fn: () => void): void;
+export function onMount(fn: () => void): void;
+export function onBeforeUpdate(fn: () => void): void;
+export function onUpdated(fn: () => void): void;
+export function onUnmount(fn: () => void): void;
+export function define(tagName: string, componentDef: any): void;
+export function mount(templateHtml: string, initialData?: Record<string, any>): MountWrapper;
+export const cache: CacheAPI;
+
 export function signal<T>(initialValue: T): Signal<T>;
 export function computed<T>(getter: () => T): Computed<T>;
-export function effect(fn: EffectFn, options?: { scheduler?: () => void }): StopFn;
+export function effect(fn: EffectFn, options?: { scheduler?: string | ((job: () => void) => void) }): StopFn;
 export function batch<T>(fn: () => T): T;
 export function untrack<T>(fn: () => T): T;
 export function reactive<T extends object>(target: T): T;
@@ -232,6 +303,39 @@ export interface PineAPI {
 
   // Prefix Configuration
   prefix: (newPrefix?: string | string[]) => string[];
+
+  // Reactive Scope Engine
+  scope: typeof scope;
+
+  // Scheduler & Async Batching
+  scheduler: SchedulerAPI;
+  batchAsync: typeof batchAsync;
+
+  // Transaction Engine
+  transaction: typeof transaction;
+
+  // Error Boundaries
+  errorBoundary: typeof errorBoundary;
+
+  // Async Resource 2.0
+  resource: typeof resource;
+
+  // Component Foundation & Lifecycles
+  component: typeof component;
+  onBeforeMount: typeof onBeforeMount;
+  onMount: typeof onMount;
+  onBeforeUpdate: typeof onBeforeUpdate;
+  onUpdated: typeof onUpdated;
+  onUnmount: typeof onUnmount;
+
+  // Web Components Custom Elements
+  define: typeof define;
+
+  // Testing Harness
+  mount: typeof mount;
+
+  // Expression Cache
+  cache: CacheAPI;
 
   // Signals, Fetch, Timeline & Templates
   signal: typeof signal;

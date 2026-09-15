@@ -41,6 +41,109 @@
   const PROXY_SYMBOL = Symbol('__pine_proxy__');
   const SCOPE_SYMBOL = Symbol('__pine_scope__');
 
+  let activeTransaction = null;
+  let activeScopeInstance = null;
+
+  // Centralized Scheduler
+  const scheduler = {
+    queue: {
+      microtask: new Set(),
+      raf: new Set(),
+      idle: new Set()
+    },
+    scheduled: {
+      microtask: false,
+      raf: false,
+      idle: false
+    },
+    sync(job) {
+      return job();
+    },
+    microtask(job) {
+      this.schedule(job, 'microtask');
+    },
+    raf(job) {
+      this.schedule(job, 'raf');
+    },
+    idle(job) {
+      this.schedule(job, 'idle');
+    },
+    schedule(job, mode = 'microtask') {
+      if (mode === 'sync') {
+        return job();
+      }
+      if (mode === 'raf') {
+        this.queue.raf.add(job);
+        if (!this.scheduled.raf) {
+          this.scheduled.raf = true;
+          const flushRaf = () => {
+            this.scheduled.raf = false;
+            const jobs = Array.from(this.queue.raf);
+            this.queue.raf.clear();
+            jobs.forEach((j) => {
+              try { j(); } catch (e) { console.error('[PineJS Scheduler] RAF error:', e); }
+            });
+          };
+          if (typeof requestAnimationFrame !== 'undefined') {
+            requestAnimationFrame(flushRaf);
+          } else {
+            setTimeout(flushRaf, 16);
+          }
+        }
+        return;
+      }
+      if (mode === 'idle') {
+        this.queue.idle.add(job);
+        if (!this.scheduled.idle) {
+          this.scheduled.idle = true;
+          const flushIdle = () => {
+            this.scheduled.idle = false;
+            const jobs = Array.from(this.queue.idle);
+            this.queue.idle.clear();
+            jobs.forEach((j) => {
+              try { j(); } catch (e) { console.error('[PineJS Scheduler] Idle error:', e); }
+            });
+          };
+          if (typeof requestIdleCallback !== 'undefined') {
+            requestIdleCallback(flushIdle);
+          } else {
+            setTimeout(flushIdle, 50);
+          }
+        }
+        return;
+      }
+
+      // Default: microtask
+      this.queue.microtask.add(job);
+      if (!this.scheduled.microtask) {
+        this.scheduled.microtask = true;
+        const flushMicrotask = () => {
+          this.scheduled.microtask = false;
+          const jobs = Array.from(this.queue.microtask);
+          this.queue.microtask.clear();
+          jobs.forEach((j) => {
+            try { j(); } catch (e) { console.error('[PineJS Scheduler] Microtask error:', e); }
+          });
+        };
+        if (typeof queueMicrotask === 'function') {
+          queueMicrotask(flushMicrotask);
+        } else {
+          Promise.resolve().then(flushMicrotask);
+        }
+      }
+    },
+    flush() {
+      ['microtask', 'raf', 'idle'].forEach((mode) => {
+        const jobs = Array.from(this.queue[mode]);
+        this.queue[mode].clear();
+        this.scheduled[mode] = false;
+        jobs.forEach((j) => {
+          try { j(); } catch (e) { console.error('[PineJS Scheduler] Flush error:', e); }
+        });
+      });
+    }
+  };
+
   class Signal {
     constructor(value) {
       this._value = value;
@@ -57,6 +160,13 @@
 
     set value(nextValue) {
       if (!Object.is(this._value, nextValue)) {
+        if (activeTransaction) {
+          activeTransaction.mutations.push({
+            type: 'signal',
+            target: this,
+            prevValue: this._value
+          });
+        }
         this._value = nextValue;
         this.notify();
       }
@@ -71,7 +181,11 @@
         if (batchDepth > 0) {
           pendingEffects.add(subscriber);
         } else {
-          subscriber.run();
+          if (typeof subscriber.trigger === 'function') {
+            subscriber.trigger();
+          } else {
+            subscriber.run();
+          }
         }
       }
     }
@@ -123,7 +237,11 @@
         if (batchDepth > 0) {
           pendingEffects.add(subscriber);
         } else {
-          subscriber.run();
+          if (typeof subscriber.trigger === 'function') {
+            subscriber.trigger();
+          } else {
+            subscriber.run();
+          }
         }
       }
     }
@@ -145,10 +263,37 @@
       this.active = true;
       this.scheduler = options.scheduler || null;
       this.onCleanup = null;
+      this.running = false;
+      this.runCount = 0;
+    }
+
+    trigger() {
+      if (!this.active) return;
+      if (this.scheduler) {
+        if (typeof this.scheduler === 'function') {
+          this.scheduler(() => this.run());
+        } else if (typeof this.scheduler === 'string' && scheduler[this.scheduler]) {
+          scheduler.schedule(() => this.run(), this.scheduler);
+        } else {
+          scheduler.schedule(() => this.run(), 'microtask');
+        }
+      } else {
+        this.run();
+      }
     }
 
     run() {
       if (!this.active) return;
+      if (this.running) {
+        console.warn('[PineJS] Circular reactive dependency detected.');
+        return;
+      }
+      this.runCount++;
+      if (this.runCount > 100) {
+        console.warn('[PineJS] Circular reactive dependency detected (recursion threshold exceeded).');
+        return;
+      }
+      this.running = true;
       this.cleanup();
       effectStack.push(activeEffect);
       activeEffect = this;
@@ -161,6 +306,8 @@
           this.onCleanup = cleanupFn;
         });
       } finally {
+        this.running = false;
+        this.runCount = 0;
         activeEffect = effectStack.pop();
       }
     }
@@ -190,6 +337,18 @@
     return () => rxEffect.destroy();
   }
 
+  function flushPendingEffects() {
+    const effectsToRun = Array.from(pendingEffects);
+    pendingEffects.clear();
+    for (const eff of effectsToRun) {
+      if (typeof eff.trigger === 'function') {
+        eff.trigger();
+      } else {
+        eff.run();
+      }
+    }
+  }
+
   function batch(fn) {
     batchDepth++;
     try {
@@ -197,13 +356,180 @@
     } finally {
       batchDepth--;
       if (batchDepth === 0) {
-        const effectsToRun = Array.from(pendingEffects);
-        pendingEffects.clear();
-        for (const eff of effectsToRun) {
-          eff.run();
-        }
+        flushPendingEffects();
       }
     }
+  }
+
+  async function batchAsync(fn) {
+    batchDepth++;
+    try {
+      return await fn();
+    } finally {
+      batchDepth--;
+      if (batchDepth === 0) {
+        flushPendingEffects();
+      }
+    }
+  }
+
+  function transaction(fn, options = {}) {
+    const rollbackOnError = options.rollbackOnError ?? true;
+    const prevTx = activeTransaction;
+    const currentTx = {
+      parent: prevTx,
+      mutations: []
+    };
+    activeTransaction = currentTx;
+    batchDepth++;
+    try {
+      const res = fn();
+      if (res && typeof res.then === 'function') {
+        return res.then(
+          (val) => {
+            activeTransaction = prevTx;
+            batchDepth--;
+            if (batchDepth === 0) {
+              flushPendingEffects();
+            }
+            return val;
+          },
+          (err) => {
+            if (rollbackOnError) {
+              rollbackTransaction(currentTx);
+            }
+            activeTransaction = prevTx;
+            batchDepth--;
+            if (batchDepth === 0) {
+              pendingEffects.clear();
+            }
+            throw err;
+          }
+        );
+      }
+      activeTransaction = prevTx;
+      return res;
+    } catch (err) {
+      if (rollbackOnError) {
+        rollbackTransaction(currentTx);
+      }
+      activeTransaction = prevTx;
+      throw err;
+    } finally {
+      batchDepth--;
+      if (batchDepth === 0) {
+        flushPendingEffects();
+      }
+    }
+  }
+
+  function rollbackTransaction(tx) {
+    for (let i = tx.mutations.length - 1; i >= 0; i--) {
+      const m = tx.mutations[i];
+      if (m.type === 'signal') {
+        m.target._value = m.prevValue;
+      } else if (m.type === 'proxy') {
+        if (m.hadProp) {
+          m.target[m.prop] = m.prevValue;
+        } else {
+          delete m.target[m.prop];
+        }
+        const sig = getSignalForProp(m.target, m.prop);
+        sig._value = m.prevValue;
+      }
+    }
+  }
+
+  class ScopeInstance {
+    constructor(parent = null) {
+      this.parent = parent;
+      this.children = new Set();
+      this.cleanups = [];
+      this.active = true;
+      if (parent && parent instanceof ScopeInstance) {
+        parent.children.add(this);
+      }
+    }
+
+    run(fn) {
+      if (!this.active) return;
+      const prevScope = activeScopeInstance;
+      activeScopeInstance = this;
+      try {
+        return fn();
+      } finally {
+        activeScopeInstance = prevScope;
+      }
+    }
+
+    effect(fn, options) {
+      if (!this.active) return () => {};
+      const stop = effect(fn, options);
+      this.cleanups.push(stop);
+      return stop;
+    }
+
+    listen(target, event, handler, options) {
+      if (!this.active || !target || typeof target.addEventListener !== 'function') return () => {};
+      target.addEventListener(event, handler, options);
+      const remove = () => {
+        target.removeEventListener(event, handler, options);
+      };
+      this.cleanups.push(remove);
+      return remove;
+    }
+
+    timeout(fn, delay) {
+      if (!this.active) return null;
+      const id = setTimeout(fn, delay);
+      this.cleanups.push(() => clearTimeout(id));
+      return id;
+    }
+
+    interval(fn, delay) {
+      if (!this.active) return null;
+      const id = setInterval(fn, delay);
+      this.cleanups.push(() => clearInterval(id));
+      return id;
+    }
+
+    cleanup(fn) {
+      if (typeof fn === 'function' && this.active) {
+        this.cleanups.push(fn);
+      }
+    }
+
+    child() {
+      return new ScopeInstance(this);
+    }
+
+    dispose() {
+      if (!this.active) return;
+      this.active = false;
+      for (const child of Array.from(this.children)) {
+        child.dispose();
+      }
+      this.children.clear();
+      for (let i = this.cleanups.length - 1; i >= 0; i--) {
+        try {
+          this.cleanups[i]();
+        } catch (e) {
+          console.error('[PineJS Scope] Cleanup error:', e);
+        }
+      }
+      this.cleanups = [];
+      if (this.parent && this.parent.children) {
+        this.parent.children.delete(this);
+      }
+    }
+  }
+
+  function createScope(fn) {
+    const sc = new ScopeInstance(activeScopeInstance);
+    if (typeof fn === 'function') {
+      sc.run(fn);
+    }
+    return sc;
   }
 
   function untrack(fn) {
@@ -325,6 +651,15 @@
         const oldValue = obj[prop];
 
         if (!Object.is(oldValue, rawVal)) {
+          if (activeTransaction) {
+            activeTransaction.mutations.push({
+              type: 'proxy',
+              target: obj,
+              prop,
+              prevValue: oldValue,
+              hadProp: Object.prototype.hasOwnProperty.call(obj, prop)
+            });
+          }
           const sig = getSignalForProp(obj, prop);
           obj[prop] = rawVal;
           sig.value = rawVal;
@@ -541,7 +876,63 @@
   // 3. EXPRESSION EVALUATOR & SAFE RUNNER (WITH CSP-SAFE FALLBACK)
   // =========================================================================
   let cspMode = false;
-  const fnCache = new Map();
+
+  class LRUCache {
+    constructor(max = 1000) {
+      this.max = max;
+      this.cache = new Map();
+      this.hits = 0;
+      this.misses = 0;
+    }
+    get(key) {
+      const item = this.cache.get(key);
+      if (item !== undefined) {
+        this.hits++;
+        this.cache.delete(key);
+        this.cache.set(key, item);
+        return item;
+      }
+      this.misses++;
+      return undefined;
+    }
+    set(key, value) {
+      if (this.cache.has(key)) {
+        this.cache.delete(key);
+      } else if (this.cache.size >= this.max) {
+        const firstKey = this.cache.keys().next().value;
+        this.cache.delete(firstKey);
+      }
+      this.cache.set(key, value);
+    }
+    has(key) {
+      return this.cache.has(key);
+    }
+    clear() {
+      this.cache.clear();
+      this.hits = 0;
+      this.misses = 0;
+    }
+    get size() {
+      return this.cache.size;
+    }
+  }
+
+  const fnCache = new LRUCache(1000);
+  const cacheApi = {
+    get size() {
+      return fnCache.size;
+    },
+    clear() {
+      fnCache.clear();
+    },
+    get stats() {
+      return {
+        hits: fnCache.hits,
+        misses: fnCache.misses,
+        size: fnCache.size
+      };
+    }
+  };
   const globalErrorHandlers = new Set();
 
   function handleError(err, el, expression) {
@@ -2370,6 +2761,19 @@
           evaluate(el, initExpr);
         }
       }
+    },
+
+    // p-scope: Isolated child scope creation
+    'p-scope': (el, { expression }) => {
+      let initialData = {};
+      if (expression && expression.trim()) {
+        const evaluated = evaluate(el, expression);
+        if (isObject(evaluated)) initialData = evaluated;
+      }
+      const parentScope = getScope(el.parentElement);
+      const scope = new Scope(initialData, parentScope, el);
+      el[SCOPE_SYMBOL] = scope;
+      el.__pine_scope__ = scope;
     },
 
     // p-id: Scoped unique IDs
@@ -4459,6 +4863,459 @@
   }
 
   // =========================================================================
+  // 13.6. ERROR BOUNDARY ENGINE
+  // =========================================================================
+  function errorBoundary(fn, options = {}) {
+    const onError = options.onError || ((err) => console.error('[PineJS ErrorBoundary]', err));
+    try {
+      const res = fn();
+      if (res && typeof res.then === 'function') {
+        return res.catch((err) => {
+          onError(err);
+        });
+      }
+      return res;
+    } catch (err) {
+      onError(err);
+    }
+  }
+
+  // =========================================================================
+  // 13.7. ASYNC RESOURCE ENGINE 2.0 (Pine.resource)
+  // =========================================================================
+  const resourceCache = new Map();
+
+  function resource(source, options = {}) {
+    const initialValue = options.initialValue !== undefined ? options.initialValue : null;
+    const ttl = options.ttl || 30000;
+    const useCache = Boolean(options.cache);
+
+    const _data = signal(initialValue);
+    const _loading = signal(false);
+    const _error = signal(null);
+    const _status = signal('idle'); // idle | loading | refreshing | success | error
+
+    let abortController = null;
+    let currentRequestId = 0;
+    let activeEffectStop = null;
+    let isDisposed = false;
+
+    const execute = async (isRefresh = false) => {
+      if (isDisposed) return;
+      const reqId = ++currentRequestId;
+
+      if (abortController) {
+        abortController.abort();
+      }
+      abortController = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const abortSignal = abortController ? abortController.signal : null;
+
+      if (isRefresh && _status.value === 'success') {
+        _status.value = 'refreshing';
+      } else {
+        _status.value = 'loading';
+      }
+      _loading.value = true;
+      _error.value = null;
+
+      try {
+        let resolvedSource = typeof source === 'function' ? source(abortSignal) : source;
+
+        let result;
+        if (typeof resolvedSource === 'string') {
+          const cacheKey = resolvedSource;
+          if (useCache && !isRefresh && resourceCache.has(cacheKey)) {
+            const entry = resourceCache.get(cacheKey);
+            if (Date.now() - entry.time < ttl) {
+              _data.value = entry.data;
+              _status.value = 'success';
+              _loading.value = false;
+              return entry.data;
+            }
+          }
+          const resp = await fetch(resolvedSource, { signal: abortSignal });
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+          const contentType = resp.headers ? resp.headers.get('content-type') || '' : '';
+          result = contentType.includes('application/json') ? await resp.json() : await resp.text();
+          if (useCache) {
+            resourceCache.set(cacheKey, { data: result, time: Date.now() });
+          }
+        } else if (resolvedSource && typeof resolvedSource.then === 'function') {
+          result = await resolvedSource;
+        } else {
+          result = resolvedSource;
+        }
+
+        if (reqId === currentRequestId && !isDisposed) {
+          _data.value = result;
+          _status.value = 'success';
+          _loading.value = false;
+          _error.value = null;
+        }
+        return result;
+      } catch (err) {
+        if (abortSignal && abortSignal.aborted) {
+          return;
+        }
+        if (reqId === currentRequestId && !isDisposed) {
+          _error.value = err;
+          _status.value = 'error';
+          _loading.value = false;
+        }
+        if (options.onError) {
+          options.onError(err);
+        }
+      }
+    };
+
+    if (typeof source === 'function') {
+      activeEffectStop = effect(() => {
+        execute(false);
+      });
+    } else {
+      execute(false);
+    }
+
+    return {
+      get data() { return _data.value; },
+      set data(v) { _data.value = v; },
+      get loading() { return _loading.value; },
+      get error() { return _error.value; },
+      get status() { return _status.value; },
+      refresh() { return execute(true); },
+      cancel() {
+        if (abortController) {
+          abortController.abort();
+          abortController = null;
+        }
+        _loading.value = false;
+        if (_status.value === 'loading' || _status.value === 'refreshing') {
+          _status.value = 'idle';
+        }
+      },
+      reset() {
+        this.cancel();
+        _data.value = initialValue;
+        _error.value = null;
+        _status.value = 'idle';
+      },
+      dispose() {
+        isDisposed = true;
+        this.cancel();
+        if (activeEffectStop) {
+          activeEffectStop();
+          activeEffectStop = null;
+        }
+      }
+    };
+  }
+
+  // =========================================================================
+  // 13.8. COMPONENT FOUNDATION & LIFECYCLES
+  // =========================================================================
+  let currentComponentInstance = null;
+
+  function onBeforeMount(fn) {
+    if (currentComponentInstance) currentComponentInstance.beforeMountHooks.push(fn);
+  }
+  function onMount(fn) {
+    if (currentComponentInstance) currentComponentInstance.mountHooks.push(fn);
+  }
+  function onBeforeUpdate(fn) {
+    if (currentComponentInstance) currentComponentInstance.beforeUpdateHooks.push(fn);
+  }
+  function onUpdated(fn) {
+    if (currentComponentInstance) currentComponentInstance.updatedHooks.push(fn);
+  }
+  function onUnmount(fn) {
+    if (currentComponentInstance) currentComponentInstance.unmountHooks.push(fn);
+  }
+
+  function createComponent(definition) {
+    return function componentFactory(initialProps = {}, slots = {}) {
+      const propsDef = definition.props || {};
+      const validatedProps = {};
+
+      for (const [propName, config] of Object.entries(propsDef)) {
+        const type = typeof config === 'function' ? config : (config && config.type ? config.type : null);
+        const defaultVal = config && typeof config === 'object' && config.default !== undefined ? config.default : undefined;
+        const required = config && typeof config === 'object' ? Boolean(config.required) : false;
+
+        let val = initialProps[propName];
+        if (val === undefined) {
+          val = typeof defaultVal === 'function' ? defaultVal() : defaultVal;
+        }
+
+        if (required && val === undefined) {
+          console.warn(`[PineJS Component] Missing required prop: "${propName}"`);
+        }
+
+        if (val !== undefined && type) {
+          const actualType = typeof val;
+          let valid = false;
+          if (type === String && actualType === 'string') valid = true;
+          else if (type === Number && actualType === 'number') valid = true;
+          else if (type === Boolean && actualType === 'boolean') valid = true;
+          else if (type === Array && Array.isArray(val)) valid = true;
+          else if (type === Object && actualType === 'object' && val !== null) valid = true;
+          else if (type === Function && actualType === 'function') valid = true;
+          else if (val instanceof type) valid = true;
+
+          if (!valid) {
+            console.warn(`[PineJS Component] Invalid prop "${propName}": expected ${type.name || type}, got ${actualType}`);
+          }
+        }
+
+        validatedProps[propName] = val;
+      }
+
+      for (const [k, v] of Object.entries(initialProps)) {
+        if (!(k in validatedProps)) {
+          validatedProps[k] = v;
+        }
+      }
+
+      const reactiveProps = reactive(validatedProps);
+
+      const instance = {
+        props: reactiveProps,
+        slots,
+        beforeMountHooks: [],
+        mountHooks: [],
+        beforeUpdateHooks: [],
+        updatedHooks: [],
+        unmountHooks: [],
+        scope: null,
+        el: null,
+        emit(event, detail) {
+          if (instance.el) {
+            instance.el.dispatchEvent(new CustomEvent(event, { detail, bubbles: true }));
+          }
+        }
+      };
+
+      const prevInstance = currentComponentInstance;
+      currentComponentInstance = instance;
+
+      let templateResult;
+      try {
+        if (typeof definition.setup === 'function') {
+          const setupResult = definition.setup(reactiveProps, { slots, emit: instance.emit.bind(instance) });
+          if (setupResult && typeof setupResult === 'function') {
+            templateResult = setupResult(reactiveProps);
+          } else if (isObject(setupResult)) {
+            Object.assign(reactiveProps, setupResult);
+          }
+        }
+        if (!templateResult && typeof definition.template === 'function') {
+          templateResult = definition.template(reactiveProps, { slots, emit: instance.emit.bind(instance) });
+        } else if (!templateResult && typeof definition.template === 'string') {
+          templateResult = definition.template;
+        }
+      } finally {
+        currentComponentInstance = prevInstance;
+      }
+
+      return {
+        instance,
+        template: templateResult,
+        render(container) {
+          instance.beforeMountHooks.forEach((h) => {
+            try { h(); } catch (e) { console.error('[PineJS Component] beforeMount hook error:', e); }
+          });
+
+          if (typeof templateResult === 'string') {
+            container.innerHTML = templateResult;
+          } else if (templateResult instanceof Node) {
+            container.appendChild(templateResult);
+          }
+          instance.el = container;
+
+          // Inject reactive props as a scope on the container so child p-data elements inherit them
+          const propsData = {};
+          const rawProps = raw(reactiveProps);
+          for (const k of Object.keys(rawProps)) {
+            propsData[k] = rawProps[k];
+          }
+          const parentScope = getScope(container.parentElement);
+          const compScope = new Scope(propsData, parentScope, container);
+          container[SCOPE_SYMBOL] = compScope;
+          container.__pine_scope__ = compScope;
+
+          initTree(container);
+
+          instance.mountHooks.forEach((h) => {
+            try { h(); } catch (e) { console.error('[PineJS Component] onMount hook error:', e); }
+          });
+          return container;
+        },
+        destroy() {
+          instance.unmountHooks.forEach((h) => {
+            try { h(); } catch (e) { console.error('[PineJS Component] onUnmount hook error:', e); }
+          });
+          if (instance.el) {
+            destroyTree(instance.el);
+          }
+        }
+      };
+    };
+  }
+
+  // =========================================================================
+  // 13.9. WEB COMPONENTS CUSTOM ELEMENTS INTEROPERABILITY (Pine.define)
+  // =========================================================================
+  function defineCustomElement(tagName, componentDef) {
+    if (typeof customElements === 'undefined') return;
+    if (customElements.get(tagName)) return;
+
+    const observedProps = Object.keys(componentDef.props || {});
+
+    class PineCustomElement extends HTMLElement {
+      static get observedAttributes() {
+        return observedProps.map((p) => p.toLowerCase());
+      }
+
+      constructor() {
+        super();
+        this._props = {};
+        this._compInstance = null;
+      }
+
+      connectedCallback() {
+        const props = { ...this._props };
+        for (const attr of this.attributes) {
+          const camelCase = attr.name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+          props[camelCase] = attr.value;
+        }
+
+        const slots = {
+          default: this.innerHTML
+        };
+
+        const compFactory = typeof componentDef === 'function' ? componentDef : createComponent(componentDef);
+        const rendered = compFactory(props, slots);
+        this._compInstance = rendered;
+
+        if (componentDef.shadow) {
+          const shadow = this.attachShadow({ mode: 'open' });
+          rendered.render(shadow);
+        } else {
+          rendered.render(this);
+        }
+      }
+
+      disconnectedCallback() {
+        if (this._compInstance) {
+          this._compInstance.destroy();
+          destroyTree(this);
+          this._compInstance = null;
+        }
+      }
+
+      attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) {
+          const camelCase = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+          this._props[camelCase] = newValue;
+          if (this._compInstance && this._compInstance.instance && this._compInstance.instance.props) {
+            this._compInstance.instance.props[camelCase] = newValue;
+          }
+        }
+      }
+    }
+
+    customElements.define(tagName, PineCustomElement);
+  }
+
+  // =========================================================================
+  // 13.10. TESTING HARNESS (Pine.mount)
+  // =========================================================================
+  function mount(templateHtml, initialData = {}) {
+    const container = document.createElement('div');
+    container.innerHTML = templateHtml.trim();
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.appendChild(container);
+    }
+
+    const rootEl = container.firstElementChild || container;
+    if (initialData && Object.keys(initialData).length > 0) {
+      rootEl[SCOPE_SYMBOL] = new Scope(initialData, null, rootEl);
+    }
+
+    initTree(rootEl);
+
+    const wrapper = {
+      el: rootEl,
+      container,
+      find(selector) {
+        return rootEl.matches && rootEl.matches(selector) ? rootEl : rootEl.querySelector(selector);
+      },
+      findAll(selector) {
+        return Array.from(rootEl.querySelectorAll(selector));
+      },
+      text(selector) {
+        const el = selector ? this.find(selector) : rootEl;
+        return el ? el.textContent.trim() : '';
+      },
+      html(selector) {
+        const el = selector ? this.find(selector) : rootEl;
+        return el ? el.innerHTML.trim() : '';
+      },
+      attribute(selector, name) {
+        const el = selector ? this.find(selector) : rootEl;
+        return el ? el.getAttribute(name) : null;
+      },
+      async click(selector) {
+        const el = typeof selector === 'string' ? this.find(selector) : selector;
+        if (!el) throw new Error(`Element not found for click: ${selector}`);
+        el.click();
+        await this.flush();
+      },
+      async input(selector, value) {
+        const el = typeof selector === 'string' ? this.find(selector) : selector;
+        if (!el) throw new Error(`Element not found for input: ${selector}`);
+        el.value = value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        await this.flush();
+      },
+      async type(selector, text) {
+        const el = typeof selector === 'string' ? this.find(selector) : selector;
+        if (!el) throw new Error(`Element not found for type: ${selector}`);
+        el.value = text;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        await this.flush();
+      },
+      dispatch(selector, eventName, detail) {
+        const el = typeof selector === 'string' ? this.find(selector) : selector;
+        if (el) {
+          el.dispatchEvent(new CustomEvent(eventName, { detail, bubbles: true }));
+        }
+      },
+      async flush() {
+        scheduler.flush();
+        await new Promise((r) => setTimeout(r, 0));
+      },
+      async waitFor(predicate, timeout = 1000) {
+        const start = Date.now();
+        while (Date.now() - start < timeout) {
+          await this.flush();
+          if (predicate()) return true;
+          await new Promise((r) => setTimeout(r, 10));
+        }
+        throw new Error('[PineJS Mount] waitFor timed out');
+      },
+      unmount() {
+        destroyTree(rootEl);
+        if (container.parentNode) {
+          container.parentNode.removeChild(container);
+        }
+      }
+    };
+
+    return wrapper;
+  }
+
+  // =========================================================================
   // 14. PUBLIC PINE API
   // =========================================================================
   const Pine = {
@@ -4489,6 +5346,39 @@
       return configuredPrefixes;
     },
 
+    // Reactive Scope Engine
+    scope: createScope,
+
+    // Scheduler & Async Batching
+    scheduler,
+    batchAsync,
+
+    // Transaction Engine
+    transaction,
+
+    // Error Boundaries
+    errorBoundary,
+
+    // Async Resource 2.0
+    resource,
+
+    // Component Foundation & Lifecycles
+    component: createComponent,
+    onBeforeMount,
+    onMount,
+    onBeforeUpdate,
+    onUpdated,
+    onUnmount,
+
+    // Web Components Custom Elements
+    define: defineCustomElement,
+
+    // Testing Harness
+    mount,
+
+    // Expression Cache
+    cache: cacheApi,
+
     // Signals Engine
     signal,
     computed,
@@ -4508,6 +5398,36 @@
 
     // DevTools & Diagnostic Runtime Bridge
     devtools: {
+      timeline: {
+        marks: [],
+        mark(type, details = {}) {
+          const entry = {
+            timestamp: typeof performance !== 'undefined' ? performance.now() : Date.now(),
+            time: new Date().toISOString().substring(11, 23),
+            type,
+            ...details
+          };
+          this.marks.push(entry);
+          if (this.marks.length > 1000) this.marks.shift();
+          return entry;
+        },
+        getEvents() {
+          return [...this.marks];
+        },
+        clear() {
+          this.marks = [];
+        }
+      },
+      memory: {
+        inspect() {
+          const roots = findRoots();
+          return {
+            activeRoots: roots.length,
+            cacheEntries: fnCache.size,
+            timestamp: Date.now()
+          };
+        }
+      },
       getRoots() {
         return findRoots();
       },

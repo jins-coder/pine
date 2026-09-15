@@ -12,10 +12,12 @@
 <p align="center">
   <a href="https://github.com/jins-coder/pine"><img src="https://img.shields.io/badge/version-1.7.0%20%22Douglas%22-10b981.svg?style=flat-square" alt="Version 1.7.0"></a>
   <a href="https://github.com/jins-coder/pine"><img src="https://img.shields.io/badge/reactivity-fine--grained%20signals-06b6d4.svg?style=flat-square" alt="Fine-Grained Reactivity"></a>
-  <a href="https://github.com/jins-coder/pine"><img src="https://img.shields.io/badge/bundle%20size-19.7%20KB%20min%20gzip-8b5cf6.svg?style=flat-square" alt="Bundle Size"></a>
-  <a href="https://github.com/jins-coder/pine"><img src="https://img.shields.io/badge/tests-59%2F59%20passing%20(100%25)-emerald.svg?style=flat-square" alt="Test Status"></a>
+  <a href="https://github.com/jins-coder/pine"><img src="https://img.shields.io/badge/bundle%20size-23.2%20KB%20min%20gzip-8b5cf6.svg?style=flat-square" alt="Bundle Size"></a>
+  <a href="https://github.com/jins-coder/pine"><img src="https://img.shields.io/badge/tests-71%2F71%20passing%20(100%25)-emerald.svg?style=flat-square" alt="Test Status"></a>
   <a href="https://github.com/jins-coder/pine"><img src="https://img.shields.io/badge/dependencies-0%20deps-f59e0b.svg?style=flat-square" alt="Zero Dependencies"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
+  <br>
+  <a href="https://github.com/jins-coder/pine">📦 GitHub Repository</a> · <a href="https://github.com/jins-coder/pine/issues">🐛 Issues</a> · <a href="https://github.com/jins-coder/pine/releases">📋 Releases</a>
 </p>
 
 ---
@@ -41,14 +43,17 @@ PineJS provides two dedicated builds to match your development and deployment wo
 
 ### 1. ⚡ Production Version (`pine.prod.js` / `pine.min.js`)
 * **Best for**: Production websites, live storefronts, high-performance web apps.
-* **Characteristics**: Fully minified with esbuild/terser, stripped of debug logging, tree-shaken, **~19.7 KB gzipped** (17.6 KB brotli).
+* **Characteristics**: Fully minified with esbuild/terser, stripped of debug logging, tree-shaken, **~23.2 KB gzipped** (20.6 KB brotli).
 
 ```html
-<!-- jsDelivr (GitHub Latest / Tagged) -->
+<!-- jsDelivr (GitHub Latest — always up to date) -->
 <script src="https://cdn.jsdelivr.net/gh/jins-coder/pine@main/dist/pine.prod.js" defer></script>
 
+<!-- jsDelivr (Pinned to v1.7.0 tag) -->
+<script src="https://cdn.jsdelivr.net/gh/jins-coder/pine@v1.7.0/dist/pine.prod.js" defer></script>
+
 <!-- unpkg (NPM release) -->
-<script src="https://unpkg.com/pinejs-core@1.7.0/dist/pine.prod.js" defer></script>
+<script src="https://unpkg.com/pinejs-core@latest/dist/pine.prod.js" defer></script>
 ```
 
 ### 2. 🛠️ Development Version (`pine.dev.js`)
@@ -56,11 +61,14 @@ PineJS provides two dedicated builds to match your development and deployment wo
 * **Characteristics**: Unminified, informative console diagnostics, detailed syntax error reports, uncompressed stack traces.
 
 ```html
-<!-- jsDelivr (GitHub Latest / Tagged) -->
+<!-- jsDelivr (GitHub Latest — always up to date) -->
 <script src="https://cdn.jsdelivr.net/gh/jins-coder/pine@main/dist/pine.dev.js" defer></script>
 
+<!-- jsDelivr (Pinned to v1.7.0 tag) -->
+<script src="https://cdn.jsdelivr.net/gh/jins-coder/pine@v1.7.0/dist/pine.dev.js" defer></script>
+
 <!-- unpkg (NPM release) -->
-<script src="https://unpkg.com/pinejs-core@1.7.0/dist/pine.dev.js" defer></script>
+<script src="https://unpkg.com/pinejs-core@latest/dist/pine.dev.js" defer></script>
 ```
 
 ### 📦 Package Manager (npm / pnpm / yarn)
@@ -350,6 +358,118 @@ To load the PineJS DevTools in Chrome:
 | **`p-id`** | Generates deterministic scoped element IDs | `<div p-id="['input', 'label']">` |
 | **`p-hydrate`** | Tells PineJS to hydrate pre-rendered SSR HTML | `<div p-data="{ count: 0 }" p-hydrate>` |
 
+| **`p-scope`** | Creates an isolated child scope on any element | `<div p-scope="{ color: 'red' }">` |
+
+---
+
+## ⚙️ Engine Hardening & Production APIs
+
+PineJS v1.7.0 includes deep engine-level primitives for production hardening:
+
+### Explicit Reactive Scopes (`Pine.scope`)
+```javascript
+const scope = Pine.scope();
+scope.effect(() => console.log(count.value));
+scope.listen(btn, 'click', () => count.value++);
+scope.timeout(() => console.log('delayed'), 1000);
+scope.dispose(); // Tears down ALL effects, listeners, and timers
+```
+
+### Centralized Scheduler (`Pine.scheduler`)
+```javascript
+Pine.scheduler.schedule(() => updateUI(), 'raf');     // requestAnimationFrame
+Pine.scheduler.schedule(() => analytics(), 'idle');    // requestIdleCallback
+Pine.scheduler.flush();                               // Force-flush all queues
+```
+
+### Async Batch Mutations (`Pine.batchAsync`)
+```javascript
+await Pine.batchAsync(async () => {
+  count.value++;
+  await fetchData();
+  items.value = data;  // Subscribers flush ONCE at completion
+});
+```
+
+### Transactional State Updates (`Pine.transaction`)
+```javascript
+try {
+  Pine.transaction(() => {
+    user.name = 'Bob';
+    user.balance -= 100;
+    if (user.balance < 0) throw new Error('Insufficient funds');
+  }, { rollbackOnError: true }); // Auto-rollback on throw!
+} catch (e) {
+  // user.name and user.balance are back to original values
+}
+```
+
+### Error Boundaries (`Pine.errorBoundary`)
+```javascript
+Pine.errorBoundary(() => riskyComponentInit(), {
+  onError(err) { showFallbackUI(err); }
+});
+```
+
+### Async Resource Engine 2.0 (`Pine.resource`)
+```javascript
+const users = Pine.resource('/api/users', { cache: true, ttl: 30000 });
+console.log(users.status);  // 'idle' → 'loading' → 'success' | 'error'
+console.log(users.data);    // Resolved payload
+users.refresh();             // Background refresh (status → 'refreshing')
+users.cancel();              // Abort in-flight request via AbortController
+users.reset();               // Reset to initial state
+```
+
+### First-Class Component Foundation (`Pine.component`)
+```javascript
+const Card = Pine.component({
+  props: {
+    title: { type: String, required: true },
+    count: { type: Number, default: 0 }
+  },
+  setup(props) {
+    Pine.onMount(() => console.log('Card mounted'));
+    Pine.onUnmount(() => console.log('Card removed'));
+    return { doubled: props.count * 2 };
+  },
+  template: (p) => `<div class="card"><h3>${p.title}</h3></div>`
+});
+const card = Card({ title: 'Hello' });
+card.render(document.getElementById('app'));
+```
+
+### Web Components Custom Elements (`Pine.define`)
+```javascript
+Pine.define('pine-counter', {
+  props: { start: Number },
+  template: (p) => `<button p-data="{ n: ${p.start || 0} }" @click="n++" p-text="n"></button>`
+});
+// Use anywhere: <pine-counter start="5"></pine-counter>
+```
+
+### Testing Harness (`Pine.mount`)
+```javascript
+const app = Pine.mount('<div p-data="{ count: 0 }"><button @click="count++">+</button><span p-text="count"></span></div>');
+await app.click('button');       // Simulate click
+app.text('span');                // → '1'
+await app.input('input', 'Hi');  // Simulate input
+app.unmount();                   // Full cleanup
+```
+
+### Expression Compilation Cache (`Pine.cache`)
+```javascript
+Pine.cache.stats;  // { hits: 142, misses: 23, size: 65 }
+Pine.cache.clear(); // Flush all cached compiled expressions
+```
+
+### DevTools Timeline Profiler & Memory Inspector
+```javascript
+Pine.devtools.timeline.mark('component:render', { id: 'UserCard' });
+Pine.devtools.timeline.getEvents(); // Timeline event log
+Pine.devtools.memory.inspect();     // { activeRoots: 3, cacheEntries: 45 }
+```
+
 ---
 
 ## 🔮 Magic Properties Reference
@@ -392,11 +512,11 @@ npm test
 
 ```
 🌲 PineJS Automated Headless Test Runner
-   Suites Total:  59
-   Suites Passed: 59 (100%)
+   Suites Total:  71
+   Suites Passed: 71 (100%)
    Suites Failed: 0
-   Tests Total:   59
-   Tests Passed:  59 (100%)
+   Tests Total:   71
+   Tests Passed:  71 (100%)
    ✨ All test suites passed successfully!
 ```
 
@@ -406,7 +526,7 @@ npm test
 
 | Version | Codename | Date | Key Highlights |
 | :--- | :--- | :--- | :--- |
-| **`v1.7.0`** | **Douglas** | 2026-09-15 | **Major Upgrade Release**: Client-Side Micro-Router (`p-route`, `p-link`, `$route`, `Pine.router`), Unified Reactive Form Engine (`$form`, `Pine.form`), Async Suspense & Skeleton Loader (`p-suspense`, `p-fallback`, `$suspense`), On-Demand Remote Component Loader (`p-component`, `Pine.loadComponent`), Zero-DOM Server-Side HTML String Compiler (`Pine.renderToString`), Scoped Shadow DOM Encapsulation (`p-shadow`), IndexedDB Offline Storage (`$idb`, `Pine.idb`), Chrome DevTools Extension (`devtools/` and `window.__PINE_DEVTOOLS_GLOBAL_HOOK__`), 59/59 test suites passing (100%). |
+| **`v1.7.0`** | **Douglas** | 2026-09-15 | **Major Upgrade Release**: Client-Side Micro-Router, Unified Reactive Form Engine, Async Suspense & Skeleton Loader, Remote Component Loader, Zero-DOM SSR Compiler, Shadow DOM Encapsulation, IndexedDB Offline Storage, Chrome DevTools Extension. **Engine Hardening**: Explicit Reactive Scopes (`Pine.scope`), Centralized Scheduler (`Pine.scheduler`), Async Batch Mutations (`Pine.batchAsync`), Transactional State Rollback (`Pine.transaction`), Error Boundaries (`Pine.errorBoundary`), Async Resource Engine 2.0 (`Pine.resource`), Component Foundation with Lifecycles (`Pine.component`, `Pine.onMount`, `Pine.onUnmount`), Web Components Interop (`Pine.define`), Testing Harness (`Pine.mount`), LRU Expression Cache (`Pine.cache`), DevTools Timeline Profiler, Circular Dependency Protection. **71/71 test suites passing (100%)**. |
 | **`v1.6.0`** | **Bristlecone** | 2026-09-15 | Dual CDN build targets (`pine.prod.js` & `pine.dev.js`), native `$websocket` and `$sse` realtime engines, global script data resolution (`p-data="alphadata"`), CSP-safe mode (`Pine.csp`), error boundaries (`p-error`), deep `$persist`, headless CI runner. |
 | **`v1.5.1`** | **Larch** | 2026-09-15 | Tagged template components (`Pine.html`), form validation (`p-validate`), cross-tab sync (`$broadcast`), native View Transitions (`$viewTransition`), Web Worker signal bridge (`Pine.worker`). |
 | **`v1.4.0`** | **Spruce** | 2026-09-15 | Multi-prefix engine (`Pine.prefix`), prefix-free semantic HTML (`state`, `text`, `loop`, `show`), WAAPI timeline orchestrator (`Pine.timeline`). |
@@ -420,3 +540,11 @@ npm test
 ## 📄 License
 
 MIT License © 2026 PineJS Core Team. Open-source and free for commercial and personal use.
+
+---
+
+<p align="center">
+  <a href="https://github.com/jins-coder/pine"><strong>⭐ Star on GitHub</strong></a> · 
+  <a href="https://github.com/jins-coder/pine/issues">Report Issues</a> · 
+  <a href="https://github.com/jins-coder/pine/pulls">Contribute</a>
+</p>

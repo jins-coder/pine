@@ -6,6 +6,21 @@
 import Pine from './pine.js';
 
 export const {
+  scope,
+  scheduler,
+  batchAsync,
+  transaction,
+  errorBoundary,
+  resource,
+  component,
+  define,
+  mount,
+  onBeforeMount,
+  onMount,
+  onBeforeUpdate,
+  onUpdated,
+  onUnmount,
+  cache,
   prefix,
   signal,
   computed,

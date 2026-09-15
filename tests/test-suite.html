@@ -1412,6 +1412,261 @@
       if (!Array.isArray(tree)) throw new Error("Expected getComponentTree() to return an array of component nodes");
     });
 
+    // 60. Explicit Reactive Scope Engine (Pine.scope)
+    test("Explicit Scopes (Pine.scope)", "Verifies scope.effect, scope.listen, and full disposal lifecycle", async () => {
+      const scope = Pine.scope();
+      const count = Pine.signal(0);
+      let effectRuns = 0;
+
+      scope.effect(() => {
+        count.value;
+        effectRuns++;
+      });
+
+      if (effectRuns !== 1) throw new Error(`Expected 1 effect run, got ${effectRuns}`);
+      count.value++;
+      if (effectRuns !== 2) throw new Error(`Expected 2 effect runs, got ${effectRuns}`);
+
+      const btn = document.createElement("button");
+      document.body.appendChild(btn);
+      let clicks = 0;
+      scope.listen(btn, "click", () => clicks++);
+
+      btn.click();
+      if (clicks !== 1) throw new Error(`Expected 1 click, got ${clicks}`);
+
+      scope.dispose();
+
+      count.value++;
+      if (effectRuns !== 2) throw new Error(`Effect ran after scope disposal: ${effectRuns}`);
+
+      btn.click();
+      if (clicks !== 1) throw new Error(`Listener fired after scope disposal: ${clicks}`);
+      btn.remove();
+    });
+
+    // 61. Centralized Scheduler (Pine.scheduler)
+    test("Centralized Scheduler (Pine.scheduler)", "Verifies microtask, raf, and sync modes with flush()", async () => {
+      let rafRun = false;
+      Pine.scheduler.schedule(() => {
+        rafRun = true;
+      }, "raf");
+
+      if (rafRun) throw new Error("RAF job should be queued asynchronously");
+      Pine.scheduler.flush();
+      if (!rafRun) throw new Error("Scheduler flush() did not run queued RAF job");
+    });
+
+    // 62. Async Batching (Pine.batchAsync)
+    test("Async Batching (Pine.batchAsync)", "Verifies mutations across async awaits are batched into a single tick", async () => {
+      const a = Pine.signal(0);
+      const b = Pine.signal(0);
+      let runs = 0;
+
+      const stop = Pine.effect(() => {
+        a.value + b.value;
+        runs++;
+      });
+
+      if (runs !== 1) throw new Error("Initial run failed");
+
+      await Pine.batchAsync(async () => {
+        a.value++;
+        await new Promise((r) => setTimeout(r, 10));
+        b.value++;
+      });
+
+      if (runs !== 2) throw new Error(`Expected exactly 2 runs after batchAsync, got ${runs}`);
+      stop();
+    });
+
+    // 63. Transactional State Rollback (Pine.transaction)
+    test("State Transactions (Pine.transaction)", "Verifies automatic state rollback when transaction throws", async () => {
+      const count = Pine.signal(10);
+      const user = Pine.reactive({ name: "Alice", age: 30 });
+
+      let errorThrown = false;
+      try {
+        Pine.transaction(() => {
+          count.value = 99;
+          user.name = "Bob";
+          user.age = 45;
+          throw new Error("Simulated network failure");
+        }, { rollbackOnError: true });
+      } catch (e) {
+        errorThrown = true;
+      }
+
+      if (!errorThrown) throw new Error("Transaction did not throw expected error");
+      if (count.value !== 10) throw new Error(`Signal was not rolled back: got ${count.value}`);
+      if (user.name !== "Alice" || user.age !== 30) throw new Error(`Reactive object was not rolled back: ${JSON.stringify(user)}`);
+    });
+
+    // 64. Error Boundary Engine (Pine.errorBoundary)
+    test("Error Boundaries (Pine.errorBoundary)", "Verifies isolated error containment without crashing execution", async () => {
+      let capturedError = null;
+      Pine.errorBoundary(() => {
+        throw new Error("Component crashed");
+      }, {
+        onError(err) {
+          capturedError = err;
+        }
+      });
+
+      if (!capturedError || !capturedError.message.includes("Component crashed")) {
+        throw new Error("ErrorBoundary failed to capture error safely");
+      }
+    });
+
+    // 65. Async Reactivity Primitive 2.0 (Pine.resource)
+    test("Async Resource (Pine.resource)", "Verifies state machine, cancellation, and refresh methods", async () => {
+      let fetchCount = 0;
+      const res = Pine.resource(async (abortSignal) => {
+        fetchCount++;
+        await new Promise((r) => setTimeout(r, 20));
+        if (abortSignal && abortSignal.aborted) throw new Error("Aborted");
+        return { items: [1, 2, 3], count: fetchCount };
+      });
+
+      if (res.status !== "loading") throw new Error(`Expected loading status, got ${res.status}`);
+      await new Promise((r) => setTimeout(r, 50));
+
+      if (res.status !== "success") throw new Error(`Expected success status, got ${res.status}`);
+      if (!res.data || res.data.items.length !== 3) throw new Error("Failed to resolve resource data");
+
+      res.cancel();
+      res.reset();
+      if (res.status !== "idle") throw new Error(`Expected idle status after reset, got ${res.status}`);
+      res.dispose();
+    });
+
+    // 66. Component Foundation & Lifecycles (Pine.component)
+    test("Component Foundation & Lifecycles", "Verifies Pine.component props validation, onMount, and onUnmount", async () => {
+      let mounted = false;
+      let unmounted = false;
+
+      const TestCard = Pine.component({
+        props: {
+          title: { type: String, default: "Default Card" }
+        },
+        setup(props) {
+          Pine.onMount(() => {
+            mounted = true;
+          });
+          Pine.onUnmount(() => {
+            unmounted = true;
+          });
+          return {
+            title: props.title
+          };
+        },
+        template: (props) => `<div p-data><h3 p-text="title"></h3></div>`
+      });
+
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+
+      const comp = TestCard({ title: "Oak Release" });
+      comp.render(container);
+
+      if (!mounted) throw new Error("onMount lifecycle hook did not fire");
+      const h3 = container.querySelector("h3");
+      if (!h3 || h3.textContent.trim() !== "Oak Release") throw new Error(`Expected h3 text 'Oak Release', got '${h3 ? h3.textContent : null}'`);
+
+      comp.destroy();
+      if (!unmounted) throw new Error("onUnmount lifecycle hook did not fire");
+      container.remove();
+    });
+
+    // 67. Web Components Custom Elements (Pine.define)
+    test("Web Components (Pine.define)", "Verifies customElements.define registration with attribute reflection", async () => {
+      const tagName = "pine-wc-badge";
+      Pine.define(tagName, {
+        props: { label: String },
+        template: (props) => `<span p-data class="wc-badge" p-text="'Badge: ' + label"></span>`
+      });
+
+      const el = document.createElement(tagName);
+      el.setAttribute("label", "Oak");
+      document.body.appendChild(el);
+
+      await new Promise((r) => setTimeout(r, 20));
+      const span = el.querySelector("span");
+      if (!span || span.textContent.trim() !== "Badge: Oak") {
+        throw new Error(`Custom element did not render correctly: got '${span ? span.textContent : null}'`);
+      }
+      el.remove();
+    });
+
+    // 68. Testing Harness (Pine.mount)
+    test("Testing Harness (Pine.mount)", "Verifies Pine.mount test wrapper with click, text, and input simulation", async () => {
+      const app = Pine.mount(`
+        <div p-data="{ count: 0, text: '' }">
+          <button id="inc-btn" @click="count++">+</button>
+          <span id="counter" p-text="count"></span>
+          <input id="txt-input" p-model="text" />
+          <p id="preview" p-text="text"></p>
+        </div>
+      `);
+
+      if (app.text("#counter") !== "0") throw new Error(`Expected initial counter 0, got ${app.text("#counter")}`);
+
+      await app.click("#inc-btn");
+      if (app.text("#counter") !== "1") throw new Error(`Expected counter 1 after click, got ${app.text("#counter")}`);
+
+      await app.input("#txt-input", "Hello Oak");
+      if (app.text("#preview") !== "Hello Oak") throw new Error(`Expected preview 'Hello Oak', got '${app.text("#preview")}'`);
+
+      app.unmount();
+    });
+
+    // 69. Expression Compilation Cache (Pine.cache)
+    test("Expression Compilation Cache (Pine.cache)", "Verifies LRU cache hits and cache clearing", async () => {
+      if (typeof Pine.cache !== "object") throw new Error("Pine.cache is not exposed");
+      const initialSize = Pine.cache.size;
+
+      const el = document.createElement("div");
+      el.setAttribute("p-data", "{ x: 10 }");
+      el.innerHTML = `<span p-text="x * 2"></span>`;
+      document.body.appendChild(el);
+      Pine.initTree(el);
+
+      if (Pine.cache.size <= initialSize) throw new Error("Expression cache size did not increase after parsing");
+      const span = el.querySelector("span");
+      if (!span || span.textContent.trim() !== "20") throw new Error("Expression evaluation failed");
+
+      Pine.destroyTree(el);
+      el.remove();
+    });
+
+    // 70. DevTools Timeline Profiler & Memory Inspector
+    test("DevTools Timeline & Memory Inspector", "Verifies timeline profiling marks and active memory metrics", async () => {
+      Pine.devtools.timeline.mark("test:run", { detail: "oak" });
+      const events = Pine.devtools.timeline.getEvents();
+      if (!events.some((e) => e.type === "test:run")) throw new Error("Timeline event mark was not recorded");
+
+      const mem = Pine.devtools.memory.inspect();
+      if (typeof mem.activeRoots !== "number" || typeof mem.cacheEntries !== "number") {
+        throw new Error("Memory inspect did not return expected telemetry shape");
+      }
+    });
+
+    // 71. Reactive Graph Circular Dependency Protection
+    test("Circular Dependency Protection", "Verifies recursive effect trigger terminates safely without freezing", async () => {
+      const sig = Pine.signal(0);
+      let runCount = 0;
+
+      const stop = Pine.effect(() => {
+        runCount++;
+        if (sig.value < 5) {
+          sig.value++;
+        }
+      });
+
+      stop();
+      if (runCount === 0 || runCount > 50) throw new Error(`Run count abnormal: ${runCount}`);
+    });
+
     // Run tests & render report
     async function runAllTests() {
       const list = document.getElementById("results-list");
