@@ -10,7 +10,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="stylesheet" href="docs.css">
   <!-- Load PineJS library via CDN with local fallback -->
-  <script src="https://unpkg.com/pinejs-core@1.5.1/dist/pine.min.js"></script>
+  <script src="https://unpkg.com/pinejs-core@1.6.0/dist/pine.min.js"></script>
   <script>window.Pine || document.write('<script src="../dist/pine.min.js"><\/script>')</script>
   <script src="docs.js" defer></script>
 </head>
@@ -25,7 +25,7 @@
           <img src="logo.svg" alt="PineJS Logo" width="24" height="24" style="display: block;">
         </div>
         <div class="brand-title">PineJS</div>
-        <span class="brand-version" title="Codename: Larch">v1.5.1 (Larch)</span>
+        <span class="brand-version" title="Codename: Bristlecone">v1.6.0 (Bristlecone)</span>
       </a>
 
       <button id="search-trigger" class="search-trigger">
@@ -215,7 +215,7 @@
         <h2 class="doc-h2">Quick Example</h2>
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
-          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.5.1/dist/pine.min.js" defer&gt;&lt;/script&gt;
+          <pre><code>&lt;script src="https://unpkg.com/pinejs-core@1.6.0/dist/pine.min.js" defer&gt;&lt;/script&gt;
 
 &lt;div p-data="{ count: 0 }"&gt;
   &lt;button @click="count++"&gt;Increment&lt;/button&gt;
@@ -247,7 +247,7 @@
         <h1 class="doc-h1">Syntax & Directive Styles</h1>
         <p class="lead-p">PineJS offers clean, flexible syntax styles. Standardize on the canonical <code>p-</code> prefix, the explicit <code>pine-</code> prefix, or prefix-free semantic HTML attributes.</p>
 
-        <h2 class="doc-h2">Syntax Styles (v1.5.1 Larch)</h2>
+        <h2 class="doc-h2">Syntax Styles (v1.6.0 Bristlecone)</h2>
         <div class="code-box">
           <div class="code-header"><span>HTML</span><button class="code-copy-btn">Copy</button></div>
           <pre><code>&lt;!-- Style 1: Standard Pine (p-) --&gt;
@@ -309,9 +309,10 @@
         <p class="lead-p">Explore PineJS releases, codenames, and release highlights.</p>
 
         <div class="demo-card" p-data="{
-          selectedVer: '1.5.1',
+          selectedVer: '1.6.0',
           releases: [
-            { ver: '1.5.1', name: 'Larch', date: '2026-09-15', status: 'Latest Stable', badge: 'stable', desc: 'Tagged Template Components (Pine.html), Form Validation (p-validate), Cross-Tab Broadcast Sync ($broadcast), Native View Transitions API ($viewTransition), and Off-Thread Web Worker Signal Bridge (Pine.worker).' },
+            { ver: '1.6.0', name: 'Bristlecone', date: '2026-09-15', status: 'Latest Stable', badge: 'stable', desc: 'Content Security Policy (CSP) Safe Evaluator (Pine.csp), Component Error Boundaries (p-error), Global Error Telemetry (Pine.onError), Multi-Child & Dynamic Target Teleportation, WAI-ARIA Auto-Sync, and Automated Headless Test Runner (npm test).' },
+            { ver: '1.5.1', name: 'Larch', date: '2026-09-15', status: 'Stable', badge: 'prev', desc: 'Tagged Template Components (Pine.html), Form Validation (p-validate), Cross-Tab Broadcast Sync ($broadcast), Native View Transitions API ($viewTransition), and Off-Thread Web Worker Signal Bridge (Pine.worker).' },
             { ver: '1.4.0', name: 'Spruce', date: '2026-09-15', status: 'Previous Stable', badge: 'prev', desc: 'Configurable multi-prefix engine (Pine.prefix), prefix-free semantic HTML (state, text, show, model, loop), and WAAPI timeline orchestrator (Pine.timeline).' },
             { ver: '1.3.0', name: 'Cedar', date: '2026-09-15', status: 'Stable', badge: 'prev', desc: 'p-animate spring physics & WAAPI keyframes, Pine.devtools diagnostic bridge, and proxy receiver binding.' },
             { ver: '1.2.0', name: 'Redwood', date: '2026-09-14', status: 'Stable', badge: 'prev', desc: 'Official TypeScript typings (dist/pine.d.ts), $history URL sync magic, and p-hydrate SSR hydration activation.' },
@@ -1590,7 +1591,7 @@
               <div p-show="currentTab === 'overview'"
                 style="padding: 1.25rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px;">
                 <h4>📊 System Overview</h4>
-                <p style="margin-top: 0.5rem; color: var(--text-secondary);">PineJS v1.5.1 fine-grained engine running
+                <p style="margin-top: 0.5rem; color: var(--text-secondary);">PineJS v1.6.0 fine-grained engine running
                   with 0ms transition latency.</p>
               </div>
 

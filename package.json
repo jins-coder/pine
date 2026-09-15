@@ -1,7 +1,7 @@
 {
   "name": "pinejs-core",
-  "version": "1.5.1",
-  "versionName": "Larch",
+  "version": "1.6.0",
+  "versionName": "Bristlecone",
   "description": "Next-generation fine-grained reactive declarative micro-framework for the modern web with CDN support, signals, and ultra-fast DOM updates.",
   "main": "dist/pine.js",
   "module": "dist/pine.esm.js",
@@ -40,7 +40,7 @@
     "build:esbuild": "node build.js --esbuild",
     "build:terser": "node build.js --terser",
     "prepublishOnly": "node build.js",
-    "test": "echo \"Open tests/test-suite.html in your browser\""
+    "test": "node scripts/test-runner.js"
   },
   "author": "PineJS Core Team",
   "license": "MIT",

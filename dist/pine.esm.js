@@ -1,5 +1,5 @@
 /**
- * PineJS v1.5.1 "Larch" (ES Module)
+ * PineJS v1.6.0 "Bristlecone" (ES Module)
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * (c) 2026 PineJS Core Team - MIT License
  */
@@ -32,6 +32,8 @@ export const {
   destroyTree,
   startObserver,
   stopObserver,
+  csp,
+  onError,
   version,
   versionName
 } = Pine;

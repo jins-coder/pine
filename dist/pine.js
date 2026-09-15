@@ -1,5 +1,5 @@
 /**
- * PineJS v1.5.1 "Larch"
+ * PineJS v1.6.0 "Bristlecone"
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * True Fine-Grained Signals + Multi-Prefix (p-, pine-) + Built-in Plugins
  * (c) 2026 PineJS Core Team - MIT License
@@ -506,9 +506,492 @@
   }
 
   // =========================================================================
-  // 3. EXPRESSION EVALUATOR & SAFE RUNNER
+  // 3. EXPRESSION EVALUATOR & SAFE RUNNER (WITH CSP-SAFE FALLBACK)
   // =========================================================================
+  let cspMode = false;
   const fnCache = new Map();
+  const globalErrorHandlers = new Set();
+
+  function handleError(err, el, expression) {
+    let handled = false;
+    for (const handler of globalErrorHandlers) {
+      try {
+        handler(err, el, expression);
+        handled = true;
+      } catch (handlerErr) {
+        console.error('[PineJS] Error in global onError handler:', handlerErr);
+      }
+    }
+
+    // Check for component error boundary (p-error / pine-error)
+    let curr = el;
+    while (curr) {
+      if (curr._pineErrorHandler) {
+        try {
+          evaluate(curr, curr._pineErrorHandler, { $error: err });
+          handled = true;
+          break;
+        } catch (boundaryErr) {
+          console.error('[PineJS] Error in p-error handler:', boundaryErr);
+        }
+      }
+      curr = curr.parentElement;
+    }
+
+    if (!handled) {
+      console.warn(`[PineJS] Error evaluating: "${expression}" on element:`, el, err);
+    }
+  }
+
+  function createTokenizer(input) {
+    let pos = 0;
+    const len = input.length;
+    const tokens = [];
+
+    function skipWhitespace() {
+      while (pos < len && /\s/.test(input[pos])) pos++;
+    }
+
+    while (pos < len) {
+      skipWhitespace();
+      if (pos >= len) break;
+
+      const ch = input[pos];
+
+      // Numbers
+      if (/\d/.test(ch) || (ch === '.' && pos + 1 < len && /\d/.test(input[pos + 1]))) {
+        let numStr = '';
+        while (pos < len && /[\d.]/.test(input[pos])) {
+          numStr += input[pos++];
+        }
+        tokens.push({ type: 'number', value: Number(numStr) });
+        continue;
+      }
+
+      // Strings ('...' or "...")
+      if (ch === '"' || ch === "'") {
+        const quote = ch;
+        pos++;
+        let str = '';
+        while (pos < len && input[pos] !== quote) {
+          if (input[pos] === '\\' && pos + 1 < len) {
+            pos++;
+            str += input[pos++];
+          } else {
+            str += input[pos++];
+          }
+        }
+        if (pos < len && input[pos] === quote) pos++;
+        tokens.push({ type: 'string', value: str });
+        continue;
+      }
+
+      // Identifiers & literals
+      if (/[a-zA-Z_$]/.test(ch)) {
+        let ident = '';
+        while (pos < len && /[a-zA-Z0-9_$]/.test(input[pos])) {
+          ident += input[pos++];
+        }
+        if (ident === 'true') tokens.push({ type: 'boolean', value: true });
+        else if (ident === 'false') tokens.push({ type: 'boolean', value: false });
+        else if (ident === 'null') tokens.push({ type: 'null', value: null });
+        else if (ident === 'undefined') tokens.push({ type: 'undefined', value: undefined });
+        else tokens.push({ type: 'ident', value: ident });
+        continue;
+      }
+
+      // Multi-char operators
+      const two = input.slice(pos, pos + 2);
+      const three = input.slice(pos, pos + 3);
+
+      if (three === '===' || three === '!==') {
+        tokens.push({ type: 'op', value: three });
+        pos += 3;
+        continue;
+      }
+
+      if (['==', '!=', '<=', '>=', '&&', '||', '??', '++', '--', '+=', '-=', '=>', '?.'].includes(two)) {
+        tokens.push({ type: 'op', value: two });
+        pos += 2;
+        continue;
+      }
+
+      // Single-char operators and punctuation
+      if ('+-*/%!<>=?:.,;()[]{}'.includes(ch)) {
+        tokens.push({ type: 'punct', value: ch });
+        pos++;
+        continue;
+      }
+
+      pos++;
+    }
+
+    return tokens;
+  }
+
+  function safeEvaluate(code, scope = {}, magics = {}) {
+    if (!code || typeof code !== 'string') return undefined;
+    const statements = code.split(';').map((s) => s.trim()).filter(Boolean);
+    if (statements.length === 0) return undefined;
+
+    let result = undefined;
+
+    function unwrap(val) {
+      return val && val.__pineRef ? val.__pineRef.target[val.__pineRef.key] : val;
+    }
+
+    function getTargetForVar(id) {
+      if (magics && id in magics) return magics;
+      if (scope && id in scope) return scope;
+      if (typeof globalThis !== 'undefined' && id in globalThis) return globalThis;
+      return scope;
+    }
+
+    function resolveVar(id) {
+      const tgt = getTargetForVar(id);
+      return tgt ? tgt[id] : undefined;
+    }
+
+    for (const stmt of statements) {
+      const tokens = createTokenizer(stmt);
+      if (tokens.length === 0) continue;
+      let cursor = 0;
+
+      function peek() {
+        return tokens[cursor] || { type: 'eof', value: '' };
+      }
+
+      function consume(expectedVal = null) {
+        const tok = peek();
+        if (expectedVal && tok.value !== expectedVal) {
+          throw new Error(`Expected "${expectedVal}", got "${tok.value}"`);
+        }
+        cursor++;
+        return tok;
+      }
+
+      function parseExpression() {
+        return parseAssignment();
+      }
+
+      function parseAssignment() {
+        const left = parseTernary();
+        const nextTok = peek();
+        if (nextTok && (nextTok.value === '=' || nextTok.value === '+=' || nextTok.value === '-=')) {
+          const op = consume().value;
+          const right = unwrap(parseAssignment());
+          if (left && left.__pineRef) {
+            const tgt = left.__pineRef.target;
+            const k = left.__pineRef.key;
+            let nextVal = right;
+            if (op === '+=') nextVal = tgt[k] + right;
+            if (op === '-=') nextVal = tgt[k] - right;
+            tgt[k] = nextVal;
+            return nextVal;
+          }
+        }
+        return left;
+      }
+
+      function parseTernary() {
+        let cond = parseLogicalOr();
+        if (peek().value === '?') {
+          consume('?');
+          const consequent = parseExpression();
+          consume(':');
+          const alternate = parseExpression();
+          return unwrap(cond) ? unwrap(consequent) : unwrap(alternate);
+        }
+        return cond;
+      }
+
+      function parseLogicalOr() {
+        let left = parseLogicalAnd();
+        while (peek().value === '||' || peek().value === '??') {
+          const op = consume().value;
+          const right = parseLogicalAnd();
+          const l = unwrap(left);
+          const r = unwrap(right);
+          left = op === '||' ? (l || r) : (l ?? r);
+        }
+        return left;
+      }
+
+      function parseLogicalAnd() {
+        let left = parseEquality();
+        while (peek().value === '&&') {
+          consume('&&');
+          const right = parseEquality();
+          left = unwrap(left) && unwrap(right);
+        }
+        return left;
+      }
+
+      function parseEquality() {
+        let left = parseRelational();
+        while (['===', '!==', '==', '!='].includes(peek().value)) {
+          const op = consume().value;
+          const right = parseRelational();
+          const l = unwrap(left);
+          const r = unwrap(right);
+          if (op === '===') left = l === r;
+          else if (op === '!==') left = l !== r;
+          else if (op === '==') left = l == r;
+          else if (op === '!=') left = l != r;
+        }
+        return left;
+      }
+
+      function parseRelational() {
+        let left = parseAdditive();
+        while (['<', '<=', '>', '>='].includes(peek().value)) {
+          const op = consume().value;
+          const right = parseAdditive();
+          const l = unwrap(left);
+          const r = unwrap(right);
+          if (op === '<') left = l < r;
+          else if (op === '<=') left = l <= r;
+          else if (op === '>') left = l > r;
+          else if (op === '>=') left = l >= r;
+        }
+        return left;
+      }
+
+      function parseAdditive() {
+        let left = parseMultiplicative();
+        while (peek().value === '+' || peek().value === '-') {
+          const op = consume().value;
+          const right = parseMultiplicative();
+          const l = unwrap(left);
+          const r = unwrap(right);
+          if (op === '+') left = l + r;
+          else left = l - r;
+        }
+        return left;
+      }
+
+      function parseMultiplicative() {
+        let left = parseUnary();
+        while (peek().value === '*' || peek().value === '/' || peek().value === '%') {
+          const op = consume().value;
+          const right = parseUnary();
+          const l = unwrap(left);
+          const r = unwrap(right);
+          if (op === '*') left = l * r;
+          else if (op === '/') left = l / r;
+          else if (op === '%') left = l % r;
+        }
+        return left;
+      }
+
+      function parseUnary() {
+        const tok = peek();
+        if (tok.value === '!') {
+          consume('!');
+          const val = parseUnary();
+          return !unwrap(val);
+        }
+        if (tok.value === '+') {
+          consume('+');
+          const val = parseUnary();
+          return +unwrap(val);
+        }
+        if (tok.value === '-') {
+          consume('-');
+          const val = parseUnary();
+          return -unwrap(val);
+        }
+        if (tok.value === '++') {
+          consume('++');
+          const val = parseMember();
+          if (val && val.__pineRef) {
+            return ++val.__pineRef.target[val.__pineRef.key];
+          }
+          return val;
+        }
+        if (tok.value === '--') {
+          consume('--');
+          const val = parseMember();
+          if (val && val.__pineRef) {
+            return --val.__pineRef.target[val.__pineRef.key];
+          }
+          return val;
+        }
+        return parsePostfix();
+      }
+
+      function parsePostfix() {
+        const expr = parseMember();
+        const nextTok = peek();
+        if (nextTok.value === '++' || nextTok.value === '--') {
+          const op = consume().value;
+          if (expr && expr.__pineRef) {
+            const oldVal = expr.__pineRef.target[expr.__pineRef.key];
+            expr.__pineRef.target[expr.__pineRef.key] = op === '++' ? oldVal + 1 : oldVal - 1;
+            return oldVal;
+          }
+        }
+        return expr;
+      }
+
+      function parseMember() {
+        let base = parsePrimary();
+
+        while (true) {
+          const tok = peek();
+          if (tok.value === '.' || tok.value === '?.') {
+            const isOptional = tok.value === '?.';
+            consume();
+            const propTok = consume();
+            const propName = propTok.value;
+            const rawBase = unwrap(base);
+            if (isOptional && (rawBase === null || rawBase === undefined)) {
+              base = undefined;
+              continue;
+            }
+            base = { __pineRef: { target: rawBase, key: propName } };
+          } else if (tok.value === '[') {
+            consume('[');
+            const indexExpr = unwrap(parseExpression());
+            consume(']');
+            const rawBase = unwrap(base);
+            base = { __pineRef: { target: rawBase, key: indexExpr } };
+          } else if (tok.value === '(') {
+            consume('(');
+            const args = [];
+            while (peek().value !== ')' && peek().type !== 'eof') {
+              args.push(unwrap(parseExpression()));
+              if (peek().value === ',') consume(',');
+            }
+            consume(')');
+            const fn = unwrap(base);
+            const contextObj = base && base.__pineRef ? base.__pineRef.target : scope;
+            if (typeof fn === 'function') {
+              base = fn.apply(contextObj, args);
+            } else {
+              base = undefined;
+            }
+          } else {
+            break;
+          }
+        }
+
+        return base;
+      }
+
+      function parsePrimary() {
+        const tok = peek();
+        if (tok.type === 'number' || tok.type === 'string' || tok.type === 'boolean' || tok.type === 'null' || tok.type === 'undefined') {
+          consume();
+          return tok.value;
+        }
+
+        if (tok.type === 'ident') {
+          const id = consume().value;
+          // Arrow function: ident => expr
+          if (peek().value === '=>') {
+            consume('=>');
+            const bodyTokens = [];
+            let depth = 0;
+            while (peek().type !== 'eof') {
+              const v = peek().value;
+              if ((v === ',' || v === ')') && depth === 0) break;
+              if (v === '(' || v === '[' || v === '{') depth++;
+              if (v === ')' || v === ']' || v === '}') depth--;
+              bodyTokens.push(consume());
+            }
+            return (arg) => {
+              const subScope = Object.assign(Object.create(scope), { [id]: arg });
+              return safeEvaluate(bodyTokens.map((t) => (t.type === 'string' ? `'${t.value}'` : t.value)).join(' '), subScope, magics);
+            };
+          }
+          return { __pineRef: { target: getTargetForVar(id), key: id } };
+        }
+
+        if (tok.value === '(') {
+          consume('(');
+          // Lookahead for arrow function: (a, b) => expr
+          let i = cursor;
+          let parenDepth = 1;
+          while (i < tokens.length) {
+            if (tokens[i].value === '(') parenDepth++;
+            else if (tokens[i].value === ')') {
+              parenDepth--;
+              if (parenDepth === 0) break;
+            }
+            i++;
+          }
+          if (i + 1 < tokens.length && tokens[i + 1].value === '=>') {
+            const paramNames = [];
+            while (peek().value !== ')') {
+              if (peek().type === 'ident') paramNames.push(consume().value);
+              else consume();
+            }
+            consume(')');
+            consume('=>');
+            const bodyTokens = [];
+            let depth = 0;
+            while (peek().type !== 'eof') {
+              const v = peek().value;
+              if ((v === ',' || v === ')') && depth === 0) break;
+              if (v === '(' || v === '[' || v === '{') depth++;
+              if (v === ')' || v === ']' || v === '}') depth--;
+              bodyTokens.push(consume());
+            }
+            return (...args) => {
+              const subScope = Object.create(scope);
+              paramNames.forEach((name, idx) => {
+                subScope[name] = args[idx];
+              });
+              return safeEvaluate(bodyTokens.map((t) => (t.type === 'string' ? `'${t.value}'` : t.value)).join(' '), subScope, magics);
+            };
+          }
+
+          const expr = parseExpression();
+          consume(')');
+          return expr;
+        }
+
+        if (tok.value === '[') {
+          consume('[');
+          const arr = [];
+          while (peek().value !== ']' && peek().type !== 'eof') {
+            arr.push(unwrap(parseExpression()));
+            if (peek().value === ',') consume(',');
+          }
+          consume(']');
+          return arr;
+        }
+
+        if (tok.value === '{') {
+          consume('{');
+          const obj = {};
+          while (peek().value !== '}' && peek().type !== 'eof') {
+            let key;
+            const kTok = consume();
+            if (kTok.type === 'string' || kTok.type === 'ident' || kTok.type === 'number') {
+              key = kTok.value;
+            }
+            if (peek().value === ':') {
+              consume(':');
+              obj[key] = unwrap(parseExpression());
+            } else {
+              obj[key] = resolveVar(key);
+            }
+            if (peek().value === ',') consume(',');
+          }
+          consume('}');
+          return obj;
+        }
+
+        throw new Error(`Unexpected token "${tok.value}"`);
+      }
+
+      result = unwrap(parseExpression());
+    }
+
+    return result;
+  }
 
   function buildEvaluator(expression) {
     const trimmed = expression.trim();
@@ -539,8 +1022,7 @@
           }`
         );
       } catch (innerErr) {
-        console.error(`[PineJS] Syntax error in expression: "${trimmed}"`, innerErr);
-        fn = () => {};
+        fn = (scope, magics) => safeEvaluate(trimmed, scope, magics);
       }
     }
 
@@ -553,12 +1035,30 @@
     const scope = getScope(el);
     const scopeData = scope ? scope.data : {};
     const magics = getMagicScope(el, additionalContext);
-    const evaluator = buildEvaluator(expression);
+
+    if (cspMode) {
+      try {
+        return safeEvaluate(expression, scopeData, magics);
+      } catch (err) {
+        handleError(err, el, expression);
+        return undefined;
+      }
+    }
 
     try {
+      const evaluator = buildEvaluator(expression);
       return evaluator(scopeData, magics);
     } catch (err) {
-      console.warn(`[PineJS] Error evaluating: "${expression}" on element:`, el, err);
+      // If CSP blocks eval, or error occurred, fallback to safe evaluator
+      if (err.name === 'EvalError' || /unsafe-eval|CSP|Function/i.test(err.message)) {
+        try {
+          return safeEvaluate(expression, scopeData, magics);
+        } catch (innerErr) {
+          handleError(innerErr, el, expression);
+          return undefined;
+        }
+      }
+      handleError(err, el, expression);
       return undefined;
     }
   }
@@ -568,6 +1068,15 @@
     const scope = getScope(el);
     const scopeData = scope ? scope.data : {};
     const magics = getMagicScope(el, additionalContext);
+
+    if (cspMode) {
+      try {
+        safeEvaluate(`${expression} = __val__`, scopeData, { ...magics, __val__: value });
+      } catch (err) {
+        handleError(err, el, expression);
+      }
+      return;
+    }
 
     try {
       const setterFn = new Function(
@@ -582,7 +1091,16 @@
       );
       setterFn(scopeData, magics, value);
     } catch (err) {
-      console.warn(`[PineJS] Error setting "${expression}" =`, value, err);
+      if (err.name === 'EvalError' || /unsafe-eval|CSP|Function/i.test(err.message)) {
+        try {
+          safeEvaluate(`${expression} = __val__`, scopeData, { ...magics, __val__: value });
+          return;
+        } catch (innerErr) {
+          handleError(innerErr, el, expression);
+          return;
+        }
+      }
+      handleError(err, el, expression);
     }
   }
 
@@ -892,31 +1410,87 @@
     $persist(el) {
       return (initialValue, keyName) => {
         const key = keyName || `pine_persist_${el.id || Math.random().toString(36).slice(2, 7)}`;
-        let stored = localStorage.getItem(key);
-        let currentVal = initialValue;
+        let stored = null;
+        try {
+          stored = typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null;
+        } catch {}
 
+        let currentVal = initialValue;
         if (stored !== null) {
           try {
             currentVal = JSON.parse(stored);
           } catch {
             currentVal = stored;
           }
-        } else {
-          localStorage.setItem(key, JSON.stringify(initialValue));
+        } else if (typeof localStorage !== 'undefined') {
+          try {
+            localStorage.setItem(key, JSON.stringify(initialValue));
+          } catch {}
+        }
+
+        let saveScheduled = false;
+        function scheduleSave(valToSave) {
+          if (saveScheduled) return;
+          saveScheduled = true;
+          const saveAction = () => {
+            saveScheduled = false;
+            try {
+              if (typeof localStorage !== 'undefined') {
+                localStorage.setItem(key, JSON.stringify(valToSave));
+              }
+            } catch (e) {
+              console.warn('[PineJS] $persist write failed:', e);
+            }
+          };
+          if (typeof queueMicrotask === 'function') {
+            queueMicrotask(saveAction);
+          } else {
+            setTimeout(saveAction, 0);
+          }
+        }
+
+        function createDeepPersistProxy(target) {
+          if (!isObject(target)) return target;
+          const rx = reactive(target);
+          return new Proxy(rx, {
+            get(t, prop, receiver) {
+              if (prop === 'value') return t;
+              if (prop === RAW_SYMBOL) return currentVal;
+              const res = Reflect.get(t, prop, receiver);
+              return isObject(res) ? createDeepPersistProxy(res) : res;
+            },
+            set(t, prop, val, receiver) {
+              if (prop === 'value' && isObject(val)) {
+                currentVal = val;
+                scheduleSave(currentVal);
+                return true;
+              }
+              const res = Reflect.set(t, prop, val, receiver);
+              scheduleSave(currentVal);
+              return res;
+            },
+            deleteProperty(t, prop) {
+              const res = Reflect.deleteProperty(t, prop);
+              scheduleSave(currentVal);
+              return res;
+            }
+          });
+        }
+
+        if (isObject(currentVal)) {
+          return createDeepPersistProxy(currentVal);
         }
 
         const sig = signal(currentVal);
-        const rxVal = reactive({
+        return reactive({
           get value() {
             return sig.value;
           },
           set value(v) {
             sig.value = v;
-            localStorage.setItem(key, JSON.stringify(v));
+            scheduleSave(v);
           }
         });
-
-        return rxVal;
       };
     },
     $intersect(el) {
@@ -1515,13 +2089,27 @@
       }
     },
 
-    // p-show: Visibility toggling with transitions
+    // p-show: Visibility toggling with transitions & accessible a11y auto-sync
     'p-show': (el, { expression, modifiers }) => {
       const originalDisplay = el.style.display === 'none' ? '' : el.style.display || '';
       let wasHidden = true;
 
+      function updateA11y(isShown) {
+        el.setAttribute('aria-hidden', isShown ? 'false' : 'true');
+        if (el.hasAttribute('aria-expanded')) {
+          el.setAttribute('aria-expanded', isShown ? 'true' : 'false');
+        }
+        if (el.id) {
+          try {
+            const triggers = document.querySelectorAll(`[aria-controls="${el.id}"]`);
+            triggers.forEach((t) => t.setAttribute('aria-expanded', isShown ? 'true' : 'false'));
+          } catch {}
+        }
+      }
+
       const stop = effect(() => {
         const isShown = Boolean(evaluate(el, expression));
+        updateA11y(isShown);
 
         if (isShown) {
           if (wasHidden) {
@@ -1779,12 +2367,27 @@
       setupTransition(el, { arg, expression, modifiers });
     },
 
-    // p-collapse: Smooth accordion height animation
+    // p-collapse: Smooth accordion height animation with accessible a11y auto-sync
     'p-collapse': (el) => {
       el.style.overflow = 'hidden';
       el.style.transition = 'height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease';
+
+      function updateCollapseA11y(isShown) {
+        el.setAttribute('aria-hidden', isShown ? 'false' : 'true');
+        if (el.hasAttribute('aria-expanded')) {
+          el.setAttribute('aria-expanded', isShown ? 'true' : 'false');
+        }
+        if (el.id) {
+          try {
+            const triggers = document.querySelectorAll(`[aria-controls="${el.id}"]`);
+            triggers.forEach((t) => t.setAttribute('aria-expanded', isShown ? 'true' : 'false'));
+          } catch {}
+        }
+      }
+
       el._pineTransition = {
         enter() {
+          updateCollapseA11y(true);
           el.style.display = '';
           el.style.height = '0px';
           el.style.opacity = '0';
@@ -1797,6 +2400,7 @@
           });
         },
         leave(done) {
+          updateCollapseA11y(false);
           el.style.height = `${el.scrollHeight}px`;
           requestAnimationFrame(() => {
             el.style.height = '0px';
@@ -1946,30 +2550,71 @@
       }
     },
 
-    // p-teleport: Mount element into another DOM container (e.g. body)
+    // p-teleport: Mount elements into another DOM container (with multi-child & dynamic target support)
     'p-teleport': (templateEl, { expression }) => {
       if (templateEl.tagName.toLowerCase() !== 'template') return;
       const targetSelector = expression || 'body';
-      const targetContainer = document.querySelector(targetSelector);
-      if (!targetContainer) return;
 
-      const clone = templateEl.content.firstElementChild.cloneNode(true);
-      const parentScope = getScope(templateEl);
-      const childScope = new Scope({}, parentScope, clone);
-      clone[SCOPE_SYMBOL] = childScope;
-      clone.__pine_scope__ = childScope;
-      clone._pineScope = childScope;
+      function mountTeleport(targetContainer) {
+        if (!targetContainer) return;
+        const fragment = templateEl.content.cloneNode(true);
+        const childNodes = Array.from(fragment.childNodes);
+        const parentScope = getScope(templateEl);
+        const childScope = new Scope({}, parentScope, templateEl);
+        const mountedNodes = [];
 
-      targetContainer.appendChild(clone);
-      initTree(clone);
-
-      const scope = getScope(templateEl);
-      if (scope) {
-        scope.addCleanup(() => {
-          childScope.destroy();
-          clone.remove();
+        childNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            node[SCOPE_SYMBOL] = childScope;
+            node.__pine_scope__ = childScope;
+            node._pineScope = childScope;
+          }
+          targetContainer.appendChild(node);
+          mountedNodes.push(node);
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            initTree(node);
+          }
         });
+
+        if (parentScope) {
+          parentScope.addCleanup(() => {
+            childScope.destroy();
+            mountedNodes.forEach((node) => {
+              if (node.parentNode) node.parentNode.removeChild(node);
+            });
+          });
+        }
       }
+
+      const existingTarget = document.querySelector(targetSelector);
+      if (existingTarget) {
+        mountTeleport(existingTarget);
+      } else {
+        let isMounted = false;
+        let observer = null;
+        const root = document.body || document.documentElement;
+        if (root && typeof MutationObserver !== 'undefined') {
+          observer = new MutationObserver(() => {
+            if (isMounted) return;
+            const target = document.querySelector(targetSelector);
+            if (target) {
+              isMounted = true;
+              observer.disconnect();
+              mountTeleport(target);
+            }
+          });
+          observer.observe(root, { childList: true, subtree: true });
+        }
+        const scope = getScope(templateEl);
+        if (scope && observer) {
+          scope.addCleanup(() => observer.disconnect());
+        }
+      }
+    },
+
+    // p-error: Declarative component error boundary
+    'p-error': (el, { expression }) => {
+      el._pineErrorHandler = expression;
     },
 
     // p-init: Component initialization callback
@@ -2342,6 +2987,7 @@
     'elseif': 'p-else-if',
     'else': 'p-else',
     'teleport': 'p-teleport',
+    'error': 'p-error',
     'effect': 'p-effect',
     'ref': 'p-ref',
     'mask': 'p-mask',
@@ -2798,8 +3444,8 @@
   // 14. PUBLIC PINE API
   // =========================================================================
   const Pine = {
-    version: '1.5.1',
-    versionName: 'Larch',
+    version: '1.6.0',
+    versionName: 'Bristlecone',
 
     // Prefix Configuration
     prefix(newPrefix) {
@@ -2928,6 +3574,21 @@
 
     initTree(element) {
       initTree(element);
+    },
+
+    // CSP Mode Configuration
+    csp(enable = true) {
+      cspMode = Boolean(enable);
+      return cspMode;
+    },
+
+    // Global Error Boundary Hook
+    onError(callback) {
+      if (typeof callback === 'function') {
+        globalErrorHandlers.add(callback);
+        return () => globalErrorHandlers.delete(callback);
+      }
+      return () => {};
     },
 
     $data(element) {

@@ -8,13 +8,48 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## 📦 Releases
 
-- [v1.5.1 — "Larch" (2026-09-15)](#v151--larch-2026-09-15) — **Latest Stable**
+- [v1.6.0 — "Bristlecone" (2026-09-15)](#v160--bristlecone-2026-09-15) — **Latest Stable**
+- [v1.5.1 — "Larch" (2026-09-15)](#v151--larch-2026-09-15)
 - [v1.4.0 — "Spruce" (2026-09-15)](#v140--spruce-2026-09-15)
 - [v1.3.0 — "Cedar" (2026-09-15)](#v130--cedar-2026-09-15)
 - [v1.2.0 — "Redwood" (2026-09-14)](#v120--redwood-2026-09-14)
 - [v1.1.0 — "Sequoia" (2026-09-14)](#v110--sequoia-2026-09-14)
 - [v1.0.0 — "Evergreen" (2026-09-10)](#v100--evergreen-2026-09-10) — Initial Release
 - [Roadmap & Upcoming Versions](#-future-roadmap)
+
+---
+
+## [v1.6.0] — "Bristlecone" (2026-09-15)
+
+> **Codename**: Bristlecone  
+> **Status**: Latest Stable  
+> **Bundle Size**: ~47.8 KB minified (~15.3 KB gzipped)  
+> **CDN Link**: `https://unpkg.com/pinejs-core@1.6.0/dist/pine.min.js`
+
+### 🛡️ Enterprise Security, Resilience & Production Hardening
+
+#### 1. Content Security Policy (CSP) Safe Evaluator (`Pine.csp`)
+- **Zero `eval` / `new Function`**: Full tokenized AST-based safe evaluator resolving properties, member paths (`user.name`), arithmetic, comparison, logical operators, assignments (`count++`, `isOpen = !isOpen`), ternary conditionals, method calls with proper `this` context, and array methods with arrow functions (`items.map(x => x * 2)`).
+- **Automatic Fallback**: Gracefully detects strict CSP environments throwing `EvalError` and falls back seamlessly to safe evaluation without crashes.
+- **Opt-in Strict Mode**: `Pine.csp(true)` enforces safe evaluation across all directives.
+
+#### 2. Declarative Component Error Boundaries (`p-error`) & `Pine.onError`
+- **Component Error Boundary**: `p-error="hasError = true; errorMsg = $error.message"` catches expression errors within its subtree and renders fallback UI.
+- **Global Error Telemetry Hook**: `Pine.onError((err, el, expr) => { ... })` for error reporting to Sentry, Bugsnag, or Datadog.
+
+#### 3. Multi-Child & Dynamic Target `p-teleport`
+- **Multi-Node Fragment Support**: Teleports all sibling nodes and non-empty text inside `<template p-teleport="target">`.
+- **Dynamic Target Mounting**: If target element is not yet in the DOM at initialization, automatically waits via `MutationObserver` and mounts as soon as it appears.
+
+#### 4. Automatic WAI-ARIA Accessibility (a11y) Synchronization
+- **`p-show` & `p-collapse`**: Automatically synchronizes `aria-hidden="true/false"` and `aria-expanded="true/false"` on controlled elements and any trigger buttons marked with `[aria-controls="panelId"]`.
+
+#### 5. Deep Reactive Persistence & Debounced Storage (`$persist`)
+- **Deep Proxy Tracking**: Persisted objects intercept nested mutations (e.g. `user.settings.theme = 'dark'`) and save to `localStorage`.
+- **Microtask Debouncing**: Prevents `localStorage` write thrashing by debouncing multiple synchronous mutations into a single storage write.
+
+#### 6. Zero-Dependency Automated Headless Browser CI Test Runner
+- **`npm test`**: Standalone runner in `scripts/test-runner.js` that detects Chrome or Edge, launches headless mode, executes all 46 test suites, and outputs structured results with exit code 0/1 for GitHub Actions and CI pipelines.
 
 ---
 

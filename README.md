@@ -7,9 +7,9 @@
 > **Next-Generation Fine-Grained Reactive Declarative Micro-Framework for Modern Web Apps**  
 > *Modern, minimal, reactive micro-framework powered by fine-grained signals (&lt; 10 KB minified).*
 
-[![Version](https://img.shields.io/badge/version-1.5.1%20%22Larch%22-10b981.svg)](https://github.com)
+[![Version](https://img.shields.io/badge/version-1.6.0%20%22Bristlecone%22-10b981.svg)](https://github.com)
 [![Reactivity](https://img.shields.io/badge/reactivity-fine--grained%20signals-06b6d4.svg)](https://github.com)
-[![Size](https://img.shields.io/badge/bundle%20size-%3C%2010%20KB%20min-8b5cf6.svg)](https://github.com)
+[![Size](https://img.shields.io/badge/bundle%20size-%3C%2016%20KB%20min%20gzip-8b5cf6.svg)](https://github.com)
 [![License](https://img.shields.io/badge/license-MIT-emerald.svg)](LICENSE)
 
 ---
@@ -20,11 +20,11 @@
 
 **PineJS is powered by true Fine-Grained Signals**. Every reactive binding (`p-text`, `:class`, `p-model`, `p-show`, `p-validate`) directly subscribes to atomic signal changes, updating DOM nodes with near-zero latency.
 
-### 🌲 Expressive Syntax in v1.5.1 ("Larch"):
+### 🌲 Expressive Syntax in v1.6.0 ("Bristlecone"):
 
 ```html
 <!-- Include via CDN -->
-<script src="https://unpkg.com/pinejs-core@1.5.1/dist/pine.min.js" defer></script>
+<script src="https://unpkg.com/pinejs-core@1.6.0/dist/pine.min.js" defer></script>
 
 <!-- Flavor 1: Standard Pine Directives (p-) -->
 <div p-data="{ count: 0 }">
@@ -78,8 +78,9 @@
 - **`p-model` / `pine-model` / `model`**: Two-way data binding for inputs, textareas, selects, checkboxes, radios with `.number`, `.trim`, `.lazy`
 - **`p-modelable`**: Expose internal component state to parent `p-model`: `<div p-modelable="selected">`
 - **`p-show` / `pine-show` / `show`**: Toggle element visibility (`display: none` / transitions): `<div p-show="isOpen"></div>`
-- **`p-if` / `p-else-if` / `p-else` / `when`: Conditionally mount/unmount DOM templates: `<template p-if="isLoggedIn">...</template>`
+- **`p-if` / `p-else-if` / `p-else` / `when`**: Conditionally mount/unmount DOM templates: `<template p-if="isLoggedIn">...</template>`
 - **`p-for` / `pine-for` / `loop`**: Loop over arrays, objects, or numbers: `<template p-for="item in items" :key="item.id">...</template>`
+- **`p-error` / `error`**: Declarative error boundary catching component crashes and exposing `$error`: `<div p-error="hasError = true">`
 - **`p-trap`**: Confinements keyboard focus within modal dialogs for WAI-ARIA compliance: `<div p-trap="isOpen">`
 - **`p-mask`**: Input formatting mask (`9` for numbers, `a` for letters, `*` for alphanumeric): `<input p-mask="9999 9999 9999 9999" />`
 - **`p-transition`**: Smooth CSS enter/leave animations: `<div p-show="open" p-transition.fade>`
@@ -87,7 +88,7 @@
 - **`p-effect`**: Execute side-effects reactively: `<div p-effect="console.log(count)">`
 - **`p-ref`**: Register DOM element reference: `<input p-ref="searchField" />`
 - **`p-cloak`**: Hide unrendered DOM until PineJS initializes: `<div p-cloak>`
-- **`p-teleport`**: Teleport templates to external DOM containers: `<template p-teleport="body">`
+- **`p-teleport`**: Multi-child teleportation to static or dynamic DOM containers: `<template p-teleport="body">`
 - **`p-id`**: Scoped unique element ID generator for accessible form controls: `<div p-id="['user-id']">`
 - **`p-hydrate`**: Server-side rendering (SSR) hydration activation marker: `<div p-data="{ count: 0 }" p-hydrate>`
 
@@ -107,17 +108,25 @@
 - **`$signal(initialValue)`**: Instantiate a raw fine-grained Signal
 - **`$broadcast(initialValue, channelName)`**: Cross-tab realtime reactive synchronization via `BroadcastChannel`
 - **`$viewTransition(callback)`**: Native View Transitions API animation wrapper
-- **`$persist(initialValue, key)`**: Fine-grained reactive `localStorage` binding
+- **`$persist(initialValue, key)`**: Deep fine-grained reactive `localStorage` binding with debounced writes
 - **`$history(initialValue, paramName)`**: Bidirectional URL query search parameter & `popstate` synchronization
 - **`$fetch(url)`**: Reactive HTTP request state (`loading`, `data`, `error`)
 - **`$intersect(callback)`**: Viewport intersection observer
 - **`$focus`**: Keyboard focus manager and modal focus trap (`$focus.trap(el)`)
+- **`$error`**: Captured runtime error within `p-error` boundary scope
 
 ---
 
 ## 🛠️ Global JavaScript API
 
 ```javascript
+// Strict Content Security Policy (CSP) Safe Evaluator Mode
+Pine.csp(true); // Disables new Function / eval across all expressions
+
+// Global Error Telemetry & Monitoring (Sentry, Bugsnag, etc.)
+Pine.onError((err, el, expr) => {
+  console.error(`[Telemetry] Error in "${expr}":`, err);
+});
 // Tagged Template Components (Compiler-less)
 const Card = ({ title }) => Pine.html`
   <div state="{ liked: false }">
@@ -157,9 +166,8 @@ Pine.batch(() => {
 
 ## 🏷️ Version History & Roadmap
 
-| Version | Codename | Release Date | Status | Key Features |
-| :--- | :--- | :--- | :--- | :--- |
-| **`v1.5.1`** | **Larch** | 2026-09-15 | **Latest Stable** | Tagged Template Components (`Pine.html`), Form Validation (`p-validate`), Cross-Tab Broadcast Sync (`$broadcast`), Native View Transitions (`$viewTransition`), Web Worker Signal Bridge (`Pine.worker`), DOM Lifecycle Observer (`MutationObserver`). |
+| **`v1.6.0`** | **Bristlecone** | 2026-09-15 | **Latest Stable** | CSP-Safe Evaluator (`Pine.csp`), Component Error Boundaries (`p-error`), Global Error Telemetry (`Pine.onError`), Multi-Child & Dynamic Target Teleportation, WAI-ARIA Auto-Sync (`p-show`, `p-collapse`), Deep Persistence (`$persist`), Automated Headless CI Runner (`npm test`). |
+| **`v1.5.1`** | **Larch** | 2026-09-15 | Stable | Tagged Template Components (`Pine.html`), Form Validation (`p-validate`), Cross-Tab Broadcast Sync (`$broadcast`), Native View Transitions (`$viewTransition`), Web Worker Signal Bridge (`Pine.worker`), DOM Lifecycle Observer (`MutationObserver`). |
 | **`v1.4.0`** | **Spruce** | 2026-09-15 | Previous Stable | Configurable multi-prefix engine (`Pine.prefix`), prefix-free semantic HTML (`state`, `text`, `show`, `model`, `loop`), WAAPI timeline orchestrator (`Pine.timeline`). |
 | **`v1.3.0`** | **Cedar** | 2026-09-15 | Stable | `p-animate` spring physics & keyframe animations, `Pine.devtools` runtime diagnostics bridge, getter receiver proxy binding. |
 | **`v1.2.0`** | **Redwood** | 2026-09-14 | Stable | Official TypeScript typings (`dist/pine.d.ts`), `$history` URL query sync magic, `p-hydrate` SSR directive, fine-grained reactivity. |

@@ -1,5 +1,5 @@
 /**
- * PineJS v1.5.1 "Larch"
+ * PineJS v1.6.0 "Bristlecone"
  * TypeScript Declaration File
  * (c) 2026 PineJS Core Team - MIT License
  */
@@ -78,6 +78,7 @@ export interface MagicScope {
   $intersect: (callback: (isIntersecting: boolean, entry: IntersectionObserverEntry) => void, options?: IntersectionObserverInit) => void;
   $focus: { focus: (target?: string | HTMLElement) => void; trap: (container?: string | HTMLElement) => void };
   $errors?: Record<string, string | null>;
+  $error?: any;
   $valid?: boolean;
   $touched?: Record<string, boolean>;
   $dirty?: Record<string, boolean>;
@@ -138,8 +139,8 @@ export interface WorkerSignal<T = any> {
 }
 
 export interface PineAPI {
-  version: '1.5.1';
-  versionName: 'Larch';
+  version: '1.6.0';
+  versionName: 'Bristlecone';
 
   // Prefix Configuration
   prefix: (newPrefix?: string | string[]) => string[];
@@ -174,6 +175,10 @@ export interface PineAPI {
   destroyTree: (element: HTMLElement) => void;
   startObserver: () => void;
   stopObserver: () => void;
+  // Security & Error Boundaries
+  csp: (enable?: boolean) => boolean;
+  onError: (callback: (err: any, el?: HTMLElement, expression?: string) => void) => () => void;
+
   $data: (element: HTMLElement) => Record<string, any> | null;
 }
 

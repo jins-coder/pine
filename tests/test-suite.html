@@ -654,11 +654,13 @@
       await p;
     });
 
-    test("v1.5.1 Larch: Engine Version & Identity", "Verifies Pine.version === '1.5.1' and Pine.versionName === 'Larch'", async () => {
-      if (Pine.version !== "1.5.1") throw new Error(`Expected Pine.version to be '1.5.1', got '${Pine.version}'`);
-      if (Pine.versionName !== "Larch") throw new Error(`Expected Pine.versionName to be 'Larch', got '${Pine.versionName}'`);
+    test("v1.6.0 Bristlecone: Engine Version & Identity", "Verifies Pine.version === '1.6.0' and Pine.versionName === 'Bristlecone'", async () => {
+      if (Pine.version !== "1.6.0") throw new Error(`Expected Pine.version to be '1.6.0', got '${Pine.version}'`);
+      if (Pine.versionName !== "Bristlecone") throw new Error(`Expected Pine.versionName to be 'Bristlecone', got '${Pine.versionName}'`);
       if (typeof Pine.html !== "function") throw new Error("Pine.html is not a function");
       if (typeof Pine.worker !== "function") throw new Error("Pine.worker is not a function");
+      if (typeof Pine.csp !== "function") throw new Error("Pine.csp is not a function");
+      if (typeof Pine.onError !== "function") throw new Error("Pine.onError is not a function");
     });
 
     test("v1.5.1 Larch: Tagged Template Components (Pine.html)", "Verifies compiler-less template creation, interpolation, and reactivity", async () => {
@@ -957,6 +959,148 @@
       if (!cleanedUp) throw new Error("Pine.destroyTree failed to trigger scope cleanups");
     });
 
+    test("CSP Mode: Safe Evaluator Fallback", "Verifies expression evaluation in strict CSP mode without new Function / eval", async () => {
+      const sandbox = getSandbox();
+      Pine.csp(true);
+      try {
+        sandbox.innerHTML = `
+          <div id="t-csp" p-data="{ count: 10, user: { name: 'Bob' }, active: false }">
+            <span id="csp-text" p-text="user.name + ' has ' + (count > 5 ? 'many' : 'few')"></span>
+            <button id="csp-btn" @click="count++; active = !active">Inc</button>
+          </div>
+        `;
+        Pine.initTree(sandbox);
+        const text = sandbox.querySelector("#csp-text");
+        if (text.textContent !== "Bob has many") throw new Error(`Expected 'Bob has many', got '${text.textContent}'`);
+
+        sandbox.querySelector("#csp-btn").click();
+        await new Promise((r) => setTimeout(r, 40));
+        const data = Pine.$data(sandbox.querySelector("#t-csp"));
+        if (data.count !== 11 || data.active !== true) throw new Error(`CSP mutation failed: count=${data.count}, active=${data.active}`);
+      } finally {
+        Pine.csp(false);
+      }
+    });
+
+    test("p-teleport: Multi-Child & Deferred Target Mounting", "Verifies teleporting multiple sibling nodes and mounting to dynamically created target", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-teleport-multi" p-data="{ title: 'Modal Header' }">
+          <template p-teleport="#dynamic-modal-target">
+            <div class="teleported-header" p-text="title"></div>
+            <p class="teleported-body">Modal body content</p>
+          </template>
+        </div>
+      `;
+      Pine.initTree(sandbox);
+
+      // Verify not yet mounted because target container doesn't exist
+      if (document.querySelector(".teleported-header")) {
+        throw new Error("Teleported header mounted before target container existed");
+      }
+
+      // Now create the dynamic target
+      const targetContainer = document.createElement("div");
+      targetContainer.id = "dynamic-modal-target";
+      document.body.appendChild(targetContainer);
+
+      await new Promise((r) => setTimeout(r, 60));
+
+      const header = targetContainer.querySelector(".teleported-header");
+      const body = targetContainer.querySelector(".teleported-body");
+      if (!header || header.textContent !== "Modal Header") throw new Error("Multi-child header missing or text mismatch");
+      if (!body || body.textContent !== "Modal body content") throw new Error("Multi-child body missing");
+
+      // Cleanup
+      targetContainer.remove();
+    });
+
+    test("Accessibility: Automatic aria-hidden and aria-expanded Sync", "Verifies p-show and triggers with [aria-controls] automatically sync accessibility state", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-a11y" p-data="{ open: false }">
+          <button id="trigger-btn" aria-controls="modal-panel" @click="open = !open">Toggle</button>
+          <div id="modal-panel" p-show="open" aria-expanded="false">
+            <span>Panel Content</span>
+          </div>
+        </div>
+      `;
+      Pine.initTree(sandbox);
+
+      const panel = sandbox.querySelector("#modal-panel");
+      const trigger = sandbox.querySelector("#trigger-btn");
+
+      // Initially closed
+      if (panel.getAttribute("aria-hidden") !== "true") throw new Error(`Expected aria-hidden='true', got '${panel.getAttribute("aria-hidden")}'`);
+      if (panel.getAttribute("aria-expanded") !== "false") throw new Error("Panel aria-expanded not false initially");
+      if (trigger.getAttribute("aria-expanded") !== "false") throw new Error("Trigger aria-expanded not false initially");
+
+      // Toggle open
+      trigger.click();
+      await new Promise((r) => setTimeout(r, 40));
+
+      if (panel.getAttribute("aria-hidden") !== "false") throw new Error("Panel aria-hidden not false after open");
+      if (panel.getAttribute("aria-expanded") !== "true") throw new Error("Panel aria-expanded not true after open");
+      if (trigger.getAttribute("aria-expanded") !== "true") throw new Error("Trigger aria-expanded not true after open");
+    });
+
+    test("$persist: Deep Reactive Mutation & Debounced Storage", "Verifies nested object property mutations persist to localStorage", async () => {
+      const sandbox = getSandbox();
+      localStorage.removeItem("pine_test_deep_persist");
+
+      sandbox.innerHTML = `
+        <div id="t-persist-deep" p-data="{ pref: $persist({ theme: 'dark', nested: { count: 0 } }, 'pine_test_deep_persist') }">
+          <span id="persist-count" p-text="pref.nested.count"></span>
+          <button id="persist-btn" @click="pref.nested.count++">Increment</button>
+        </div>
+      `;
+      Pine.initTree(sandbox);
+
+      sandbox.querySelector("#persist-btn").click();
+      await new Promise((r) => setTimeout(r, 60));
+
+      const raw = localStorage.getItem("pine_test_deep_persist");
+      if (!raw) throw new Error("localStorage value not set for deep persist");
+      const parsed = JSON.parse(raw);
+      if (!parsed.nested || parsed.nested.count !== 1) {
+        throw new Error(`Expected nested.count to be 1 in storage, got ${JSON.stringify(parsed)}`);
+      }
+
+      localStorage.removeItem("pine_test_deep_persist");
+    });
+
+    test("Error Boundary: p-error & Pine.onError", "Verifies declarative error catching and global error hooks without application crash", async () => {
+      const sandbox = getSandbox();
+      let caughtGlobal = null;
+      const unhook = Pine.onError((err, el, expr) => {
+        caughtGlobal = { err, expr };
+      });
+
+      sandbox.innerHTML = `
+        <div id="t-error-boundary" p-data="{ hasError: false, errorMsg: '' }" p-error="hasError = true; errorMsg = $error.message">
+          <div p-if="!hasError">
+            <button id="crash-btn" @click="throw new Error('Explosion in child')">Crash</button>
+          </div>
+          <div id="fallback-ui" p-if="hasError">
+            <span id="err-text" p-text="'Caught: ' + errorMsg"></span>
+          </div>
+        </div>
+      `;
+      Pine.initTree(sandbox);
+
+      sandbox.querySelector("#crash-btn").click();
+      await new Promise((r) => setTimeout(r, 60));
+
+      unhook();
+
+      const data = Pine.$data(sandbox.querySelector("#t-error-boundary"));
+      if (!data.hasError) throw new Error("p-error failed to catch error and update hasError");
+      if (!data.errorMsg.includes("Explosion")) throw new Error(`Unexpected errorMsg: ${data.errorMsg}`);
+      if (!caughtGlobal || !caughtGlobal.err.message.includes("Explosion")) {
+        throw new Error("Global Pine.onError hook failed to receive error event");
+      }
+    });
+
     // Run tests & render report
     async function runAllTests() {
       const list = document.getElementById("results-list");
@@ -964,6 +1108,7 @@
       list.innerHTML = "";
       let passed = 0;
       let failed = 0;
+      const failures = [];
 
       for (const t of tests) {
         let isPass = false;
@@ -975,6 +1120,7 @@
         } catch (err) {
           failed++;
           errorMsg = err.message || String(err);
+          failures.push({ suite: t.name, test: t.description, error: errorMsg });
           console.error(`Test failed: ${t.name}`, err);
         }
 
@@ -996,6 +1142,27 @@
       } else {
         summaryBadge.className = "badge badge-fail";
         summaryBadge.textContent = `${failed} Failed, ${passed} Passed`;
+      }
+
+      // If running via headless test runner, report results to server
+      if (window.location.search.includes("headless=true")) {
+        try {
+          await fetch("/api/results", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              suitesTotal: tests.length,
+              suitesPassed: passed,
+              suitesFailed: failed,
+              testsTotal: tests.length,
+              testsPassed: passed,
+              testsFailed: failed,
+              failures
+            })
+          });
+        } catch (postErr) {
+          console.error("Headless reporter error:", postErr);
+        }
       }
     }
 
