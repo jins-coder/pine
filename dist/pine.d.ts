@@ -72,9 +72,15 @@ export interface MagicScope {
   $signal: <T>(val: T) => Signal<T>;
   $persist: <T>(initialValue: T, keyName?: string) => { value: T };
   $history: <T>(initialValue: T, paramName?: string) => { value: T };
+  $broadcast: <T>(initialValue: T, channelName?: string) => { value: T };
+  $viewTransition: (callback: () => void | Promise<void>) => Promise<void>;
   $fetch: FetchClient;
   $intersect: (callback: (isIntersecting: boolean, entry: IntersectionObserverEntry) => void, options?: IntersectionObserverInit) => void;
   $focus: { focus: (target?: string | HTMLElement) => void; trap: (container?: string | HTMLElement) => void };
+  $errors?: Record<string, string | null>;
+  $valid?: boolean;
+  $touched?: Record<string, boolean>;
+  $dirty?: Record<string, boolean>;
 }
 
 export interface DirectiveContext {
@@ -165,6 +171,9 @@ export interface PineAPI {
   morph: (fromEl: HTMLElement, toEl: HTMLElement | string) => void;
   start: () => void;
   initTree: (element: HTMLElement) => void;
+  destroyTree: (element: HTMLElement) => void;
+  startObserver: () => void;
+  stopObserver: () => void;
   $data: (element: HTMLElement) => Record<string, any> | null;
 }
 

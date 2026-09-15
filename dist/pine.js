@@ -14,6 +14,12 @@
     const Pine = factory();
     global.Pine = Pine;
     if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+      if (document.head && !document.getElementById('pine-cloak-styles')) {
+        const style = document.createElement('style');
+        style.id = 'pine-cloak-styles';
+        style.textContent = '[p-cloak], [x-cloak], [cloak] { display: none !important; }';
+        document.head.appendChild(style);
+      }
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => Pine.start());
       } else {
@@ -429,6 +435,74 @@
       curr = curr.parentElement;
     }
     return null;
+  }
+
+  function destroyTree(root) {
+    if (!root || root.nodeType !== Node.ELEMENT_NODE) return;
+
+    let child = root.firstElementChild;
+    while (child) {
+      const next = child.nextElementSibling;
+      destroyTree(child);
+      child = next;
+    }
+
+    const ownScope = root[SCOPE_SYMBOL] || root.__pine_scope__ || root._pineScope;
+    if (ownScope && typeof ownScope.destroy === 'function') {
+      ownScope.destroy();
+      delete root[SCOPE_SYMBOL];
+      delete root.__pine_scope__;
+      delete root._pineScope;
+    }
+    delete root._pineInitialized;
+  }
+
+  function ensureCloakStyle() {
+    if (typeof document !== 'undefined' && document.head) {
+      if (!document.getElementById('pine-cloak-styles')) {
+        const style = document.createElement('style');
+        style.id = 'pine-cloak-styles';
+        style.textContent = '[p-cloak], [x-cloak], [cloak] { display: none !important; }';
+        document.head.appendChild(style);
+      }
+    }
+  }
+
+  let mutationObserver = null;
+
+  function handleMutations(mutations) {
+    for (const mutation of mutations) {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          if (node.hasAttribute && (node.hasAttribute('p-ignore') || node.hasAttribute('x-ignore') || node.hasAttribute('ignore'))) return;
+          initTree(node);
+        }
+      });
+
+      mutation.removedNodes.forEach((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          destroyTree(node);
+        }
+      });
+    }
+  }
+
+  function startObserver() {
+    if (typeof MutationObserver === 'undefined' || typeof document === 'undefined' || mutationObserver) return;
+    const target = document.body || document.documentElement;
+    if (!target) return;
+    mutationObserver = new MutationObserver(handleMutations);
+    mutationObserver.observe(target, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  function stopObserver() {
+    if (mutationObserver) {
+      mutationObserver.disconnect();
+      mutationObserver = null;
+    }
   }
 
   // =========================================================================
@@ -943,6 +1017,12 @@
               }
               isBroadcasting = false;
             }
+          },
+          toString() {
+            return String(sig.value);
+          },
+          valueOf() {
+            return sig.value;
           }
         });
 
@@ -956,16 +1036,24 @@
     },
     $viewTransition() {
       return (callback) => {
+        let executed = false;
+        const runCallback = () => {
+          if (!executed && typeof callback === 'function') {
+            executed = true;
+            return callback();
+          }
+        };
+
         if (typeof document !== 'undefined' && typeof document.startViewTransition === 'function') {
-          return document.startViewTransition(() => {
-            return typeof callback === 'function' ? callback() : undefined;
-          });
+          try {
+            const vt = document.startViewTransition(runCallback);
+            setTimeout(runCallback, 20);
+            return vt;
+          } catch (_) {
+            return Promise.resolve(runCallback());
+          }
         }
-        if (typeof callback === 'function') {
-          const res = callback();
-          return Promise.resolve(res);
-        }
-        return Promise.resolve();
+        return Promise.resolve(runCallback());
       };
     }
   };
@@ -1113,24 +1201,42 @@
         }
       });
 
-      const keyModifiers = [
-        'enter', 'escape', 'tab', 'space', 'delete', 'slash',
-        'arrow-up', 'arrow-down', 'arrow-left', 'arrow-right'
-      ];
-      const activeKeyMods = modifiers.filter((m) => keyModifiers.includes(m));
-
       let timer = null;
       let inThrottle = false;
+      let wasHiddenAtStart = false;
+
+      const captureHandler = isOutside && typeof document !== 'undefined' ? () => {
+        wasHiddenAtStart = (
+          el.style.display === 'none' ||
+          (el.offsetWidth === 0 && el.offsetHeight === 0 && el.getClientRects().length === 0)
+        );
+      } : null;
+
+      if (captureHandler) {
+        document.addEventListener(eventName, captureHandler, { capture: true, passive: true });
+      }
 
       const handler = (event) => {
         if (isSelf && event.target !== el) return;
         if (isPrevent) event.preventDefault();
         if (isStop) event.stopPropagation();
 
+        // Keyboard modifier keys (.ctrl, .meta, .cmd, .shift, .alt)
+        if (modifiers.includes('ctrl') && !event.ctrlKey) return;
+        if ((modifiers.includes('meta') || modifiers.includes('cmd')) && !event.metaKey) return;
+        if (modifiers.includes('shift') && !event.shiftKey) return;
+        if (modifiers.includes('alt') && !event.altKey) return;
+
+        // Mouse button modifiers (.left, .middle, .right)
+        if (modifiers.includes('left') && event.button !== 0) return;
+        if (modifiers.includes('middle') && event.button !== 1) return;
+        if (modifiers.includes('right') && event.button !== 2) return;
+
         if (isOutside) {
           if (!el.isConnected) return;
+          if (wasHiddenAtStart) return;
           if (el.contains(event.target)) return;
-          if (el.offsetWidth === 0 && el.offsetHeight === 0 && el.getClientRects().length === 0) return;
+          if (el.style.display === 'none' || (el.offsetWidth === 0 && el.offsetHeight === 0 && el.getClientRects().length === 0)) return;
           if (el._pineJustShown && (Date.now() - el._pineJustShown < 100)) return;
           let ancestor = el.parentElement;
           let ancestorJustShown = false;
@@ -1144,22 +1250,30 @@
           if (ancestorJustShown) return;
         }
 
-        if (activeKeyMods.length > 0 && event instanceof KeyboardEvent) {
-          const key = event.key.toLowerCase();
-          const match = activeKeyMods.some((m) => {
-            if (m === 'enter' && key === 'enter') return true;
-            if (m === 'escape' && (key === 'escape' || key === 'esc')) return true;
-            if (m === 'tab' && key === 'tab') return true;
-            if (m === 'space' && (key === ' ' || key === 'spacebar')) return true;
-            if (m === 'delete' && (key === 'delete' || key === 'backspace')) return true;
-            if (m === 'slash' && key === '/') return true;
-            if (m === 'arrow-up' && key === 'arrowup') return true;
-            if (m === 'arrow-down' && key === 'arrowdown') return true;
-            if (m === 'arrow-left' && key === 'arrowleft') return true;
-            if (m === 'arrow-right' && key === 'arrowright') return true;
-            return false;
-          });
-          if (!match) return;
+        if (event instanceof KeyboardEvent) {
+          const nonKeyMods = new Set([
+            'window', 'document', 'outside', 'once', 'passive', 'capture',
+            'self', 'prevent', 'stop', 'ctrl', 'meta', 'cmd', 'shift', 'alt',
+            'left', 'middle', 'right'
+          ]);
+          const candidateKeys = modifiers.filter((m) => !nonKeyMods.has(m) && !m.startsWith('debounce') && !m.startsWith('throttle'));
+          if (candidateKeys.length > 0) {
+            const key = event.key ? event.key.toLowerCase() : '';
+            const match = candidateKeys.some((m) => {
+              if (m === 'enter') return key === 'enter';
+              if (m === 'escape' || m === 'esc') return key === 'escape' || key === 'esc';
+              if (m === 'tab') return key === 'tab';
+              if (m === 'space') return key === ' ' || key === 'spacebar';
+              if (m === 'delete') return key === 'delete' || key === 'backspace';
+              if (m === 'slash') return key === '/';
+              if (m === 'arrow-up') return key === 'arrowup';
+              if (m === 'arrow-down') return key === 'arrowdown';
+              if (m === 'arrow-left') return key === 'arrowleft';
+              if (m === 'arrow-right') return key === 'arrowright';
+              return key === m.toLowerCase();
+            });
+            if (!match) return;
+          }
         }
 
         const execute = () => {
@@ -1193,6 +1307,9 @@
       if (scope) {
         scope.addCleanup(() => {
           target.removeEventListener(eventName, handler, opts);
+          if (captureHandler) {
+            document.removeEventListener(eventName, captureHandler, { capture: true });
+          }
           if (timer) clearTimeout(timer);
         });
       }
@@ -1201,7 +1318,10 @@
     // p-text: Atomic text node reactivity
     'p-text': (el, { expression }) => {
       const stop = effect(() => {
-        const value = evaluate(el, expression);
+        let value = evaluate(el, expression);
+        if (value && typeof value === 'object' && 'value' in value && !Array.isArray(value)) {
+          value = value.value;
+        }
         el.textContent = value === undefined || value === null ? '' : String(value);
       });
       const scope = getScope(el);
@@ -1429,42 +1549,99 @@
       if (scope) scope.addCleanup(stop);
     },
 
-    // p-if: Conditional DOM rendering
+    // p-if: Conditional DOM rendering with p-else-if, p-else, and multi-child support
     'p-if': (templateEl, { expression }) => {
       if (templateEl.tagName.toLowerCase() !== 'template') {
         console.warn('[PineJS] p-if must be used on a <template> tag.');
         return;
       }
 
+      const branches = [{ template: templateEl, expression, type: 'if' }];
+
+      // Scan contiguous sibling <template> tags for p-else-if or p-else
+      let nextEl = templateEl.nextElementSibling;
+      while (nextEl && nextEl.tagName && nextEl.tagName.toLowerCase() === 'template') {
+        let isBranch = false;
+        const attrs = Array.from(nextEl.attributes || []);
+        for (const attr of attrs) {
+          const parsed = parseDirective(attr.name);
+          if (parsed) {
+            if (parsed.directive === 'p-else-if') {
+              nextEl._pineHandled = true;
+              branches.push({ template: nextEl, expression: attr.value, type: 'else-if' });
+              isBranch = true;
+              break;
+            } else if (parsed.directive === 'p-else') {
+              nextEl._pineHandled = true;
+              branches.push({ template: nextEl, expression: 'true', type: 'else' });
+              isBranch = true;
+              break;
+            }
+          }
+        }
+        if (!isBranch) break;
+        nextEl = nextEl.nextElementSibling;
+      }
+
       const marker = document.createComment('pine-if');
       templateEl.parentElement.insertBefore(marker, templateEl);
 
-      let currentElement = null;
-      let childScope = null;
+      let currentBranchIndex = -1;
+      let currentNodes = [];
+      let currentScope = null;
 
       const stop = effect(() => {
-        const condition = Boolean(evaluate(templateEl, expression));
-
-        if (condition) {
-          if (!currentElement) {
-            const clone = templateEl.content.firstElementChild.cloneNode(true);
-            const parentScope = getScope(templateEl);
-            childScope = new Scope({}, parentScope, clone);
-            clone[SCOPE_SYMBOL] = childScope;
-            clone.__pine_scope__ = childScope;
-            clone._pineScope = childScope;
-
-            marker.parentElement.insertBefore(clone, marker);
-            initTree(clone);
-            currentElement = clone;
+        let matchingIndex = -1;
+        for (let i = 0; i < branches.length; i++) {
+          const branch = branches[i];
+          if (branch.type === 'else') {
+            matchingIndex = i;
+            break;
           }
-        } else {
-          if (currentElement) {
-            if (childScope) childScope.destroy();
-            currentElement.remove();
-            currentElement = null;
-            childScope = null;
+          if (Boolean(evaluate(branch.template, branch.expression))) {
+            matchingIndex = i;
+            break;
           }
+        }
+
+        if (matchingIndex === currentBranchIndex) return;
+
+        // Cleanup previously mounted elements
+        if (currentNodes.length > 0) {
+          if (currentScope) currentScope.destroy();
+          currentNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) destroyTree(node);
+            if (node.isConnected) node.remove();
+          });
+          currentNodes = [];
+          currentScope = null;
+        }
+
+        currentBranchIndex = matchingIndex;
+
+        if (matchingIndex > -1) {
+          const activeBranch = branches[matchingIndex];
+          const fragment = activeBranch.template.content.cloneNode(true);
+          const parentScope = getScope(activeBranch.template);
+          const childScope = new Scope({}, parentScope, null);
+          currentScope = childScope;
+
+          const nodesToInsert = Array.from(fragment.childNodes);
+          const parent = marker.parentElement;
+
+          nodesToInsert.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              node[SCOPE_SYMBOL] = childScope;
+              node.__pine_scope__ = childScope;
+              node._pineScope = childScope;
+            }
+            parent.insertBefore(node, marker);
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              initTree(node);
+            }
+          });
+
+          currentNodes = nodesToInsert;
         }
       });
 
@@ -1472,13 +1649,20 @@
       if (scope) {
         scope.addCleanup(stop);
         scope.addCleanup(() => {
-          if (currentElement) currentElement.remove();
+          if (currentNodes.length > 0) {
+            if (currentScope) currentScope.destroy();
+            currentNodes.forEach((node) => {
+              if (node.nodeType === Node.ELEMENT_NODE) destroyTree(node);
+              if (node.isConnected) node.remove();
+            });
+            currentNodes = [];
+          }
           if (marker.isConnected) marker.remove();
         });
       }
     },
 
-    // p-for: Fine-grained keyed list rendering
+    // p-for: Fine-grained keyed list rendering with multi-child and custom :key support
     'p-for': (templateEl, { expression }) => {
       if (templateEl.tagName.toLowerCase() !== 'template') {
         console.warn('[PineJS] p-for must be used on a <template> tag.');
@@ -1494,6 +1678,11 @@
       const itemVar = match[1];
       const indexVar = match[2] || null;
       const itemsExpr = match[3];
+
+      const keyAttr = templateEl.getAttribute(':key') ||
+                      templateEl.getAttribute('p-bind:key') ||
+                      templateEl.getAttribute('x-bind:key') ||
+                      templateEl.getAttribute('key');
 
       const marker = document.createComment(`pine-for: ${expression}`);
       templateEl.parentElement.insertBefore(marker, templateEl);
@@ -1518,35 +1707,52 @@
         const parent = marker.parentElement;
 
         itemsArray.forEach((item, index) => {
-          const key = item && item.id !== undefined ? item.id : index;
+          let key;
+          if (keyAttr) {
+            key = evaluate(templateEl, keyAttr, { [itemVar]: item, ...(indexVar ? { [indexVar]: index } : {}) });
+          } else {
+            key = item && item.id !== undefined ? item.id : (item && item._id !== undefined ? item._id : index);
+          }
+
           const existingIdx = renderedNodes.findIndex((n) => n.key === key);
 
           if (existingIdx > -1) {
             const existing = renderedNodes.splice(existingIdx, 1)[0];
             existing.scope.data[itemVar] = item;
             if (indexVar) existing.scope.data[indexVar] = index;
-            parent.insertBefore(existing.node, marker);
+            existing.nodes.forEach((n) => parent.insertBefore(n, marker));
             newRenderedNodes.push(existing);
           } else {
-            const clone = templateEl.content.firstElementChild.cloneNode(true);
+            const fragment = templateEl.content.cloneNode(true);
             const parentScope = getScope(templateEl);
             const loopData = { [itemVar]: item };
             if (indexVar) loopData[indexVar] = index;
 
-            const childScope = new Scope(loopData, parentScope, clone);
-            clone[SCOPE_SYMBOL] = childScope;
-            clone.__pine_scope__ = childScope;
-            clone._pineScope = childScope;
+            const childScope = new Scope(loopData, parentScope, null);
+            const clonedNodes = Array.from(fragment.childNodes);
 
-            parent.insertBefore(clone, marker);
-            initTree(clone);
-            newRenderedNodes.push({ node: clone, scope: childScope, key });
+            clonedNodes.forEach((node) => {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                node[SCOPE_SYMBOL] = childScope;
+                node.__pine_scope__ = childScope;
+                node._pineScope = childScope;
+              }
+              parent.insertBefore(node, marker);
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                initTree(node);
+              }
+            });
+
+            newRenderedNodes.push({ nodes: clonedNodes, scope: childScope, key });
           }
         });
 
-        renderedNodes.forEach(({ node, scope }) => {
+        renderedNodes.forEach(({ nodes, scope }) => {
           if (scope) scope.destroy();
-          node.remove();
+          nodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) destroyTree(node);
+            if (node.isConnected) node.remove();
+          });
         });
 
         renderedNodes = newRenderedNodes;
@@ -1556,9 +1762,12 @@
       if (scope) {
         scope.addCleanup(stop);
         scope.addCleanup(() => {
-          renderedNodes.forEach(({ node, scope: s }) => {
+          renderedNodes.forEach(({ nodes, scope: s }) => {
             if (s) s.destroy();
-            node.remove();
+            nodes.forEach((node) => {
+              if (node.nodeType === Node.ELEMENT_NODE) destroyTree(node);
+              if (node.isConnected) node.remove();
+            });
           });
           if (marker.isConnected) marker.remove();
         });
@@ -1598,18 +1807,117 @@
       };
     },
 
-    // p-mask: Input masking helper
+    // p-trap: Declarative accessible focus trap
+    'p-trap': (el, { expression }) => {
+      let isTrapped = false;
+      let previousActive = null;
+
+      const getFocusables = () => {
+        return Array.from(el.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )).filter((node) => node.offsetWidth > 0 || node.offsetHeight > 0 || node.getClientRects().length > 0);
+      };
+
+      const handleKeydown = (e) => {
+        if (!isTrapped || e.key !== 'Tab') return;
+        const focusables = getFocusables();
+        if (focusables.length === 0) {
+          e.preventDefault();
+          return;
+        }
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first || !el.contains(document.activeElement)) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last || !el.contains(document.activeElement)) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      };
+
+      const activateTrap = () => {
+        if (isTrapped) return;
+        isTrapped = true;
+        previousActive = document.activeElement;
+        document.addEventListener('keydown', handleKeydown);
+        const focusables = getFocusables();
+        if (focusables.length > 0) {
+          focusables[0].focus();
+        } else if (el.focus) {
+          if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');
+          el.focus();
+        }
+      };
+
+      const deactivateTrap = () => {
+        if (!isTrapped) return;
+        isTrapped = false;
+        document.removeEventListener('keydown', handleKeydown);
+        if (previousActive && previousActive.focus) {
+          try { previousActive.focus(); } catch {}
+        }
+      };
+
+      if (!expression) {
+        activateTrap();
+      } else {
+        const stop = effect(() => {
+          const shouldTrap = Boolean(evaluate(el, expression));
+          if (shouldTrap) {
+            activateTrap();
+          } else {
+            deactivateTrap();
+          }
+        });
+        const scope = getScope(el);
+        if (scope) scope.addCleanup(stop);
+      }
+
+      const scope = getScope(el);
+      if (scope) scope.addCleanup(deactivateTrap);
+    },
+
+    // p-mask: Input masking helper supporting digits (9), letters (a), and alphanumeric (*)
     'p-mask': (el, { expression }) => {
       const maskFormat = expression.replace(/['"]/g, '');
       const handleMask = () => {
-        let val = el.value.replace(/\D/g, '');
+        let val = el.value;
         let formatted = '';
         let valIdx = 0;
         for (let i = 0; i < maskFormat.length && valIdx < val.length; i++) {
-          if (maskFormat[i] === '9') {
-            formatted += val[valIdx++];
+          const m = maskFormat[i];
+          if (m === '9') {
+            while (valIdx < val.length && !/\d/.test(val[valIdx])) {
+              valIdx++;
+            }
+            if (valIdx < val.length) {
+              formatted += val[valIdx++];
+            }
+          } else if (m === 'a' || m === 'A') {
+            while (valIdx < val.length && !/[a-zA-Z]/.test(val[valIdx])) {
+              valIdx++;
+            }
+            if (valIdx < val.length) {
+              formatted += val[valIdx++];
+            }
+          } else if (m === '*') {
+            while (valIdx < val.length && !/[a-zA-Z0-9]/.test(val[valIdx])) {
+              valIdx++;
+            }
+            if (valIdx < val.length) {
+              formatted += val[valIdx++];
+            }
           } else {
-            formatted += maskFormat[i];
+            formatted += m;
+            if (val[valIdx] === m) {
+              valIdx++;
+            }
           }
         }
         el.value = formatted;
@@ -1931,7 +2239,14 @@
     if (!fromEl || !toEl) return;
 
     if (fromEl.nodeType !== toEl.nodeType || fromEl.nodeName !== toEl.nodeName) {
-      fromEl.replaceWith(toEl.cloneNode(true));
+      if (fromEl.nodeType === Node.ELEMENT_NODE) {
+        destroyTree(fromEl);
+      }
+      const clone = toEl.cloneNode(true);
+      fromEl.replaceWith(clone);
+      if (clone.nodeType === Node.ELEMENT_NODE) {
+        initTree(clone);
+      }
       return;
     }
 
@@ -1958,6 +2273,31 @@
       }
     });
 
+    // Sync form values and interactive state (preserve user interactive values unless HTML attribute changed)
+    if (fromEl.tagName === 'INPUT') {
+      if (fromEl.type === 'checkbox' || fromEl.type === 'radio') {
+        const fromHasChk = fromEl.hasAttribute('checked');
+        const toHasChk = toEl.hasAttribute('checked');
+        if (fromHasChk !== toHasChk) {
+          fromEl.checked = toEl.checked;
+        }
+      } else {
+        const fromValAttr = fromEl.getAttribute('value') || '';
+        const toValAttr = toEl.getAttribute('value') || '';
+        if (fromValAttr !== toValAttr) {
+          fromEl.value = toEl.value;
+        }
+      }
+    } else if (fromEl.tagName === 'TEXTAREA') {
+      if (fromEl.defaultValue !== toEl.defaultValue) {
+        fromEl.value = toEl.value;
+      }
+    } else if (fromEl.tagName === 'SELECT') {
+      if (fromEl.value !== toEl.value && toEl.value) {
+        fromEl.value = toEl.value;
+      }
+    }
+
     // Sync children
     const fromChildren = Array.from(fromEl.childNodes);
     const toChildren = Array.from(toEl.childNodes);
@@ -1965,8 +2305,15 @@
     const max = Math.max(fromChildren.length, toChildren.length);
     for (let i = 0; i < max; i++) {
       if (!fromChildren[i] && toChildren[i]) {
-        fromEl.appendChild(toChildren[i].cloneNode(true));
+        const newChild = toChildren[i].cloneNode(true);
+        fromEl.appendChild(newChild);
+        if (newChild.nodeType === Node.ELEMENT_NODE) {
+          initTree(newChild);
+        }
       } else if (fromChildren[i] && !toChildren[i]) {
+        if (fromChildren[i].nodeType === Node.ELEMENT_NODE) {
+          destroyTree(fromChildren[i]);
+        }
         fromChildren[i].remove();
       } else if (fromChildren[i] && toChildren[i]) {
         morph(fromChildren[i], toChildren[i]);
@@ -1989,17 +2336,19 @@
     'model': 'p-model',
     'modelable': 'p-modelable',
     'loop': 'p-for',
-    'for': 'p-for',
     'when': 'p-if',
     'if': 'p-if',
+    'else-if': 'p-else-if',
+    'elseif': 'p-else-if',
+    'else': 'p-else',
     'teleport': 'p-teleport',
     'effect': 'p-effect',
     'ref': 'p-ref',
     'mask': 'p-mask',
     'collapse': 'p-collapse',
+    'trap': 'p-trap',
     'animate': 'p-animate',
     'hydrate': 'p-hydrate',
-    'id': 'p-id',
     'bind': 'p-bind',
     'on': 'p-on',
     'init': 'p-init',
@@ -2126,7 +2475,9 @@
   // =========================================================================
   function initElement(el) {
     if (!el || el.nodeType !== Node.ELEMENT_NODE) return;
+    if (el._pineInitialized) return;
     if (el.hasAttribute && (el.hasAttribute('p-ignore') || el.hasAttribute('x-ignore') || el.hasAttribute('ignore'))) return;
+    el._pineInitialized = true;
 
     const attrs = Array.from(el.attributes || []);
     const parsedDirectives = [];
@@ -2156,7 +2507,7 @@
 
     const directiveOrder = [
       'p-bind', 'p-modelable', 'p-model', 'p-text', 'p-html',
-      'p-show', 'p-collapse', 'p-mask', 'p-animate', 'p-transition', 'p-effect',
+      'p-show', 'p-collapse', 'p-mask', 'p-trap', 'p-animate', 'p-transition', 'p-effect',
       'p-ref', 'p-on', 'p-init'
     ];
 
@@ -2178,6 +2529,7 @@
 
   function initTree(root) {
     if (!root || root.nodeType !== Node.ELEMENT_NODE) return;
+    if (root._pineHandled) return;
     if (root.hasAttribute && (root.hasAttribute('p-ignore') || root.hasAttribute('x-ignore') || root.hasAttribute('ignore'))) return;
 
     if (root.tagName && root.tagName.toLowerCase() === 'template') {
@@ -2234,42 +2586,93 @@
   // 11. TIMELINE ANIMATION ORCHESTRATOR
   // =========================================================================
   function timeline(steps = [], globalOptions = {}) {
-    let currentTime = 0;
+    const stepList = Array.isArray(steps) ? [...steps] : [];
     const animations = [];
+    let totalDuration = 0;
 
-    for (const step of steps) {
-      const el = typeof step.el === 'string' && typeof document !== 'undefined'
-        ? document.querySelector(step.el)
-        : step.el;
-      if (!el || typeof el.animate !== 'function') continue;
+    const instance = {
+      animations,
+      duration: 0,
+      add(el, keyframes, options = {}, offset) {
+        stepList.push({ el, keyframes, options, offset });
+        return instance;
+      },
+      play() {
+        if (animations.length === 0) this._build();
+        animations.forEach((a) => a.play());
+        return instance;
+      },
+      pause() { animations.forEach((a) => a.pause()); return instance; },
+      reverse() { animations.forEach((a) => a.reverse()); return instance; },
+      finish() { animations.forEach((a) => a.finish()); return instance; },
+      cancel() { animations.forEach((a) => a.cancel()); return instance; },
+      then(resolve, reject) {
+        if (animations.length === 0) this._build();
+        const maxWait = Math.max(50, totalDuration || 0) + 50;
+        const promises = animations.map((a) => {
+          if (!a) return Promise.resolve();
+          const p = a.finished ? a.finished : Promise.resolve();
+          return Promise.race([
+            p,
+            new Promise((r) => setTimeout(r, maxWait))
+          ]);
+        });
+        return Promise.all(promises).then(resolve, reject);
+      },
+      catch(reject) {
+        return this.then(undefined, reject);
+      },
+      finally(callback) {
+        return this.then(
+          (value) => Promise.resolve(callback()).then(() => value),
+          (err) => Promise.resolve(callback()).then(() => { throw err; })
+        );
+      },
+      _build() {
+        animations.length = 0;
+        let currentTime = 0;
+        for (const step of stepList) {
+          const el = typeof step.el === 'string' && typeof document !== 'undefined'
+            ? document.querySelector(step.el)
+            : step.el;
+          if (!el || typeof el.animate !== 'function') continue;
 
-      const delay = (step.delay !== undefined ? step.delay : 0) + (step.at !== undefined ? step.at : currentTime);
-      const duration = step.duration || (step.options && step.options.duration) || 350;
-      const easing = step.easing || (step.options && step.options.easing) || 'cubic-bezier(0.34, 1.56, 0.64, 1)';
-      const keyframes = step.keyframes || step.frames || [];
+          let delay = (step.delay !== undefined ? step.delay : 0);
+          if (step.offset && typeof step.offset === 'string') {
+            const num = parseFloat(step.offset.replace(/[^0-9.-]/g, '')) || 0;
+            if (step.offset.startsWith('-=')) delay = Math.max(0, currentTime - num);
+            else if (step.offset.startsWith('+=')) delay = currentTime + num;
+            else delay = currentTime;
+          } else {
+            delay += (step.at !== undefined ? step.at : currentTime);
+          }
 
-      const anim = el.animate(keyframes, {
-        ...globalOptions,
-        ...step.options,
-        duration,
-        delay,
-        easing,
-        fill: 'forwards'
-      });
+          const duration = step.duration || (step.options && step.options.duration) || 350;
+          const easing = step.easing || (step.options && step.options.easing) || 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+          const keyframes = step.keyframes || step.frames || [];
 
-      animations.push(anim);
-      currentTime = delay + duration;
+          const anim = el.animate(keyframes, {
+            ...globalOptions,
+            ...step.options,
+            duration,
+            delay,
+            easing,
+            fill: 'forwards'
+          });
+
+          animations.push(anim);
+          currentTime = delay + duration;
+        }
+        totalDuration = currentTime;
+        this.duration = totalDuration;
+      }
+    };
+
+    if (Array.isArray(steps) && steps.length > 0) {
+      instance._build();
     }
 
-    return {
-      animations,
-      duration: currentTime,
-      play() { animations.forEach((a) => a.play()); },
-      pause() { animations.forEach((a) => a.pause()); },
-      reverse() { animations.forEach((a) => a.reverse()); },
-      finish() { animations.forEach((a) => a.finish()); },
-      cancel() { animations.forEach((a) => a.cancel()); }
-    };
+    return instance;
   }
 
   // =========================================================================
@@ -2453,6 +2856,8 @@
         const scope = getScope(element);
         return {
           element,
+          hasScope: Boolean(scope),
+          scope: scope ? scope.data : null,
           data: scope ? scope.data : null,
           parent: scope && scope.parent ? scope.parent.el : null,
           cleanupsCount: scope ? scope.cleanups.length : 0
@@ -2508,10 +2913,11 @@
 
     // Initialization & Lifecycle
     start() {
+      ensureCloakStyle();
       const roots = findRoots();
       if (roots.length > 0) {
         roots.forEach((root) => initTree(root));
-      } else {
+      } else if (typeof document !== 'undefined' && document.body) {
         initTree(document.body);
       }
 
@@ -2522,6 +2928,20 @@
           el.removeAttribute('cloak');
         });
       }
+
+      startObserver();
+    },
+
+    destroyTree(element) {
+      destroyTree(element);
+    },
+
+    startObserver() {
+      startObserver();
+    },
+
+    stopObserver() {
+      stopObserver();
     },
 
     initTree(element) {

@@ -29,6 +29,9 @@ export const {
   morph,
   start,
   initTree,
+  destroyTree,
+  startObserver,
+  stopObserver,
   version,
   versionName
 } = Pine;
