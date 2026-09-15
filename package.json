@@ -1,7 +1,7 @@
 {
   "name": "pinejs-core",
-  "version": "1.6.0",
-  "versionName": "Bristlecone",
+  "version": "1.7.0",
+  "versionName": "Douglas",
   "description": "Next-generation fine-grained reactive declarative micro-framework for the modern web with CDN support, signals, and ultra-fast DOM updates.",
   "main": "dist/pine.js",
   "module": "dist/pine.esm.js",

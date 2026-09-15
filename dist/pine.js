@@ -1,7 +1,7 @@
 /**
- * PineJS v1.6.0 "Bristlecone"
+ * PineJS v1.7.0 "Douglas"
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
- * True Fine-Grained Signals + Multi-Prefix (p-, pine-) + Built-in Plugins
+ * True Fine-Grained Signals + Multi-Prefix (p-, pine-) + Built-in Realtime & App Engines
  * (c) 2026 PineJS Core Team - MIT License
  * https://pinejs.dev
  */
@@ -241,8 +241,33 @@
     return val !== null && typeof val === 'object';
   }
 
+  function deepClone(val) {
+    if (val === null || typeof val !== 'object') return val;
+    if (Array.isArray(val)) return val.map(deepClone);
+    const copy = {};
+    for (const k of Object.keys(val)) {
+      copy[k] = deepClone(val[k]);
+    }
+    return copy;
+  }
+
+  function deepEqual(a, b) {
+    if (Object.is(a, b)) return true;
+    if (a === null || typeof a !== 'object' || b === null || typeof b !== 'object') return false;
+    if (Array.isArray(a) !== Array.isArray(b)) return false;
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
+    if (keysA.length !== keysB.length) return false;
+    for (const k of keysA) {
+      if (!Object.prototype.hasOwnProperty.call(b, k) || !deepEqual(a[k], b[k])) return false;
+    }
+    return true;
+  }
+
   function reactive(target) {
     if (!isObject(target)) return target;
+    if (typeof Promise !== 'undefined' && (target instanceof Promise || typeof target.then === 'function')) return target;
+    if (target instanceof Date || target instanceof RegExp || (typeof Map !== 'undefined' && target instanceof Map) || (typeof Set !== 'undefined' && target instanceof Set)) return target;
     if (target[RAW_SYMBOL]) return target;
     if (rawToProxyMap.has(target)) return rawToProxyMap.get(target);
 
@@ -343,6 +368,10 @@
       this.refs = {};
       this.scopedIds = {};
 
+      if (typeof emitDevTools === 'function') {
+        emitDevTools('scope:create', { el: this.el, data: this.data });
+      }
+
       this.data = new Proxy(this.localData, {
         get: (target, prop, receiver) => {
           if (prop === RAW_SYMBOL) return target;
@@ -404,6 +433,9 @@
     }
 
     destroy() {
+      if (typeof emitDevTools === 'function') {
+        emitDevTools('scope:destroy', { el: this.el });
+      }
       for (const fn of this.cleanups) {
         try {
           fn();
@@ -1472,6 +1504,419 @@
   }
 
   // =========================================================================
+  // 4.5. DEVTOOLS EXTENSION GLOBAL HOOK (window.__PINE_DEVTOOLS_GLOBAL_HOOK__)
+  // =========================================================================
+  let devtoolsHook = null;
+  if (typeof window !== 'undefined') {
+    if (!window.__PINE_DEVTOOLS_GLOBAL_HOOK__) {
+      const listeners = new Map();
+      window.__PINE_DEVTOOLS_GLOBAL_HOOK__ = {
+        version: '1.7.0',
+        on(event, fn) {
+          if (!listeners.has(event)) listeners.set(event, new Set());
+          listeners.get(event).add(fn);
+          return () => listeners.get(event)?.delete(fn);
+        },
+        emit(event, payload) {
+          if (listeners.has(event)) {
+            listeners.get(event).forEach((fn) => {
+              try { fn(payload); } catch (e) { console.error('[Pine DevTools Error]', e); }
+            });
+          }
+        },
+        getRoots() {
+          return findRoots();
+        },
+        getScope(element) {
+          return getScope(element);
+        },
+        getComponentTree() {
+          const roots = findRoots();
+          function serialize(node) {
+            if (!node || node.nodeType !== 1) return null;
+            const scope = getScope(node);
+            const children = [];
+            for (let i = 0; i < node.children.length; i++) {
+              const s = serialize(node.children[i]);
+              if (s) children.push(s);
+            }
+            return {
+              tag: node.tagName.toLowerCase(),
+              id: node.id || null,
+              classes: Array.from(node.classList || []),
+              hasScope: Boolean(scope),
+              data: scope ? { ...scope.data } : null,
+              children
+            };
+          }
+          return roots.map(serialize);
+        }
+      };
+    }
+    devtoolsHook = window.__PINE_DEVTOOLS_GLOBAL_HOOK__;
+  }
+
+  function emitDevTools(event, payload) {
+    if (devtoolsHook) {
+      devtoolsHook.emit(event, payload);
+    }
+  }
+
+  // =========================================================================
+  // 5.6. CLIENT-SIDE MICRO-ROUTER ENGINE
+  // =========================================================================
+  const routerPathSignal = signal(
+    typeof window !== 'undefined' ? window.location.pathname || '/' : '/'
+  );
+  const routerQuerySignal = signal(
+    typeof window !== 'undefined' ? window.location.search || '' : ''
+  );
+  const routerParamsSignal = signal({});
+  const routerHashSignal = signal(
+    typeof window !== 'undefined' ? window.location.hash || '' : ''
+  );
+
+  const routeGuards = [];
+
+  function matchRoutePattern(pattern, currentPath) {
+    if (!pattern || pattern === '*' || pattern === '.*') {
+      return { matches: true, params: {} };
+    }
+    if (pattern === currentPath) {
+      return { matches: true, params: {} };
+    }
+
+    const paramNames = [];
+    const regexPattern = '^' + pattern
+      .replace(/[-\/\\^$*+?.()|[\]{}]/g, (match) => (match === '*' ? '.*' : '\\' + match))
+      .replace(/:([a-zA-Z0-9_]+)/g, (_, name) => {
+        paramNames.push(name);
+        return '([^/]+)';
+      }) + '$';
+
+    try {
+      const rx = new RegExp(regexPattern);
+      const match = currentPath.match(rx);
+      if (match) {
+        const params = {};
+        paramNames.forEach((name, idx) => {
+          params[name] = decodeURIComponent(match[idx + 1] || '');
+        });
+        return { matches: true, params };
+      }
+    } catch {}
+
+    return { matches: false, params: {} };
+  }
+
+  const router = {
+    get path() {
+      return routerPathSignal.value;
+    },
+    get query() {
+      return routerQuerySignal.value;
+    },
+    get params() {
+      return routerParamsSignal.value;
+    },
+    get hash() {
+      return routerHashSignal.value;
+    },
+    navigate(toPath, options = {}) {
+      if (typeof window === 'undefined') return false;
+      for (const guard of routeGuards) {
+        if (guard(toPath, routerPathSignal.value) === false) {
+          return false;
+        }
+      }
+
+      const updateHistoryAndState = () => {
+        if (options.replace) {
+          window.history.replaceState({}, '', toPath);
+        } else {
+          window.history.pushState({}, '', toPath);
+        }
+        routerPathSignal.value = window.location.pathname;
+        routerQuerySignal.value = window.location.search;
+        routerHashSignal.value = window.location.hash;
+        window.dispatchEvent(new CustomEvent('pine:route', { detail: { path: window.location.pathname } }));
+        emitDevTools('route:change', { path: window.location.pathname });
+      };
+
+      if (options.transition !== false && typeof document !== 'undefined' && typeof document.startViewTransition === 'function') {
+        try {
+          document.startViewTransition(updateHistoryAndState);
+          return true;
+        } catch {
+          updateHistoryAndState();
+          return true;
+        }
+      }
+
+      updateHistoryAndState();
+      return true;
+    },
+    beforeEach(guardFn) {
+      if (typeof guardFn === 'function') {
+        routeGuards.push(guardFn);
+        return () => {
+          const idx = routeGuards.indexOf(guardFn);
+          if (idx > -1) routeGuards.splice(idx, 1);
+        };
+      }
+      return () => {};
+    },
+    match(pattern, path = routerPathSignal.value) {
+      return matchRoutePattern(pattern, path);
+    }
+  };
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('popstate', () => {
+      routerPathSignal.value = window.location.pathname;
+      routerQuerySignal.value = window.location.search;
+      routerHashSignal.value = window.location.hash;
+      emitDevTools('route:change', { path: window.location.pathname });
+    });
+  }
+
+  // =========================================================================
+  // 5.7. UNIFIED REACTIVE FORM ENGINE ($form & Pine.form)
+  // =========================================================================
+  function createForm(initialValues = {}, options = {}) {
+    const initialSnapshot = deepClone(initialValues);
+    const values = reactive(deepClone(initialValues));
+    const errors = reactive({});
+    const touched = reactive({});
+    const submitting = signal(false);
+    const submitted = signal(false);
+    const submitCount = signal(0);
+
+    const formObj = {
+      values,
+      initial: initialSnapshot,
+      errors,
+      touched,
+      get dirty() {
+        return !deepEqual(values, initialSnapshot);
+      },
+      get pristine() {
+        return !this.dirty;
+      },
+      get valid() {
+        return Object.values(errors).filter(Boolean).length === 0;
+      },
+      get invalid() {
+        return !this.valid;
+      },
+      get submitting() {
+        return submitting.value;
+      },
+      get submitted() {
+        return submitted.value;
+      },
+      get submitCount() {
+        return submitCount.value;
+      },
+      isDirty(field) {
+        return !deepEqual(values[field], initialSnapshot[field]);
+      },
+      isTouched(field) {
+        return Boolean(touched[field]);
+      },
+      touch(field) {
+        touched[field] = true;
+      },
+      setError(field, msg) {
+        errors[field] = msg;
+      },
+      setErrors(errs) {
+        if (isObject(errs)) {
+          for (const [k, v] of Object.entries(errs)) {
+            errors[k] = v;
+          }
+        }
+      },
+      clearErrors() {
+        for (const k of Object.keys(errors)) {
+          delete errors[k];
+        }
+      },
+      reset() {
+        for (const k of Object.keys(values)) {
+          if (!(k in initialSnapshot)) {
+            delete values[k];
+          }
+        }
+        for (const [k, v] of Object.entries(initialSnapshot)) {
+          values[k] = deepClone(v);
+        }
+        this.clearErrors();
+        for (const k of Object.keys(touched)) {
+          delete touched[k];
+        }
+        submitting.value = false;
+      },
+      formData() {
+        const fd = new FormData();
+        for (const [k, v] of Object.entries(values)) {
+          if (v instanceof Blob || v instanceof File) {
+            fd.append(k, v);
+          } else if (isObject(v)) {
+            fd.append(k, JSON.stringify(v));
+          } else if (v !== undefined && v !== null) {
+            fd.append(k, String(v));
+          }
+        }
+        return fd;
+      },
+      json() {
+        return JSON.parse(JSON.stringify(values));
+      },
+      async submit(endpointOrHandler, submitOptions = {}) {
+        submitting.value = true;
+        submitted.value = true;
+        submitCount.value++;
+        emitDevTools('form:submit', { values });
+
+        try {
+          if (typeof endpointOrHandler === 'function') {
+            const res = await endpointOrHandler(values, formObj);
+            return res;
+          } else if (typeof endpointOrHandler === 'string') {
+            const method = submitOptions.method || 'POST';
+            const headers = {
+              'Content-Type': 'application/json',
+              ...(submitOptions.headers || {})
+            };
+            const response = await fetch(endpointOrHandler, {
+              method,
+              headers,
+              body: JSON.stringify(values)
+            });
+            if (!response.ok) {
+              try {
+                const data = await response.json();
+                if (data.errors) formObj.setErrors(data.errors);
+              } catch {}
+              throw new Error(`HTTP ${response.status}: Form submission failed`);
+            }
+            return await response.json();
+          }
+        } catch (err) {
+          throw err;
+        } finally {
+          submitting.value = false;
+        }
+      }
+    };
+
+    return formObj;
+  }
+
+  // =========================================================================
+  // 5.8. ASYNC SUSPENSE & SKELETON ENGINE
+  // =========================================================================
+  const suspenseRegistry = new WeakMap();
+
+  function registerSuspensePromise(el, promise) {
+    let current = el;
+    while (current) {
+      if (suspenseRegistry.has(current)) {
+        const controller = suspenseRegistry.get(current);
+        controller.track(promise);
+        return;
+      }
+      current = current.parentElement;
+    }
+  }
+
+  // =========================================================================
+  // 5.9. REMOTE COMPONENT LOADER ENGINE (p-component & Pine.loadComponent)
+  // =========================================================================
+  const componentCache = new Map();
+
+  async function loadRemoteComponent(url, options = {}) {
+    if (componentCache.has(url) && !options.forceReload) {
+      return componentCache.get(url);
+    }
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to load component from ${url}: HTTP ${res.status}`);
+    const htmlText = await res.text();
+    componentCache.set(url, htmlText);
+    return htmlText;
+  }
+
+  // =========================================================================
+  // 5.10. INDEXEDDB OFFLINE STORAGE ENGINE ($idb & Pine.idb)
+  // =========================================================================
+  function createIdbResource(initialValue, key, dbName = 'pine_db', storeName = 'store', el = null) {
+    const sig = signal(initialValue);
+    let db = null;
+    let saveTimeout = null;
+
+    if (typeof indexedDB !== 'undefined') {
+      const req = indexedDB.open(dbName, 1);
+      req.onupgradeneeded = (e) => {
+        const database = e.target.result;
+        if (!database.objectStoreNames.contains(storeName)) {
+          database.createObjectStore(storeName);
+        }
+      };
+      req.onsuccess = (e) => {
+        db = e.target.result;
+        const tx = db.transaction(storeName, 'readonly');
+        const store = tx.objectStore(storeName);
+        const getReq = store.get(key);
+        getReq.onsuccess = () => {
+          if (getReq.result !== undefined) {
+            sig.value = getReq.result;
+          } else {
+            const putTx = db.transaction(storeName, 'readwrite');
+            putTx.objectStore(storeName).put(initialValue, key);
+          }
+        };
+      };
+    }
+
+    const rx = reactive({
+      get value() {
+        return sig.value;
+      },
+      set value(nextVal) {
+        sig.value = nextVal;
+        if (db) {
+          if (saveTimeout) clearTimeout(saveTimeout);
+          saveTimeout = setTimeout(() => {
+            try {
+              const tx = db.transaction(storeName, 'readwrite');
+              tx.objectStore(storeName).put(nextVal, key);
+            } catch (err) {
+              console.warn('[PineJS] $idb save error:', err);
+            }
+          }, 60);
+        }
+      },
+      toString() {
+        return String(sig.value);
+      },
+      valueOf() {
+        return sig.value;
+      }
+    });
+
+    const scope = getScope(el);
+    if (scope && el) {
+      scope.addCleanup(() => {
+        if (saveTimeout) clearTimeout(saveTimeout);
+        if (db) db.close();
+      });
+    }
+
+    return rx;
+  }
+
+  // =========================================================================
   // 6. MAGIC PROPERTIES ENGINE
   // =========================================================================
   const builtInMagics = {
@@ -1816,6 +2261,35 @@
     },
     $ws(el) {
       return (url, options = {}) => createWebSocketResource(url, options, el);
+    },
+    $route() {
+      return {
+        get path() {
+          return router.path;
+        },
+        get query() {
+          return router.query;
+        },
+        get params() {
+          return router.params;
+        },
+        get hash() {
+          return router.hash;
+        },
+        push: (to, opt) => router.navigate(to, opt),
+        replace: (to, opt) => router.navigate(to, { ...(opt || {}), replace: true }),
+        go: (n) => (typeof window !== 'undefined' ? window.history.go(n) : null),
+        active: (pattern) => router.match(pattern).matches
+      };
+    },
+    $form(el) {
+      return (initialValues, options) => createForm(initialValues, options);
+    },
+    $idb(el) {
+      return (initialValue, key, dbName, storeName) => createIdbResource(initialValue, key, dbName, storeName, el);
+    },
+    $suspense(el) {
+      return (promise) => registerSuspensePromise(el, promise);
     }
   };
 
@@ -2977,6 +3451,214 @@
         el.removeEventListener('input', onInput);
         el.removeEventListener('blur', onBlur);
       });
+    },
+
+    // p-route: Client-side route matching & rendering
+    'p-route': (el, { expression, modifiers }) => {
+      const pattern = expression.trim();
+      let mountedNodes = [];
+      let isMounted = false;
+
+      const isTemplate = el.tagName === 'TEMPLATE';
+      const commentAnchor = isTemplate ? document.createComment(`p-route: ${pattern}`) : null;
+      if (isTemplate && el.parentNode) {
+        el.parentNode.insertBefore(commentAnchor, el);
+      }
+
+      const stop = effect(() => {
+        const currentPath = router.path;
+        const res = matchRoutePattern(pattern, currentPath);
+
+        if (res.matches) {
+          routerParamsSignal.value = res.params;
+          if (isTemplate) {
+            if (!isMounted) {
+              const clone = el.content.cloneNode(true);
+              mountedNodes = Array.from(clone.childNodes);
+              if (commentAnchor && commentAnchor.parentNode) {
+                commentAnchor.parentNode.insertBefore(clone, commentAnchor);
+              }
+              mountedNodes.forEach((n) => {
+                if (n.nodeType === 1) initTree(n);
+              });
+              isMounted = true;
+            }
+          } else {
+            el.style.display = '';
+            el.removeAttribute('hidden');
+          }
+        } else {
+          if (isTemplate) {
+            if (isMounted) {
+              mountedNodes.forEach((n) => {
+                if (n.nodeType === 1) destroyTree(n);
+                n.remove();
+              });
+              mountedNodes = [];
+              isMounted = false;
+            }
+          } else {
+            el.style.display = 'none';
+            el.setAttribute('hidden', '');
+          }
+        }
+      });
+
+      const scope = getScope(el);
+      if (scope) {
+        scope.addCleanup(() => {
+          stop();
+          if (commentAnchor && commentAnchor.parentNode) commentAnchor.remove();
+          mountedNodes.forEach((n) => n.remove());
+        });
+      }
+    },
+
+    // p-link: Declarative SPA navigation and active class state
+    'p-link': (el, { expression, modifiers }) => {
+      const activeClass = modifiers.length > 0 ? modifiers.join(' ') : 'active';
+      const href = el.getAttribute('href') || expression;
+
+      const onClick = (e) => {
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+        const target = el.getAttribute('target');
+        if (target && target !== '_self') return;
+        const toUrl = el.getAttribute('href') || href;
+        if (!toUrl || toUrl.startsWith('#') || toUrl.startsWith('mailto:') || toUrl.startsWith('tel:')) return;
+        if (toUrl.includes('://') && !toUrl.startsWith(window.location.origin)) return;
+
+        e.preventDefault();
+        router.navigate(toUrl, { replace: el.hasAttribute('replace') });
+      };
+
+      el.addEventListener('click', onClick);
+
+      const stop = effect(() => {
+        const currentPath = router.path;
+        const targetHref = el.getAttribute('href') || href;
+        if (targetHref) {
+          const isCurrent = targetHref === currentPath || (targetHref !== '/' && currentPath.startsWith(targetHref));
+          if (isCurrent) {
+            activeClass.split(' ').forEach((c) => c && el.classList.add(c));
+            el.setAttribute('aria-current', 'page');
+          } else {
+            activeClass.split(' ').forEach((c) => c && el.classList.remove(c));
+            el.removeAttribute('aria-current');
+          }
+        }
+      });
+
+      const scope = getScope(el);
+      if (scope) {
+        scope.addCleanup(() => {
+          el.removeEventListener('click', onClick);
+          stop();
+        });
+      }
+    },
+
+    // p-suspense: Async promise/resource coordinator
+    'p-suspense': (el) => {
+      const fallbackTemplate = el.querySelector('template[p-fallback], template[fallback], template[p-loading], template[loading]');
+      let fallbackNodes = [];
+      const pendingSet = new Set();
+      const isPendingSignal = signal(false);
+
+      const controller = {
+        track(promise) {
+          if (!promise || typeof promise.then !== 'function') return;
+          pendingSet.add(promise);
+          isPendingSignal.value = true;
+          promise.finally(() => {
+            pendingSet.delete(promise);
+            if (pendingSet.size === 0) {
+              isPendingSignal.value = false;
+            }
+          });
+        }
+      };
+
+      suspenseRegistry.set(el, controller);
+
+      if (fallbackTemplate && fallbackTemplate.parentNode) {
+        const anchor = document.createComment('p-suspense-anchor');
+        fallbackTemplate.parentNode.insertBefore(anchor, fallbackTemplate);
+
+        const stop = effect(() => {
+          if (isPendingSignal.value) {
+            if (fallbackNodes.length === 0) {
+              const clone = fallbackTemplate.content.cloneNode(true);
+              fallbackNodes = Array.from(clone.childNodes);
+              anchor.parentNode.insertBefore(clone, anchor);
+              fallbackNodes.forEach((n) => {
+                if (n.nodeType === 1) initTree(n);
+              });
+            }
+          } else {
+            fallbackNodes.forEach((n) => {
+              if (n.nodeType === 1) destroyTree(n);
+              n.remove();
+            });
+            fallbackNodes = [];
+          }
+        });
+
+        const scope = getScope(el);
+        if (scope) {
+          scope.addCleanup(() => {
+            stop();
+            if (anchor && anchor.parentNode) anchor.remove();
+            fallbackNodes.forEach((n) => n.remove());
+          });
+        }
+      }
+    },
+
+    // p-component: On-demand remote HTML component loader & morpher
+    'p-component': (el, { expression }) => {
+      const url = expression ? expression.replace(/^['"]|['"]$/g, '').trim() : '';
+      if (!url) return;
+      const loadingTemplate = el.querySelector('template[p-loading], template[loading]');
+      let loadingNodes = [];
+      if (loadingTemplate && loadingTemplate.parentNode) {
+        const clone = loadingTemplate.content.cloneNode(true);
+        loadingNodes = Array.from(clone.childNodes);
+        loadingTemplate.parentNode.insertBefore(clone, loadingTemplate);
+      }
+
+      loadRemoteComponent(url)
+        .then((htmlText) => {
+          loadingNodes.forEach((n) => n.remove());
+          loadingNodes = [];
+          if (typeof DOMParser !== 'undefined') {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlText, 'text/html');
+            const content = doc.body.firstElementChild || doc.body;
+            if (content) {
+              destroyTree(el);
+              morph(el, content);
+              destroyTree(el);
+              initTree(el);
+              emitDevTools('component:loaded', { url, el });
+            }
+          }
+        })
+        .catch((err) => {
+          loadingNodes.forEach((n) => n.remove());
+          console.error(`[PineJS] Failed to load component: ${url}`, err);
+        });
+    },
+
+    // p-shadow: Shadow DOM encapsulation for scoped CSS and components
+    'p-shadow': (el, { expression }) => {
+      const mode = expression && expression.includes('closed') ? 'closed' : 'open';
+      if (!el.shadowRoot && typeof el.attachShadow === 'function') {
+        const shadow = el.attachShadow({ mode });
+        while (el.childNodes.length > 0) {
+          shadow.appendChild(el.childNodes[0]);
+        }
+        initTree(shadow);
+      }
     }
   };
 
@@ -3205,7 +3887,14 @@
     'init': 'p-init',
     'transition': 'p-transition',
     'validate': 'p-validate',
-    'valid': 'p-validate'
+    'valid': 'p-validate',
+    'route': 'p-route',
+    'link': 'p-link',
+    'form': 'p-form',
+    'suspense': 'p-suspense',
+    'fallback': 'p-fallback',
+    'component': 'p-component',
+    'shadow': 'p-shadow'
   };
 
   function setPrefix(pfx) {
@@ -3361,7 +4050,17 @@
   }
 
   function initTree(root) {
-    if (!root || root.nodeType !== Node.ELEMENT_NODE) return;
+    if (!root) return;
+    if (root.nodeType === 11 || (typeof Node !== 'undefined' && root.nodeType === Node.DOCUMENT_FRAGMENT_NODE)) {
+      let child = root.firstElementChild;
+      while (child) {
+        const next = child.nextElementSibling;
+        initTree(child);
+        child = next;
+      }
+      return;
+    }
+    if (root.nodeType !== (typeof Node !== 'undefined' ? Node.ELEMENT_NODE : 1)) return;
     if (root._pineHandled) return;
     if (root.hasAttribute && (root.hasAttribute('p-ignore') || root.hasAttribute('pine-ignore') || root.hasAttribute('ignore'))) return;
 
@@ -3380,6 +4079,10 @@
           }
           if (parsed.directive === 'p-teleport') {
             directives['p-teleport'](root, { expression: attr.value, modifiers: parsed.modifiers });
+            return;
+          }
+          if (parsed.directive === 'p-route') {
+            directives['p-route'](root, { expression: attr.value, modifiers: parsed.modifiers });
             return;
           }
         }
@@ -3646,11 +4349,137 @@
   }
 
   // =========================================================================
+  // 13.5. ZERO-DOM SERVER-SIDE HTML STRING COMPILER (Pine.renderToString)
+  // =========================================================================
+  function renderToString(templateHtml, initialData = {}, options = {}) {
+    if (typeof templateHtml !== 'string') return '';
+    let htmlStr = templateHtml;
+
+    const context = { ...initialData, ...(options.data || {}) };
+
+    // 1. Process p-data="{ ... }"
+    const dataMatch = htmlStr.match(/p-data=(["'])(.*?)\1/);
+    if (dataMatch && dataMatch[2]) {
+      try {
+        const parsed = (new Function(`return (${dataMatch[2]})`))();
+        if (isObject(parsed)) Object.assign(context, parsed);
+      } catch {}
+    }
+
+    // 2. Process conditional branches: <template p-if="cond">...</template>
+    htmlStr = htmlStr.replace(/<template[^>]*\bp-if=(["'])(.*?)\1[^>]*>([\s\S]*?)<\/template>/gi, (_, q, expr, inner) => {
+      try {
+        const fn = new Function(...Object.keys(context), `return Boolean(${expr})`);
+        const isTrue = fn(...Object.values(context));
+        return isTrue ? inner : '';
+      } catch {
+        return '';
+      }
+    });
+
+    // 3. Process loops: <template p-for="(item, i) in list">...</template>
+    htmlStr = htmlStr.replace(/<template[^>]*\bp-for=(["'])(.*?)\1[^>]*>([\s\S]*?)<\/template>/gi, (_, q, expr, inner) => {
+      try {
+        const forMatch = expr.match(/^\s*(?:\(?\s*([a-zA-Z0-9_$]+)(?:\s*,\s*([a-zA-Z0-9_$]+))?\s*\)?)\s+(?:in|of)\s+(.+)$/);
+        if (forMatch) {
+          const itemVar = forMatch[1];
+          const idxVar = forMatch[2] || 'index';
+          const listExpr = forMatch[3];
+          const fn = new Function(...Object.keys(context), `return (${listExpr})`);
+          const list = fn(...Object.values(context));
+          if (Array.isArray(list)) {
+            return list.map((item, idx) => {
+              const itemContext = { ...context, [itemVar]: item, [idxVar]: idx };
+              let renderedItem = inner;
+              renderedItem = renderedItem.replace(/<([a-zA-Z0-9-]+)([^>]*)p-text=(["'])(.*?)\3([^>]*)>(.*?)<\/\1>/gi, (m, tag, pre, q2, textExpr, post) => {
+                try {
+                  const tFn = new Function(...Object.keys(itemContext), `return (${textExpr})`);
+                  return `<${tag}${pre}p-text=${q2}${textExpr}${q2}${post}>${tFn(...Object.values(itemContext))}</${tag}>`;
+                } catch { return m; }
+              });
+              return renderedItem;
+            }).join('');
+          }
+        }
+      } catch {}
+      return '';
+    });
+
+    // 4. Process p-text="expr"
+    htmlStr = htmlStr.replace(/<([a-zA-Z0-9-]+)([^>]*)p-text=(["'])(.*?)\3([^>]*)>(.*?)<\/\1>/gi, (match, tag, preAttrs, q, expr, postAttrs) => {
+      try {
+        const fn = new Function(...Object.keys(context), `return (${expr})`);
+        const val = fn(...Object.values(context));
+        const escaped = String(val ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return `<${tag}${preAttrs}p-text=${q}${expr}${q}${postAttrs}>${escaped}</${tag}>`;
+      } catch {
+        return match;
+      }
+    });
+
+    // 5. Process p-html="expr"
+    htmlStr = htmlStr.replace(/<([a-zA-Z0-9-]+)([^>]*)p-html=(["'])(.*?)\3([^>]*)>(.*?)<\/\1>/gi, (match, tag, preAttrs, q, expr, postAttrs) => {
+      try {
+        const fn = new Function(...Object.keys(context), `return (${expr})`);
+        const val = fn(...Object.values(context));
+        return `<${tag}${preAttrs}p-html=${q}${expr}${q}${postAttrs}>${val ?? ''}</${tag}>`;
+      } catch {
+        return match;
+      }
+    });
+
+    // 6. Process dynamic attributes :attr="expr" or p-bind:attr="expr"
+    htmlStr = htmlStr.replace(/<([a-zA-Z0-9-]+)([^>]*?)>/gi, (match, tag, attrs) => {
+      if (tag.toLowerCase() === 'template') return match;
+      let newAttrs = attrs;
+      newAttrs = newAttrs.replace(/(?::|p-bind:)([a-zA-Z0-9_-]+)=(["'])(.*?)\2/gi, (m, attrName, q, expr) => {
+        try {
+          const fn = new Function(...Object.keys(context), `return (${expr})`);
+          const val = fn(...Object.values(context));
+          if (attrName === 'class' && isObject(val)) {
+            const classes = Object.entries(val).filter(([_, active]) => Boolean(active)).map(([c]) => c).join(' ');
+            return `class="${classes}" ${m}`;
+          }
+          if (val === true) return `${attrName} ${m}`;
+          if (val === false || val === null || val === undefined) return m;
+          return `${attrName}="${String(val).replace(/"/g, '&quot;')}" ${m}`;
+        } catch {
+          return m;
+        }
+      });
+      return `<${tag}${newAttrs}>`;
+    });
+
+    // 7. Inject p-hydrate attribute into the root element
+    if (!htmlStr.includes('p-hydrate')) {
+      htmlStr = htmlStr.replace(/<([a-zA-Z0-9-]+)(\s|>)/, '<$1 p-hydrate$2');
+    }
+
+    return htmlStr;
+  }
+
+  // =========================================================================
   // 14. PUBLIC PINE API
   // =========================================================================
   const Pine = {
-    version: '1.6.0',
-    versionName: 'Bristlecone',
+    version: '1.7.0',
+    versionName: 'Douglas',
+
+    // Router Engine
+    router,
+
+    // Form Engine
+    form: createForm,
+
+    // IDB Engine
+    idb: createIdbResource,
+
+    // Dynamic Remote Component Loader
+    loadComponent: loadRemoteComponent,
+    componentCache,
+
+    // Server-Side Rendering
+    renderToString,
 
     // Prefix Configuration
     prefix(newPrefix) {

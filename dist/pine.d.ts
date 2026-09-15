@@ -1,5 +1,5 @@
 /**
- * PineJS v1.6.0 "Bristlecone"
+ * PineJS v1.7.0 "Douglas"
  * TypeScript Declaration File
  * (c) 2026 PineJS Core Team - MIT License
  */
@@ -78,6 +78,45 @@ export interface FetchClient {
   json<T = any>(url: string | (() => string), options?: FetchOptions): Promise<T>;
 }
 
+export interface RouterMatch {
+  matches: boolean;
+  params: Record<string, string>;
+}
+
+export interface RouterAPI {
+  readonly path: string;
+  readonly query: string;
+  readonly params: Record<string, string>;
+  readonly hash: string;
+  navigate(toPath: string, options?: { replace?: boolean; transition?: boolean }): boolean;
+  beforeEach(guardFn: (to: string, from: string) => boolean | void): () => void;
+  match(pattern: string, path?: string): RouterMatch;
+}
+
+export interface FormInstance<T = Record<string, any>> {
+  values: T;
+  readonly initial: T;
+  errors: Record<string, string | null>;
+  touched: Record<string, boolean>;
+  readonly dirty: boolean;
+  readonly pristine: boolean;
+  readonly valid: boolean;
+  readonly invalid: boolean;
+  readonly submitting: boolean;
+  readonly submitted: boolean;
+  readonly submitCount: number;
+  isDirty(field: keyof T | string): boolean;
+  isTouched(field: keyof T | string): boolean;
+  touch(field: keyof T | string): void;
+  setError(field: keyof T | string, message: string): void;
+  setErrors(errors: Partial<Record<keyof T | string, string>>): void;
+  clearErrors(): void;
+  reset(): void;
+  formData(): FormData;
+  json(): T;
+  submit(endpointOrHandler: string | ((values: T, form: FormInstance<T>) => any), options?: { method?: string; headers?: Record<string, string> }): Promise<any>;
+}
+
 export interface MagicScope {
   $el: HTMLElement;
   $root: HTMLElement;
@@ -99,6 +138,19 @@ export interface MagicScope {
   $ws: <T = any>(url: string | (() => string), options?: { autoReconnect?: boolean; maxRetries?: number; protocols?: string | string[]; maxHistory?: number }) => WebSocketResource<T>;
   $intersect: (callback: (isIntersecting: boolean, entry: IntersectionObserverEntry) => void, options?: IntersectionObserverInit) => void;
   $focus: { focus: (target?: string | HTMLElement) => void; trap: (container?: string | HTMLElement) => void };
+  $route: {
+    readonly path: string;
+    readonly query: string;
+    readonly params: Record<string, string>;
+    readonly hash: string;
+    push(path: string, options?: any): boolean;
+    replace(path: string, options?: any): boolean;
+    go(delta: number): void;
+    active(pattern: string): boolean;
+  };
+  $form: <T = Record<string, any>>(initialValues?: T, options?: any) => FormInstance<T>;
+  $idb: <T = any>(initialValue: T, key: string, dbName?: string, storeName?: string) => { value: T };
+  $suspense: (promise: Promise<any>) => void;
   $errors?: Record<string, string | null>;
   $error?: any;
   $valid?: boolean;
@@ -161,8 +213,22 @@ export interface WorkerSignal<T = any> {
 }
 
 export interface PineAPI {
-  version: '1.6.0';
-  versionName: 'Bristlecone';
+  version: '1.7.0';
+  versionName: 'Douglas';
+
+  // Router Engine
+  router: RouterAPI;
+
+  // Form Engine
+  form: <T = Record<string, any>>(initialValues?: T, options?: any) => FormInstance<T>;
+
+  // IDB Offline Engine
+  idb: <T = any>(initialValue: T, key: string, dbName?: string, storeName?: string) => { value: T };
+
+  // Component & SSR Engines
+  loadComponent: (url: string, options?: { forceReload?: boolean }) => Promise<string>;
+  componentCache: Map<string, string>;
+  renderToString: (templateHtml: string, initialData?: Record<string, any>, options?: { data?: Record<string, any> }) => string;
 
   // Prefix Configuration
   prefix: (newPrefix?: string | string[]) => string[];
@@ -188,7 +254,7 @@ export interface PineAPI {
   devtools: DevToolsAPI;
 
   // Component Registration
-  data: (name: string, factory: () => Record<string, any>) => void;
+  data: (name: string, factory: (...args: any[]) => Record<string, any>) => void;
   bind: (name: string, callback: () => Record<string, any>) => void;
   store: (name: string, data?: any) => any;
   directive: (name: string, callback: DirectiveHandler) => void;
@@ -200,6 +266,7 @@ export interface PineAPI {
   destroyTree: (element: HTMLElement) => void;
   startObserver: () => void;
   stopObserver: () => void;
+
   // Security & Error Boundaries
   csp: (enable?: boolean) => boolean;
   onError: (callback: (err: any, el?: HTMLElement, expression?: string) => void) => () => void;

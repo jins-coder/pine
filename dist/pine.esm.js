@@ -1,5 +1,5 @@
 /**
- * PineJS v1.6.0 "Bristlecone" (ES Module)
+ * PineJS v1.7.0 "Douglas" (ES Module)
  * Next-Generation Fine-Grained Reactive Declarative Micro-Framework
  * (c) 2026 PineJS Core Team - MIT License
  */
@@ -23,6 +23,12 @@ export const {
   tpl,
   worker,
   devtools,
+  router,
+  form,
+  idb,
+  loadComponent,
+  componentCache,
+  renderToString,
   data,
   bind,
   store,

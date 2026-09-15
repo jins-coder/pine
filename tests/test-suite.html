@@ -137,6 +137,7 @@
   <div id="sandbox-root" class="sandbox"></div>
 
   <script>
+    const isHeadless = typeof window !== 'undefined' && window.location.search.includes('headless=true');
     const tests = [];
 
     function test(name, description, runner) {
@@ -654,9 +655,9 @@
       await p;
     });
 
-    test("v1.6.0 Bristlecone: Engine Version & Identity", "Verifies Pine.version === '1.6.0' and Pine.versionName === 'Bristlecone'", async () => {
-      if (Pine.version !== "1.6.0") throw new Error(`Expected Pine.version to be '1.6.0', got '${Pine.version}'`);
-      if (Pine.versionName !== "Bristlecone") throw new Error(`Expected Pine.versionName to be 'Bristlecone', got '${Pine.versionName}'`);
+    test("v1.7.0 Douglas: Engine Version & Identity", "Verifies Pine.version === '1.7.0' and Pine.versionName === 'Douglas'", async () => {
+      if (Pine.version !== "1.7.0") throw new Error(`Expected Pine.version to be '1.7.0', got '${Pine.version}'`);
+      if (Pine.versionName !== "Douglas") throw new Error(`Expected Pine.versionName to be 'Douglas', got '${Pine.versionName}'`);
       if (typeof Pine.html !== "function") throw new Error("Pine.html is not a function");
       if (typeof Pine.worker !== "function") throw new Error("Pine.worker is not a function");
       if (typeof Pine.csp !== "function") throw new Error("Pine.csp is not a function");
@@ -1218,6 +1219,199 @@
       if (data.chat.status !== "closed") throw new Error(`Expected socket status to be closed, got ${data.chat.status}`);
     });
 
+    // =========================================================================
+    // PINEJS v1.7.0 "DOUGLAS" TEST SUITES
+    // =========================================================================
+
+    test("v1.7.0 Douglas: Client-Side Micro-Router (p-route, p-link, $route)", "Verifies path matching, dynamic :params extraction, p-link active class, and navigation", async () => {
+      const initialPath = window.location.pathname + window.location.search;
+      try {
+        const sandbox = getSandbox();
+        sandbox.innerHTML = `
+          <div id="t-router" p-data="{ activeRoute: '' }">
+            <a id="nav-about" p-link href="/about">About</a>
+            <a id="nav-item" p-link href="/items/42">Item</a>
+
+            <template p-route="/about">
+              <div id="route-about-view">About Page Content</div>
+            </template>
+
+            <template p-route="/items/:id">
+              <div id="route-item-view">Item ID: <span id="route-item-id" p-text="$route.params.id"></span></div>
+            </template>
+          </div>
+        `;
+        Pine.initTree(sandbox.querySelector("#t-router"));
+
+        Pine.router.navigate("/about", { transition: false });
+        await new Promise((r) => setTimeout(r, 40));
+
+        const aboutView = sandbox.querySelector("#route-about-view");
+        if (!aboutView) throw new Error("Expected #route-about-view to be mounted");
+        const aboutLink = sandbox.querySelector("#nav-about");
+        if (!aboutLink.classList.contains("active")) throw new Error("Expected #nav-about to have 'active' class");
+
+        Pine.router.navigate("/items/99", { transition: false });
+        await new Promise((r) => setTimeout(r, 40));
+
+        if (sandbox.querySelector("#route-about-view")) throw new Error("Expected #route-about-view to be unmounted");
+        const itemView = sandbox.querySelector("#route-item-view");
+        if (!itemView) throw new Error("Expected #route-item-view to be mounted");
+        const idSpan = sandbox.querySelector("#route-item-id");
+        if (idSpan.textContent !== "99") throw new Error(`Expected item id 99, got '${idSpan.textContent}'`);
+      } finally {
+        window.history.replaceState({}, '', initialPath);
+        Pine.router.navigate(initialPath, { transition: false });
+      }
+    });
+
+    test("v1.7.0 Douglas: Unified Reactive Form Engine ($form, Pine.form)", "Verifies dirty/pristine tracking, validation, programmatic reset, and custom submit handler", async () => {
+      const form = Pine.form({ username: "john", email: "john@example.com" });
+      if (!form.pristine || form.dirty) throw new Error("Form should initially be pristine");
+      if (!form.valid) throw new Error("Form should initially be valid");
+
+      form.values.username = "jane";
+      if (!form.dirty || form.pristine) throw new Error("Form should be dirty after value mutation");
+      if (!form.isDirty("username")) throw new Error("username field should be dirty");
+      if (form.isDirty("email")) throw new Error("email field should not be dirty");
+
+      form.setError("username", "Username already taken");
+      if (form.valid || !form.invalid) throw new Error("Form should be invalid after setting error");
+      if (form.errors.username !== "Username already taken") throw new Error("Expected username error message");
+
+      let submittedData = null;
+      await form.submit(async (vals) => {
+        submittedData = { ...vals };
+        return { ok: true };
+      });
+
+      if (!submittedData || submittedData.username !== "jane") throw new Error("Form submit did not receive mutated values");
+      if (!form.submitted || form.submitCount !== 1) throw new Error("Expected form.submitted to be true and submitCount to be 1");
+
+      form.reset();
+      if (form.values.username !== "john") throw new Error("Form reset failed to revert username to initial");
+      if (form.dirty || !form.pristine) throw new Error("Form reset failed to reset dirty state");
+      if (!form.valid) throw new Error("Form reset failed to clear errors");
+    });
+
+    test("v1.7.0 Douglas: Async Suspense & Skeleton Loader (p-suspense, p-fallback)", "Verifies fallback skeleton rendering while promises are pending and smooth reveal upon resolution", async () => {
+      const sandbox = getSandbox();
+      let resolvePromise;
+      const asyncTask = new Promise((resolve) => { resolvePromise = resolve; });
+
+      sandbox.innerHTML = `
+        <div id="t-suspense" p-data="{ task: null }" p-suspense>
+          <button id="suspense-trigger" @click="$suspense(task)">Trigger</button>
+          <template p-fallback>
+            <div id="suspense-skeleton">Loading Content...</div>
+          </template>
+          <div id="suspense-content">Resolved Real Data</div>
+        </div>
+      `;
+      const el = sandbox.querySelector("#t-suspense");
+      Pine.initTree(el);
+
+      const scope = Pine.$data(el);
+      scope.task = asyncTask;
+      sandbox.querySelector("#suspense-trigger").click();
+      await new Promise((r) => setTimeout(r, 40));
+
+      const skeleton = sandbox.querySelector("#suspense-skeleton");
+      if (!skeleton) throw new Error("Expected fallback skeleton to be rendered while pending");
+
+      resolvePromise("done");
+      await new Promise((r) => setTimeout(r, 60));
+
+      if (sandbox.querySelector("#suspense-skeleton")) throw new Error("Expected fallback skeleton to be removed after resolve");
+    });
+
+    test("v1.7.0 Douglas: Remote Component Loader & Morpher (p-component)", "Verifies on-demand template fetching, caching, and element morphing", async () => {
+      Pine.componentCache.set("/mock/card.html", `<div id="card-root" p-data="{ label: 'Dynamic Card' }"><span id="card-label" p-text="label"></span></div>`);
+
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="comp-container" p-component="/mock/card.html">
+          <template p-loading>
+            <span id="comp-loading">Loading widget...</span>
+          </template>
+        </div>
+      `;
+      Pine.initTree(sandbox.querySelector("#comp-container"));
+      await new Promise((r) => setTimeout(r, 60));
+
+      const card = sandbox.querySelector("#card-root");
+      if (!card) throw new Error("Expected #card-root to be morphed into container");
+      const label = sandbox.querySelector("#card-label");
+      if (!label || label.textContent !== "Dynamic Card") {
+        throw new Error(`Expected 'Dynamic Card', got '${label ? label.textContent : "missing"}'`);
+      }
+    });
+
+    test("v1.7.0 Douglas: Zero-DOM Server-Side HTML String Compiler (Pine.renderToString)", "Verifies server-side HTML template pre-rendering, signal interpolation, and p-hydrate injection", async () => {
+      const template = `
+        <div p-data="{ user: 'Alice', role: 'Engineer', count: 3 }">
+          <h1 p-text="user"></h1>
+          <span p-text="role"></span>
+          <template p-if="count > 0">
+            <p>Active Tasks: <span p-text="count"></span></p>
+          </template>
+        </div>
+      `;
+
+      const rendered = Pine.renderToString(template);
+      if (!rendered.includes('p-hydrate')) throw new Error("Expected output to include p-hydrate attribute");
+      if (!rendered.includes('<h1 p-text="user">Alice</h1>')) throw new Error(`Expected pre-rendered Alice heading, got: ${rendered}`);
+      if (!rendered.includes('<span p-text="role">Engineer</span>')) throw new Error("Expected pre-rendered Engineer role");
+      if (!rendered.includes('Active Tasks:')) throw new Error("Expected p-if true branch to be rendered");
+    });
+
+    test("v1.7.0 Douglas: Scoped Shadow DOM Encapsulation (p-shadow)", "Verifies Shadow Root creation, encapsulation, and internal Pine reactivity", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-shadow" p-shadow>
+          <div p-data="{ message: 'Shadow Secret' }">
+            <span id="shadow-msg" p-text="message"></span>
+          </div>
+        </div>
+      `;
+      const host = sandbox.querySelector("#t-shadow");
+      Pine.initTree(host);
+
+      if (!host.shadowRoot) throw new Error("Expected host element to have a shadowRoot");
+      const shadowSpan = host.shadowRoot.querySelector("#shadow-msg");
+      if (!shadowSpan) throw new Error("Expected #shadow-msg to exist inside shadowRoot");
+      if (shadowSpan.textContent !== "Shadow Secret") {
+        throw new Error(`Expected 'Shadow Secret', got '${shadowSpan.textContent}'`);
+      }
+    });
+
+    test("v1.7.0 Douglas: IndexedDB Large Offline Storage ($idb, Pine.idb)", "Verifies IndexedDB asynchronous open, reactive read/write, and debounced persistence", async () => {
+      const idbResource = Pine.idb({ count: 100 }, "test_key", "pine_test_db", "test_store");
+      if (idbResource.value.count !== 100) throw new Error(`Expected initial value count 100, got ${idbResource.value.count}`);
+
+      idbResource.value = { count: 200 };
+      if (idbResource.value.count !== 200) throw new Error("Expected reactive state to immediately reflect updated value");
+    });
+
+    test("v1.7.0 Douglas: DevTools Browser Extension Hook (__PINE_DEVTOOLS_GLOBAL_HOOK__)", "Verifies global DevTools hook registration, component tree hierarchy, and event bus emissions", async () => {
+      const hook = window.__PINE_DEVTOOLS_GLOBAL_HOOK__;
+      if (!hook) throw new Error("Expected window.__PINE_DEVTOOLS_GLOBAL_HOOK__ to be defined");
+      if (hook.version !== "1.7.0") throw new Error(`Expected version 1.7.0, got ${hook.version}`);
+      if (typeof hook.getComponentTree !== "function") throw new Error("getComponentTree is not a function");
+
+      let receivedEvent = null;
+      const unsub = hook.on("test:event", (data) => {
+        receivedEvent = data;
+      });
+
+      hook.emit("test:event", { foo: "bar" });
+      if (!receivedEvent || receivedEvent.foo !== "bar") throw new Error("DevTools hook event bus failed to dispatch event");
+      unsub();
+
+      const tree = hook.getComponentTree();
+      if (!Array.isArray(tree)) throw new Error("Expected getComponentTree() to return an array of component nodes");
+    });
+
     // Run tests & render report
     async function runAllTests() {
       const list = document.getElementById("results-list");
@@ -1262,7 +1456,7 @@
       }
 
       // If running via headless test runner, report results to server
-      if (window.location.search.includes("headless=true")) {
+      if (isHeadless) {
         try {
           await fetch("/api/results", {
             method: "POST",

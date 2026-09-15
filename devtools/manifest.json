@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "PineJS DevTools",
+  "version": "1.7.0",
+  "description": "Visual component inspector, signal dependency graph, and state debugger for PineJS applications.",
+  "devtools_page": "devtools.html",
+  "icons": {
+    "128": "../docs/logo.svg"
+  }
+}
