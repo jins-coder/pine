@@ -1294,6 +1294,184 @@
   }
 
   // =========================================================================
+  // 5.5. REALTIME STREAMING ENGINES ($sse & $websocket)
+  // =========================================================================
+  function createSSEResource(urlInput, options = {}, el = null) {
+    const url = typeof urlInput === 'function' ? urlInput() : urlInput;
+    let eventSource = null;
+
+    const state = reactive({
+      status: 'connecting',
+      data: null,
+      text: '',
+      event: 'message',
+      lastEventId: '',
+      history: [],
+      close() {
+        if (eventSource) {
+          eventSource.close();
+          eventSource = null;
+        }
+        state.status = 'closed';
+      }
+    });
+
+    if (typeof EventSource !== 'undefined' && url) {
+      try {
+        eventSource = new EventSource(url, options);
+
+        eventSource.onopen = () => {
+          state.status = 'open';
+        };
+
+        eventSource.onerror = () => {
+          if (eventSource && eventSource.readyState === EventSource.CLOSED) {
+            state.status = 'closed';
+          } else {
+            state.status = 'error';
+          }
+        };
+
+        const handleMsg = (e) => {
+          state.text = e.data || '';
+          state.event = e.type || 'message';
+          state.lastEventId = e.lastEventId || '';
+          let parsed = e.data;
+          try {
+            parsed = JSON.parse(e.data);
+          } catch {}
+          state.data = parsed;
+          state.history.push(parsed);
+          const maxHistory = options.maxHistory || 50;
+          if (state.history.length > maxHistory) {
+            state.history.shift();
+          }
+        };
+
+        eventSource.onmessage = handleMsg;
+
+        if (Array.isArray(options.events)) {
+          options.events.forEach((evtName) => {
+            eventSource.addEventListener(evtName, handleMsg);
+          });
+        }
+      } catch (err) {
+        state.status = 'error';
+      }
+    }
+
+    if (el) {
+      const scope = getScope(el);
+      if (scope) {
+        scope.addCleanup(() => state.close());
+      }
+    }
+
+    return state;
+  }
+
+  function createWebSocketResource(urlInput, options = {}, el = null) {
+    const url = typeof urlInput === 'function' ? urlInput() : urlInput;
+    let ws = null;
+    let reconnectAttempts = 0;
+    let reconnectTimer = null;
+    let manuallyClosed = false;
+
+    const autoReconnect = options.autoReconnect !== undefined ? Boolean(options.autoReconnect) : true;
+    const maxRetries = options.maxRetries !== undefined ? Number(options.maxRetries) : 10;
+    const protocols = options.protocols || undefined;
+
+    const state = reactive({
+      status: 'connecting',
+      data: null,
+      text: '',
+      history: [],
+      send(payload) {
+        if (!ws || ws.readyState !== (typeof WebSocket !== 'undefined' ? WebSocket.OPEN : 1)) {
+          console.warn('[PineJS] Cannot send: WebSocket is not open.');
+          return false;
+        }
+        const toSend = typeof payload === 'object' && !(typeof Blob !== 'undefined' && payload instanceof Blob) && !(typeof ArrayBuffer !== 'undefined' && payload instanceof ArrayBuffer)
+          ? JSON.stringify(payload)
+          : payload;
+        ws.send(toSend);
+        return true;
+      },
+      close() {
+        manuallyClosed = true;
+        if (reconnectTimer) clearTimeout(reconnectTimer);
+        if (ws) {
+          ws.close();
+          ws = null;
+        }
+        state.status = 'closed';
+      }
+    });
+
+    function connect() {
+      if (typeof WebSocket === 'undefined' || !url || manuallyClosed) return;
+
+      try {
+        state.status = 'connecting';
+        ws = protocols ? new WebSocket(url, protocols) : new WebSocket(url);
+
+        ws.onopen = () => {
+          reconnectAttempts = 0;
+          state.status = 'open';
+        };
+
+        ws.onmessage = (e) => {
+          state.text = typeof e.data === 'string' ? e.data : '';
+          let parsed = e.data;
+          if (typeof e.data === 'string') {
+            try {
+              parsed = JSON.parse(e.data);
+            } catch {}
+          }
+          state.data = parsed;
+          state.history.push(parsed);
+          const maxHistory = options.maxHistory || 50;
+          if (state.history.length > maxHistory) {
+            state.history.shift();
+          }
+        };
+
+        ws.onerror = () => {
+          state.status = 'error';
+        };
+
+        ws.onclose = () => {
+          if (!manuallyClosed) {
+            state.status = 'closed';
+            if (autoReconnect && reconnectAttempts < maxRetries) {
+              reconnectAttempts++;
+              const delay = Math.min(1000 * Math.pow(1.5, reconnectAttempts), 10000);
+              reconnectTimer = setTimeout(() => {
+                if (!manuallyClosed) connect();
+              }, delay);
+            }
+          } else {
+            state.status = 'closed';
+          }
+        };
+      } catch (err) {
+        state.status = 'error';
+      }
+    }
+
+    connect();
+
+    if (el) {
+      const scope = getScope(el);
+      if (scope) {
+        scope.addCleanup(() => state.close());
+      }
+    }
+
+    return state;
+  }
+
+  // =========================================================================
   // 6. MAGIC PROPERTIES ENGINE
   // =========================================================================
   const builtInMagics = {
@@ -1629,6 +1807,15 @@
         }
         return Promise.resolve(runCallback());
       };
+    },
+    $sse(el) {
+      return (url, options = {}) => createSSEResource(url, options, el);
+    },
+    $websocket(el) {
+      return (url, options = {}) => createWebSocketResource(url, options, el);
+    },
+    $ws(el) {
+      return (url, options = {}) => createWebSocketResource(url, options, el);
     }
   };
 
@@ -1666,16 +1853,34 @@
   // 6. DIRECTIVE HANDLERS
   // =========================================================================
   const directives = {
-    // p-data: Root component initialization
+    // p-data: Root component initialization (supports inline objects, Pine.data, script variables & functions)
     'p-data': (el, { expression }) => {
       let initialData = {};
       if (expression && expression.trim()) {
-        if (registeredData.has(expression.trim())) {
-          const factory = registeredData.get(expression.trim());
-          initialData = typeof factory === 'function' ? factory() : factory;
+        const trimmed = expression.trim();
+        if (registeredData.has(trimmed)) {
+          const factory = registeredData.get(trimmed);
+          initialData = typeof factory === 'function' ? factory.call(el, el) : factory;
         } else {
-          const evaluated = evaluate(el, expression);
-          initialData = isObject(evaluated) ? evaluated : {};
+          // Provide registeredData in evaluation context for parameterized calls like dropdown(true)
+          const dataContext = {};
+          for (const [name, factory] of registeredData.entries()) {
+            dataContext[name] = factory;
+          }
+          let evaluated = evaluate(el, expression, dataContext);
+
+          // If evaluated is undefined and matches a global variable on window/globalThis
+          if (evaluated === undefined && typeof globalThis !== 'undefined' && trimmed in globalThis) {
+            evaluated = globalThis[trimmed];
+          }
+
+          if (typeof evaluated === 'function') {
+            initialData = evaluated.call(el, el);
+          } else if (isObject(evaluated)) {
+            initialData = evaluated;
+          } else {
+            initialData = {};
+          }
         }
       }
 
@@ -3464,6 +3669,9 @@
     reactive,
     raw,
     fetch: createFetchResource,
+    sse: createSSEResource,
+    websocket: createWebSocketResource,
+    ws: createWebSocketResource,
     timeline,
     html,
     tpl: html,

@@ -49,6 +49,25 @@ export interface FetchResource<T = any> extends PromiseLike<T> {
   refetch(overrideOptions?: Partial<FetchOptions>): Promise<T>;
 }
 
+export interface SSEResource<T = any> {
+  status: 'connecting' | 'open' | 'closed' | 'error';
+  data: T | null;
+  text: string;
+  event: string;
+  lastEventId: string;
+  history: T[];
+  close(): void;
+}
+
+export interface WebSocketResource<T = any> {
+  status: 'connecting' | 'open' | 'closed' | 'error';
+  data: T | null;
+  text: string;
+  history: T[];
+  send(payload: any): boolean;
+  close(): void;
+}
+
 export interface FetchClient {
   <T = any>(url: string | (() => string), options?: FetchOptions | (() => FetchOptions)): FetchResource<T>;
   get<T = any>(url: string | (() => string), options?: FetchOptions): FetchResource<T>;
@@ -75,6 +94,9 @@ export interface MagicScope {
   $broadcast: <T>(initialValue: T, channelName?: string) => { value: T };
   $viewTransition: (callback: () => void | Promise<void>) => Promise<void>;
   $fetch: FetchClient;
+  $sse: <T = any>(url: string | (() => string), options?: { events?: string[]; maxHistory?: number }) => SSEResource<T>;
+  $websocket: <T = any>(url: string | (() => string), options?: { autoReconnect?: boolean; maxRetries?: number; protocols?: string | string[]; maxHistory?: number }) => WebSocketResource<T>;
+  $ws: <T = any>(url: string | (() => string), options?: { autoReconnect?: boolean; maxRetries?: number; protocols?: string | string[]; maxHistory?: number }) => WebSocketResource<T>;
   $intersect: (callback: (isIntersecting: boolean, entry: IntersectionObserverEntry) => void, options?: IntersectionObserverInit) => void;
   $focus: { focus: (target?: string | HTMLElement) => void; trap: (container?: string | HTMLElement) => void };
   $errors?: Record<string, string | null>;
@@ -154,6 +176,9 @@ export interface PineAPI {
   reactive: typeof reactive;
   raw: typeof raw;
   fetch: FetchClient;
+  sse: <T = any>(url: string | (() => string), options?: { events?: string[]; maxHistory?: number }) => SSEResource<T>;
+  websocket: <T = any>(url: string | (() => string), options?: { autoReconnect?: boolean; maxRetries?: number; protocols?: string | string[]; maxHistory?: number }) => WebSocketResource<T>;
+  ws: <T = any>(url: string | (() => string), options?: { autoReconnect?: boolean; maxRetries?: number; protocols?: string | string[]; maxHistory?: number }) => WebSocketResource<T>;
   timeline: (steps: TimelineStep[], globalOptions?: KeyframeAnimationOptions) => TimelineInstance;
   html: (strings: TemplateStringsArray, ...values: any[]) => HTMLElement | DocumentFragment;
   tpl: (strings: TemplateStringsArray, ...values: any[]) => HTMLElement | DocumentFragment;

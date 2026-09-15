@@ -1101,6 +1101,123 @@
       }
     });
 
+    test("Global Script Variable in p-data", "Verifies <div p-data='alphadata'> binds global object defined in script", async () => {
+      const sandbox = getSandbox();
+      window.alphadata = { site: "Shopify Store", count: 42, up() { this.count++; } };
+
+      sandbox.innerHTML = `
+        <div id="t-script-data" p-data="alphadata">
+          <span id="script-site" p-text="site"></span>
+          <span id="script-count" p-text="count"></span>
+          <button id="script-btn" @click="up()">Up</button>
+        </div>
+      `;
+      Pine.initTree(sandbox);
+
+      const siteSpan = sandbox.querySelector("#script-site");
+      const countSpan = sandbox.querySelector("#script-count");
+      if (siteSpan.textContent !== "Shopify Store") throw new Error(`Expected 'Shopify Store', got '${siteSpan.textContent}'`);
+      if (countSpan.textContent !== "42") throw new Error(`Expected '42', got '${countSpan.textContent}'`);
+
+      sandbox.querySelector("#script-btn").click();
+      await new Promise((r) => setTimeout(r, 40));
+      if (countSpan.textContent !== "43") throw new Error(`Expected '43' after click, got '${countSpan.textContent}'`);
+      delete window.alphadata;
+    });
+
+    test("Global Script Function in p-data (Auto-Invoked)", "Verifies <div p-data='alphadataFunc'> auto-invokes function as factory", async () => {
+      const sandbox = getSandbox();
+      window.alphadataFunc = function () {
+        return { message: "Auto Invoked", clicks: 0, clickMe() { this.clicks++; } };
+      };
+
+      sandbox.innerHTML = `
+        <div id="t-func-data" p-data="alphadataFunc">
+          <span id="func-msg" p-text="message"></span>
+          <span id="func-clicks" p-text="clicks"></span>
+          <button id="func-btn" @click="clickMe()">Click</button>
+        </div>
+      `;
+      Pine.initTree(sandbox);
+
+      const msgSpan = sandbox.querySelector("#func-msg");
+      const clicksSpan = sandbox.querySelector("#func-clicks");
+      if (msgSpan.textContent !== "Auto Invoked") throw new Error(`Expected 'Auto Invoked', got '${msgSpan.textContent}'`);
+      if (clicksSpan.textContent !== "0") throw new Error(`Expected '0', got '${clicksSpan.textContent}'`);
+
+      sandbox.querySelector("#func-btn").click();
+      await new Promise((r) => setTimeout(r, 40));
+      if (clicksSpan.textContent !== "1") throw new Error(`Expected '1', got '${clicksSpan.textContent}'`);
+      delete window.alphadataFunc;
+    });
+
+    test("Parameterized Pine.data Component", "Verifies parameterized Pine.data call: p-data='paramDropdown(true, 5)'", async () => {
+      const sandbox = getSandbox();
+      Pine.data("paramDropdown", (initialOpen = false, initialStep = 1) => ({
+        open: initialOpen,
+        step: initialStep,
+        toggle() { this.open = !this.open; }
+      }));
+
+      sandbox.innerHTML = `
+        <div id="t-param-data" p-data="paramDropdown(true, 5)">
+          <span id="param-open" p-text="open ? 'YES' : 'NO'"></span>
+          <span id="param-step" p-text="step"></span>
+          <button id="param-btn" @click="toggle()">Toggle</button>
+        </div>
+      `;
+      Pine.initTree(sandbox);
+
+      const openSpan = sandbox.querySelector("#param-open");
+      const stepSpan = sandbox.querySelector("#param-step");
+      if (openSpan.textContent !== "YES") throw new Error(`Expected 'YES', got '${openSpan.textContent}'`);
+      if (stepSpan.textContent !== "5") throw new Error(`Expected '5', got '${stepSpan.textContent}'`);
+
+      sandbox.querySelector("#param-btn").click();
+      await new Promise((r) => setTimeout(r, 40));
+      if (openSpan.textContent !== "NO") throw new Error(`Expected 'NO', got '${openSpan.textContent}'`);
+    });
+
+    test("Realtime Streaming: $sse Magic Resource", "Verifies $sse reactive state, auto-parse, and lifecycle cleanup", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-sse" p-data="{ stream: $sse('https://mock-sse.internal') }">
+          <span id="sse-status" p-text="stream.status"></span>
+        </div>
+      `;
+      Pine.initTree(sandbox);
+
+      const data = Pine.$data(sandbox.querySelector("#t-sse"));
+      if (!data || !data.stream) throw new Error("Failed to initialize $sse resource");
+      if (data.stream.status !== "connecting" && data.stream.status !== "error") {
+        throw new Error(`Unexpected $sse initial status: ${data.stream.status}`);
+      }
+      if (typeof data.stream.close !== "function") throw new Error("$sse.close is not a function");
+      data.stream.close();
+      if (data.stream.status !== "closed") throw new Error(`Expected status to be closed, got ${data.stream.status}`);
+    });
+
+    test("Realtime Streaming: $websocket Magic Resource", "Verifies $websocket duplex send, reactive state, and lifecycle teardown", async () => {
+      const sandbox = getSandbox();
+      sandbox.innerHTML = `
+        <div id="t-ws" p-data="{ chat: $websocket('wss://mock-ws.internal', { autoReconnect: false }) }">
+          <span id="ws-status" p-text="chat.status"></span>
+        </div>
+      `;
+      Pine.initTree(sandbox);
+
+      const data = Pine.$data(sandbox.querySelector("#t-ws"));
+      if (!data || !data.chat) throw new Error("Failed to initialize $websocket resource");
+      if (data.chat.status !== "connecting" && data.chat.status !== "error" && data.chat.status !== "closed") {
+        throw new Error(`Unexpected $websocket initial status: ${data.chat.status}`);
+      }
+      if (typeof data.chat.send !== "function") throw new Error("$websocket.send is not a function");
+      if (typeof data.chat.close !== "function") throw new Error("$websocket.close is not a function");
+
+      data.chat.close();
+      if (data.chat.status !== "closed") throw new Error(`Expected socket status to be closed, got ${data.chat.status}`);
+    });
+
     // Run tests & render report
     async function runAllTests() {
       const list = document.getElementById("results-list");
