@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +17,7 @@
       --pass: #10b981;
       --fail: #ef4444;
     }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
@@ -23,10 +25,12 @@
       margin: 0;
       padding: 2rem;
     }
+
     .container {
       max-width: 900px;
       margin: 0 auto;
     }
+
     .header {
       display: flex;
       justify-content: space-between;
@@ -35,6 +39,7 @@
       padding-bottom: 1.5rem;
       margin-bottom: 2rem;
     }
+
     h1 {
       margin: 0;
       font-size: 1.8rem;
@@ -42,14 +47,26 @@
       align-items: center;
       gap: 0.75rem;
     }
+
     .badge {
       font-size: 0.85rem;
       padding: 0.25rem 0.6rem;
       border-radius: 9999px;
       font-weight: 600;
     }
-    .badge-pass { background: rgba(16, 185, 129, 0.2); color: var(--pass); border: 1px solid var(--pass); }
-    .badge-fail { background: rgba(239, 68, 68, 0.2); color: var(--fail); border: 1px solid var(--fail); }
+
+    .badge-pass {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--pass);
+      border: 1px solid var(--pass);
+    }
+
+    .badge-fail {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--fail);
+      border: 1px solid var(--fail);
+    }
+
     .test-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -60,11 +77,33 @@
       justify-content: space-between;
       align-items: center;
     }
-    .test-title { font-weight: 500; font-size: 1rem; }
-    .test-desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
-    .status { font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    .status.pass { color: var(--pass); }
-    .status.fail { color: var(--fail); }
+
+    .test-title {
+      font-weight: 500;
+      font-size: 1rem;
+    }
+
+    .test-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .status {
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status.pass {
+      color: var(--pass);
+    }
+
+    .status.fail {
+      color: var(--fail);
+    }
+
     .sandbox {
       position: fixed;
       left: -9999px;
@@ -78,14 +117,18 @@
   <!-- Load PineJS -->
   <script src="../dist/pine.js"></script>
 </head>
+
 <body>
   <div class="container">
     <div class="header">
       <div>
         <h1>🌲 PineJS Test Suite <span id="summary-badge" class="badge">Running...</span></h1>
-        <p style="color: var(--text-muted); margin: 0.5rem 0 0 0;">Comprehensive verification of all Alpine.js parity features, directives, magics, morphing, and plugins</p>
+        <p style="color: var(--text-muted); margin: 0.5rem 0 0 0;">Comprehensive verification of all Alpine.js parity
+          features, directives, magics, morphing, and plugins</p>
       </div>
-      <button onclick="runAllTests()" style="padding: 0.6rem 1.2rem; background: var(--primary); color: #000; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">Re-run Tests</button>
+      <button onclick="runAllTests()"
+        style="padding: 0.6rem 1.2rem; background: var(--primary); color: #000; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;">Re-run
+        Tests</button>
     </div>
 
     <div id="results-list"></div>
@@ -406,7 +449,7 @@
           const u = new URL(window.location.href);
           u.searchParams.delete("test_search_key");
           window.history.replaceState({}, "", u.toString());
-        } catch {}
+        } catch { }
       }
 
       try {
@@ -421,7 +464,7 @@
         const input = sandbox.querySelector("#hist-input");
         const span = sandbox.querySelector("#hist-span");
         if (span.textContent !== "initialQuery") throw new Error(`Expected 'initialQuery', got '${span.textContent}'`);
-        
+
         input.value = "updatedFilter";
         input.dispatchEvent(new Event("input"));
         if (span.textContent !== "updatedFilter") throw new Error(`Expected 'updatedFilter', got '${span.textContent}'`);
@@ -438,7 +481,7 @@
             const u = new URL(window.location.href);
             u.searchParams.delete("test_search_key");
             window.history.replaceState({}, "", u.toString());
-          } catch {}
+          } catch { }
         }
       }
     });
@@ -548,7 +591,7 @@
 
       if (textSpan.textContent !== "PineJS") throw new Error(`Expected 'PineJS', got '${textSpan.textContent}'`);
       if (items.length !== 2 || items[0].textContent !== "Alpha") throw new Error(`Semantic loop failed to render items properly`);
-      
+
       btn.click();
       if (textSpan.textContent !== "Spruce") throw new Error(`Expected 'Spruce' after click, got '${textSpan.textContent}'`);
     });
@@ -612,7 +655,7 @@
           <div id="box-2" style="width: 20px; height: 20px; background: blue;"></div>
         </div>
       `;
-      
+
       const tl = Pine.timeline()
         .add(sandbox.querySelector("#box-1"), [{ opacity: 0 }, { opacity: 1 }], { duration: 50 })
         .add(sandbox.querySelector("#box-2"), [{ transform: 'scale(0.5)' }, { transform: 'scale(1)' }], { duration: 50 });
@@ -638,11 +681,11 @@
       if (typeof Pine.worker !== "function") throw new Error("Pine.worker is not a function");
     });
 
-    test("v1.5.0 Larch: Tagged Template Components (Pine.html)", "Verifies compiler-less template creation, interpolation, and reactivity", async () => {
+    test("v1.5.1 Larch: Tagged Template Components (Pine.html)", "Verifies compiler-less template creation, interpolation, and reactivity", async () => {
       const sandbox = getSandbox();
       const title = "Reactive Banner";
       const count = 42;
-      
+
       const component = Pine.html`
         <div id="tpl-root" state="{ active: true }">
           <h2 id="tpl-title">${title}</h2>
@@ -665,7 +708,7 @@
       if (status.style.display === "none") throw new Error("Status element should be visible initially");
     });
 
-    test("v1.5.0 Larch: Declarative Form Validation (p-validate)", "Verifies field constraint validation rules, $errors, and $valid states", async () => {
+    test("v1.5.1 Larch: Declarative Form Validation (p-validate)", "Verifies field constraint validation rules, $errors, and $valid states", async () => {
       const sandbox = getSandbox();
       sandbox.innerHTML = `
         <div id="t-validate" p-data="{ email: '', username: '' }">
@@ -697,7 +740,7 @@
       if (scope.$errors.user_email !== null) throw new Error("Expected $errors.user_email to be null for valid email");
     });
 
-    test("v1.5.0 Larch: Cross-Tab Reactive Synchronization ($broadcast)", "Verifies $broadcast magic reactive signal initialization and channel connectivity", async () => {
+    test("v1.5.1 Larch: Cross-Tab Reactive Synchronization ($broadcast)", "Verifies $broadcast magic reactive signal initialization and channel connectivity", async () => {
       const sandbox = getSandbox();
       sandbox.innerHTML = `
         <div id="t-broadcast" p-data="{ room: $broadcast('Lobby', 'test_channel') }">
@@ -714,7 +757,7 @@
       if (text.textContent !== "Stage 1") throw new Error(`Expected 'Stage 1' after update, got '${text.textContent}'`);
     });
 
-    test("v1.5.0 Larch: Native View Transitions API ($viewTransition)", "Verifies $viewTransition magic execution and Promise lifecycle", async () => {
+    test("v1.5.1 Larch: Native View Transitions API ($viewTransition)", "Verifies $viewTransition magic execution and Promise lifecycle", async () => {
       const sandbox = getSandbox();
       sandbox.innerHTML = `
         <div id="t-vt" p-data="{ tab: 'home' }">
@@ -732,7 +775,7 @@
       if (tabSpan.textContent !== "dashboard") throw new Error(`Expected 'dashboard', got '${tabSpan.textContent}'`);
     });
 
-    test("v1.5.0 Larch: Off-Thread Web Worker Signal Bridge (Pine.worker)", "Verifies background worker signal computation and reactive state synchronization", async () => {
+    test("v1.5.1 Larch: Off-Thread Web Worker Signal Bridge (Pine.worker)", "Verifies background worker signal computation and reactive state synchronization", async () => {
       const worker = Pine.worker((n) => n * 2);
       if (typeof worker.compute !== "function" || typeof worker.terminate !== "function") {
         throw new Error("WorkerSignal missing compute or terminate methods");
@@ -789,4 +832,5 @@
     document.addEventListener("DOMContentLoaded", runAllTests);
   </script>
 </body>
+
 </html>
