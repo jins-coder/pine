@@ -37,7 +37,7 @@ Modern web development shouldn't require complex toolchains, megabyte-sized runt
 
 ---
 
-## 🚀 Installation & Dual CDN Guide
+## 🚀 Installation & CDN
 
 PineJS provides two dedicated builds to match your development and deployment workflows:
 
@@ -46,14 +46,11 @@ PineJS provides two dedicated builds to match your development and deployment wo
 * **Characteristics**: Fully minified with esbuild/terser, stripped of debug logging, tree-shaken, **~23.2 KB gzipped** (20.6 KB brotli).
 
 ```html
-<!-- jsDelivr (GitHub Latest — always up to date) -->
-<script src="https://cdn.jsdelivr.net/gh/jins-coder/pine@main/dist/pine.prod.js" defer></script>
-
-<!-- jsDelivr (Pinned to v1.7.0 tag) -->
-<script src="https://cdn.jsdelivr.net/gh/jins-coder/pine@v1.7.0/dist/pine.prod.js" defer></script>
-
-<!-- unpkg (NPM release) -->
+<!-- unpkg (Latest) -->
 <script src="https://unpkg.com/pinejs-core@latest/dist/pine.prod.js" defer></script>
+
+<!-- unpkg (Pinned to v1.7.0) -->
+<script src="https://unpkg.com/pinejs-core@1.7.0/dist/pine.prod.js" defer></script>
 ```
 
 ### 2. 🛠️ Development Version (`pine.dev.js`)
@@ -61,14 +58,11 @@ PineJS provides two dedicated builds to match your development and deployment wo
 * **Characteristics**: Unminified, informative console diagnostics, detailed syntax error reports, uncompressed stack traces.
 
 ```html
-<!-- jsDelivr (GitHub Latest — always up to date) -->
-<script src="https://cdn.jsdelivr.net/gh/jins-coder/pine@main/dist/pine.dev.js" defer></script>
-
-<!-- jsDelivr (Pinned to v1.7.0 tag) -->
-<script src="https://cdn.jsdelivr.net/gh/jins-coder/pine@v1.7.0/dist/pine.dev.js" defer></script>
-
-<!-- unpkg (NPM release) -->
+<!-- unpkg (Latest) -->
 <script src="https://unpkg.com/pinejs-core@latest/dist/pine.dev.js" defer></script>
+
+<!-- unpkg (Pinned to v1.7.0) -->
+<script src="https://unpkg.com/pinejs-core@1.7.0/dist/pine.dev.js" defer></script>
 ```
 
 ### 📦 Package Manager (npm / pnpm / yarn)
