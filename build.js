@@ -172,13 +172,28 @@ async function main() {
   if (args.includes('--esbuild')) engine = 'esbuild';
   if (args.includes('--terser')) engine = 'terser';
 
-  console.log(`\n🌲 ${colors.bright}PineJS v${pkg.version} "${pkg.versionName}" Production Build Pipeline${colors.reset}`);
+  console.log(`\n🌲 ${colors.bright}PineJS v${pkg.version} "${pkg.versionName}" Multi-Target Build Pipeline${colors.reset}`);
   console.log(`────────────────────────────────────────────────────────────`);
 
-  await buildTarget(srcUmd, minUmd, 'Global / CDN Bundle (IIFE)', engine);
-  await buildTarget(srcEsm, minEsm, 'ES Module Bundle (ESM)', engine);
+  // 1. Generate Development Build (dist/pine.dev.js)
+  const devBanner = `/**\n * PineJS v${pkg.version} "${pkg.versionName}" [DEVELOPMENT BUILD]\n * Full source with runtime diagnostics, DevTools bridge, and descriptive warnings.\n * For production deployments, use dist/pine.min.js or dist/pine.prod.js\n * (c) 2026 PineJS Core Team | MIT License | https://pinejs.dev\n */\n`;
+  const rawUmd = fs.readFileSync(srcUmd, 'utf8');
+  fs.writeFileSync(path.join(distDir, 'pine.dev.js'), devBanner + rawUmd.replace(/^\/\*\*[\s\S]*?\*\/\n/, ''), 'utf8');
+  console.log(`\n🛠️  ${colors.bright}Development Bundle (IIFE)${colors.reset}`);
+  console.log(`   Output:     ${colors.cyan}dist/pine.dev.js${colors.reset} -> ${colors.bright}${formatSize(Buffer.byteLength(rawUmd, 'utf8'))}${colors.reset}`);
 
-  console.log(`\n✨ ${colors.green}All bundles successfully built and optimized!${colors.reset}\n`);
+  // 2. Generate Production Minified Builds (dist/pine.min.js and dist/pine.prod.js)
+  await buildTarget(srcUmd, minUmd, 'Production Bundle (IIFE: pine.min.js)', engine);
+  fs.copyFileSync(minUmd, path.join(distDir, 'pine.prod.js'));
+  console.log(`   Mirrored:   ${colors.cyan}dist/pine.prod.js${colors.reset}`);
+
+  // 3. Generate ES Module Builds
+  fs.copyFileSync(srcEsm, path.join(distDir, 'pine.esm.dev.js'));
+  await buildTarget(srcEsm, minEsm, 'Production ES Module Bundle (pine.esm.min.js)', engine);
+  fs.copyFileSync(minEsm, path.join(distDir, 'pine.esm.prod.js'));
+  console.log(`   Mirrored:   ${colors.cyan}dist/pine.esm.prod.js${colors.reset}`);
+
+  console.log(`\n✨ ${colors.green}All Development and Production targets successfully generated!${colors.reset}\n`);
 }
 
 main().catch((err) => {

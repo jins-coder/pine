@@ -33,7 +33,17 @@
       "default": "./dist/pine.js"
     },
     "./esm": "./dist/pine.esm.js",
-    "./min": "./dist/pine.min.js"
+    "./min": "./dist/pine.min.js",
+    "./dev": "./dist/pine.dev.js",
+    "./prod": "./dist/pine.prod.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jins-coder/pine.git"
+  },
+  "homepage": "https://github.com/jins-coder/pine#readme",
+  "bugs": {
+    "url": "https://github.com/jins-coder/pine/issues"
   },
   "scripts": {
     "build": "node build.js",
